@@ -1,5 +1,7 @@
 import ScoresTicker from "@/components/ScoresTicker";
 import ArticleCard from "@/components/ArticleCard";
+import MostRead from "@/components/MostRead";
+import SportSection from "@/components/SportSection";
 
 const f = '"Proxima Nova", Arial, sans-serif';
 
@@ -38,6 +40,24 @@ const topHeadlines = [
 const badgeColors: Record<string, string> = {
   NFL: "#e9173d", NBA: "#e9173d", MLB: "#003087", NHL: "#003087",
   Soccer: "#1a1a1a", Boxing: "#1a1a1a", MMA: "#1a1a1a", Golf: "#1a6b3c",
+};
+
+type Article = { image: string; category: string; emoji?: string; title: string };
+
+const nflSection: { title: string; featured: Article; grid: [Article, Article, Article, Article] } = {
+  title: "Around the NFL",
+  featured: {
+    image: "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=900&q=80",
+    category: "NFL",
+    emoji: "✌️",
+    title: "Re-Ranking Best WR Duos ✌️",
+  },
+  grid: [
+    { image: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=500&q=80", category: "NFL", emoji: "🏈", title: "Steelers Icon's Take on Rodgers 🏈" },
+    { image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&q=80", category: "NFL", emoji: "🎬", title: "Hollywood Defends Hurts 🎬" },
+    { image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=500&q=80", category: "NFL", emoji: "🛒", title: "Vikings' Reported Spending Strategy 🛒" },
+    { image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=500&q=80", category: "NFL", emoji: "💥", title: "7 Players Set to Break Out on New Teams 💥" },
+  ],
 };
 
 export default function Home() {
@@ -106,6 +126,9 @@ export default function Home() {
 
         </main>
       </div>
+
+      <MostRead />
+      <SportSection {...nflSection} />
 
     </>
   );
