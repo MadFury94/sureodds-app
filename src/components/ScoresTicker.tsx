@@ -76,11 +76,11 @@ export default function ScoresTicker() {
 
     return (
         <div style={{ backgroundColor: "#f2f5f6", borderBottom: "1px solid #ddd" }}>
-            <div style={{ maxWidth: "128rem", margin: "0 auto", position: "relative" }}>
+            <div style={{ maxWidth: "144rem", margin: "0 auto", position: "relative" }}>
 
                 {/* Scrollable row — no scrollbar */}
                 <div ref={scrollRef} onScroll={onScroll} style={{ overflowX: "auto", overflowY: "visible" }} className="scrollbar-hide">
-                    <div style={{ display: "flex", alignItems: "flex-start", width: "max-content", padding: "0.8rem 5.6rem 0.8rem 0" }}>
+                    <div style={{ display: "flex", alignItems: "flex-start", width: "max-content", padding: "0.8rem 5.6rem 0.8rem 2rem" }}>
 
                         {leagueOrder.map((league) => (
                             <div key={league} style={{ display: "flex", flexDirection: "column", marginLeft: "1.6rem" }}>

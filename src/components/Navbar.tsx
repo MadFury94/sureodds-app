@@ -1,6 +1,9 @@
 "use client";
 import { useState } from "react";
 
+const f = '"Proxima Nova", Arial, sans-serif';
+const fd = '"Druk Text Wide", "Arial Black", sans-serif';
+
 const navItems = [
     { label: "NFL", hasDropdown: true },
     { label: "NBA", hasDropdown: true },
@@ -31,13 +34,8 @@ export default function Navbar() {
 
     return (
         <header style={{ position: "sticky", top: 0, zIndex: 50, backgroundColor: "#000" }}>
-            {/* Full-width border line, content constrained inside */}
             <div style={{ borderBottom: "1px solid #27262a" }}>
-                <div style={{
-                    maxWidth: "128rem", margin: "0 auto",
-                    display: "flex", alignItems: "center",
-                    height: "7.2rem", padding: "0 2rem",
-                }}>
+                <div className="nav-inner">
                     {/* Hamburger */}
                     <button
                         onClick={() => setMegaOpen(!megaOpen)}
@@ -50,34 +48,28 @@ export default function Navbar() {
                         }
                     </button>
 
-                    {/* Logo box */}
+                    {/* Logo */}
                     <a href="/" style={{ flexShrink: 0, marginRight: "1.6rem" }}>
                         <div style={{
                             width: "4rem", height: "4rem", backgroundColor: "#fff",
                             display: "flex", alignItems: "center", justifyContent: "center",
                             borderRadius: "0.2rem",
                         }}>
-                            <span style={{
-                                fontFamily: '"Druk Text Wide", "Arial Black", sans-serif',
-                                fontWeight: 700, fontSize: "1.1rem",
-                                color: "#000", lineHeight: 1, letterSpacing: "-0.02em",
-                            }}>SO</span>
+                            <span style={{ fontFamily: fd, fontWeight: 700, fontSize: "1.1rem", color: "#000", lineHeight: 1, letterSpacing: "-0.02em" }}>SO</span>
                         </div>
                     </a>
 
-                    {/* Nav items */}
-                    <nav style={{ display: "flex", alignItems: "center", flex: 1, gap: "0.2rem" }}>
+                    {/* Desktop nav links */}
+                    <nav className="nav-links">
                         {navItems.map((item) => (
-                            <a key={item.label} href="#"
-                                style={{
-                                    display: "flex", alignItems: "center", gap: "0.3rem",
-                                    padding: "0.8rem 1.2rem", height: "7.2rem",
-                                    fontFamily: '"Proxima Nova", Arial, sans-serif',
-                                    fontWeight: 700, fontSize: "1.6rem",
-                                    color: "#fff", whiteSpace: "nowrap",
-                                    borderBottom: "2px solid transparent",
-                                    transition: "border-color 0.15s",
-                                }}
+                            <a key={item.label} href="#" style={{
+                                display: "flex", alignItems: "center", gap: "0.3rem",
+                                padding: "0.8rem 1.2rem", height: "7.2rem",
+                                fontFamily: f, fontWeight: 700, fontSize: "1.6rem",
+                                color: "#fff", whiteSpace: "nowrap",
+                                borderBottom: "2px solid transparent",
+                                transition: "border-color 0.15s",
+                            }}
                                 onMouseEnter={e => (e.currentTarget.style.borderBottomColor = "#e9173d")}
                                 onMouseLeave={e => (e.currentTarget.style.borderBottomColor = "transparent")}
                             >
@@ -91,19 +83,16 @@ export default function Navbar() {
                         ))}
                     </nav>
 
-                    {/* Right links */}
-                    <div style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
+                    {/* Desktop right links */}
+                    <div className="nav-right">
                         {rightLinks.map((link) => (
-                            <button key={link} onClick={() => setActiveRight(link)}
-                                style={{
-                                    padding: "0.8rem 1.2rem", height: "7.2rem",
-                                    fontFamily: '"Proxima Nova", Arial, sans-serif',
-                                    fontWeight: 700, fontSize: "1.6rem",
-                                    color: "#fff", whiteSpace: "nowrap",
-                                    borderBottom: activeRight === link ? "2px solid #e9173d" : "2px solid transparent",
-                                    transition: "border-color 0.15s",
-                                }}
-                            >
+                            <button key={link} onClick={() => setActiveRight(link)} style={{
+                                padding: "0.8rem 1.2rem", height: "7.2rem",
+                                fontFamily: f, fontWeight: 700, fontSize: "1.6rem",
+                                color: "#fff", whiteSpace: "nowrap",
+                                borderBottom: activeRight === link ? "2px solid #e9173d" : "2px solid transparent",
+                                transition: "border-color 0.15s",
+                            }}>
                                 {link}
                             </button>
                         ))}
@@ -111,21 +100,29 @@ export default function Navbar() {
                 </div>
             </div>
 
-            {/* Mega menu — full width background, content constrained */}
+            {/* Mega menu / mobile drawer */}
             {megaOpen && (
                 <div style={{ backgroundColor: "#fff", boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}>
+                    {/* Mobile-only nav links at top */}
+                    <div style={{ display: "none" }} className="mobile-nav-links">
+                        {[...navItems.map(i => i.label), ...rightLinks].map(label => (
+                            <a key={label} href="#" style={{
+                                display: "block", padding: "1.2rem 2rem",
+                                fontFamily: f, fontWeight: 700, fontSize: "1.6rem",
+                                color: "#1a1a1a", borderBottom: "1px solid #eee",
+                            }}>{label}</a>
+                        ))}
+                    </div>
                     <div style={{
-                        maxWidth: "128rem", margin: "0 auto", padding: "2.4rem 1.6rem",
+                        maxWidth: "144rem", margin: "0 auto", padding: "2.4rem 2rem",
                         display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "0.4rem 0",
-                    }}>
+                    }} className="mega-grid">
                         {megaMenuSports.map((sport) => (
                             <a key={sport.label} href="#" style={{
                                 display: "flex", alignItems: "center", gap: "1rem",
                                 padding: "1rem 0.8rem",
-                                fontFamily: '"Proxima Nova", Arial, sans-serif',
-                                fontWeight: 600, fontSize: "1.4rem",
-                                color: "#1a1a1a",
-                                borderBottom: "1px solid #eee",
+                                fontFamily: f, fontWeight: 600, fontSize: "1.4rem",
+                                color: "#1a1a1a", borderBottom: "1px solid #eee",
                             }}>
                                 <span style={{ fontSize: "1.8rem" }}>{sport.icon}</span>
                                 {sport.label}

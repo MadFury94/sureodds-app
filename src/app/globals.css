@@ -118,3 +118,172 @@ button {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* ── Responsive utilities ── */
+
+/* Navbar */
+.nav-inner {
+  max-width: 144rem;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  height: 7.2rem;
+  padding: 0 2rem;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 0.2rem;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Hero section grid */
+.hero-section {
+  display: grid;
+  grid-template-columns: 27.5rem 0.85fr 22rem;
+  gap: 1.26rem;
+  padding: 2rem 2rem 3rem;
+  align-items: start;
+}
+
+.hero-left {
+  display: flex;
+  flex-direction: column;
+  gap: 1.26rem;
+}
+
+.hero-headlines {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Footer */
+.footer-inner {
+  max-width: 144rem;
+  margin: 0 auto;
+  padding: 4.8rem 2rem 3.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3.2rem;
+}
+
+.footer-newsletter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  width: 100%;
+  max-width: 50rem;
+}
+
+.footer-email-row {
+  display: flex;
+  width: 100%;
+  gap: 0.8rem;
+}
+
+/* Tablet: ≤ 1024px */
+@media (max-width: 1024px) {
+  .nav-links {
+    display: none;
+  }
+
+  .nav-right {
+    display: none;
+  }
+
+  .hero-section {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .hero-left {
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+  }
+
+  /* center hero spans full width on tablet */
+  .hero-center {
+    grid-column: 1 / 3;
+    grid-row: 2 / 3;
+    order: -1;
+  }
+
+  .hero-headlines {
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+  }
+}
+
+/* Mobile: ≤ 640px */
+@media (max-width: 640px) {
+  .hero-section {
+    grid-template-columns: 1fr;
+    padding: 1.6rem 1.6rem 2.4rem;
+    gap: 2rem;
+  }
+
+  .hero-left {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .hero-center {
+    grid-column: 1;
+    grid-row: auto;
+    order: 0;
+  }
+
+  .hero-headlines {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .footer-email-row {
+    flex-direction: column;
+  }
+
+  .footer-newsletter {
+    max-width: 100%;
+  }
+}
+
+/* Mega menu grid responsive */
+.mega-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+}
+
+@media (max-width: 1024px) {
+  .mega-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .mobile-nav-links {
+    display: block !important;
+    border-bottom: 2px solid #eee;
+  }
+}
+
+@media (max-width: 640px) {
+  .mega-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Scale down hero text on mobile */
+  .hero-section h2 {
+    font-size: 1.8rem !important;
+  }
+
+  .hero-section .clamp2 {
+    font-size: 1.4rem !important;
+  }
+}
