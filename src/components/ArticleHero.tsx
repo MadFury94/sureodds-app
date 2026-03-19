@@ -19,7 +19,7 @@ export default function ArticleHero({ image, title, category, categoryColor, aut
     }
 
     return (
-        <div style={{ position: "relative", width: "100%", height: "70vh", minHeight: "39.2rem", maxHeight: "63rem", overflow: "hidden" }}>
+        <div style={{ position: "relative", width: "100%", height: "70vh", minHeight: "39.2rem", maxHeight: "63rem", overflow: "hidden" }} className="article-hero-wrap">
 
             {/* Background image */}
             <img
@@ -56,7 +56,7 @@ export default function ArticleHero({ image, title, category, categoryColor, aut
                     {/* Title */}
                     <h1 style={{
                         fontFamily: fd, fontWeight: 700,
-                        fontSize: "clamp(2.8rem, 5vw, 5.6rem)",
+                        fontSize: "clamp(2.2rem, 4vw, 5.6rem)",
                         lineHeight: 1.08, color: "#fff",
                         maxWidth: "88rem", marginBottom: "2rem",
                         textShadow: "0 2px 12px rgba(0,0,0,0.5)",

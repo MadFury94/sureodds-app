@@ -66,7 +66,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
             {/* Body + Sidebar — BR layout */}
             <div style={{ maxWidth: "132.48rem", margin: "0 auto", padding: "4rem 1.2rem 6rem" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 32rem", gap: "6rem", alignItems: "start" }}>
+                <div className="article-body-grid">
 
                     {/* Article body */}
                     <div>
@@ -100,7 +100,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                     </div>
 
                     {/* Sidebar */}
-                    <aside style={{ position: "sticky", top: "9rem" }}>
+                    <aside className="article-sidebar" style={{ position: "sticky", top: "9rem" }}>
                         <p style={{ fontFamily: fd, fontWeight: 700, fontSize: "1.3rem", color: "#1a1a1a", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "1.6rem", paddingBottom: "1rem", borderBottom: "2px solid #1a1a1a" }}>
                             Top News
                         </p>
