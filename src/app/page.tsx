@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import ScoresTicker from "@/components/ScoresTicker";
 import MostRead from "@/components/MostRead";
 import SportSection from "@/components/SportSection";
@@ -7,6 +8,20 @@ import {
   getPosts, getCategories, getFeaturedImage, getPostCategory,
   formatDate, decodeTitle, WPPost, WPCategory
 } from "@/lib/wordpress";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sureodds.ng";
+
+export const metadata: Metadata = {
+  title: "Sureodds | Football News, Betting Tips & Match Analysis",
+  description: "Your home for football news, transfer updates, match previews, betting tips and live scores. EPL, La Liga, UCL, AFCON and more.",
+  alternates: { canonical: SITE_URL },
+  openGraph: {
+    type: "website",
+    url: SITE_URL,
+    title: "Sureodds | Football News, Betting Tips & Match Analysis",
+    description: "Your home for football news, transfer updates, match previews, betting tips and live scores.",
+  },
+};
 
 function toArticle(post: WPPost) {
   return {

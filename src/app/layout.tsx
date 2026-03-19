@@ -3,14 +3,115 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sureodds.ng";
+const SITE_NAME = "Sureodds";
+const DEFAULT_DESCRIPTION =
+  "Sureodds — expert football analysis, transfer news, match previews, betting tips, La Liga, EPL, UCL and AFCON coverage. Stay ahead of the game.";
+const DEFAULT_OG_IMAGE = `${SITE_URL}/og-default.jpg`;
+
 export const metadata: Metadata = {
-  title: "Sureodds | Sports. Odds. News. Now.",
-  description: "Stay ahead with Sureodds. Expert analysis, highlights, scores, and betting odds for all your favorite sports.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Sureodds | Football News, Betting Tips & Match Analysis",
+    template: "%s | Sureodds",
+  },
+  description: DEFAULT_DESCRIPTION,
+  keywords: [
+    "football news", "soccer news", "betting tips", "match predictions",
+    "EPL news", "La Liga news", "Champions League", "AFCON", "transfer news",
+    "football analysis", "sureodds", "sports betting Nigeria",
+  ],
+  authors: [{ name: "Sureodds Editorial Team", url: SITE_URL }],
+  creator: "Sureodds",
+  publisher: "Sureodds",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    title: "Sureodds | Football News, Betting Tips & Match Analysis",
+    description: DEFAULT_DESCRIPTION,
+    images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630, alt: "Sureodds" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@sureodds",
+    creator: "@sureodds",
+    title: "Sureodds | Football News, Betting Tips & Match Analysis",
+    description: DEFAULT_DESCRIPTION,
+    images: [DEFAULT_OG_IMAGE],
+  },
+  alternates: {
+    canonical: SITE_URL,
+    types: {
+      "application/rss+xml": `${SITE_URL}/feed.xml`,
+    },
+  },
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION ?? "",
+  },
+  category: "sports",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        {/* JSON-LD: Organization */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: SITE_NAME,
+              url: SITE_URL,
+              logo: `${SITE_URL}/logo.png`,
+              sameAs: [
+                "https://twitter.com/sureodds",
+                "https://facebook.com/sureodds",
+                "https://instagram.com/sureodds",
+              ],
+              contactPoint: {
+                "@type": "ContactPoint",
+                email: "info@sureodds.com",
+                contactType: "customer support",
+              },
+            }),
+          }}
+        />
+        {/* JSON-LD: WebSite with SearchAction */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: SITE_NAME,
+              url: SITE_URL,
+              potentialAction: {
+                "@type": "SearchAction",
+                target: {
+                  "@type": "EntryPoint",
+                  urlTemplate: `${SITE_URL}/search?q={search_term_string}`,
+                },
+                "query-input": "required name=search_term_string",
+              },
+            }),
+          }}
+        />
+      </head>
       <body style={{ minHeight: "100vh", backgroundColor: "#f2f5f6" }}>
         <Navbar />
         {children}

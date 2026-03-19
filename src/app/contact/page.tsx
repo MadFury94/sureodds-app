@@ -2,6 +2,9 @@
 import { useState } from "react";
 import PageHeader from "@/components/PageHeader";
 
+// Note: metadata must be in a separate server component for client pages.
+// Add this to a parent layout or use a generateMetadata export in a wrapper.
+
 const f = '"Proxima Nova", Arial, sans-serif';
 const fd = '"Druk Text Wide", "Arial Black", sans-serif';
 

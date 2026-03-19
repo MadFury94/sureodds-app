@@ -1,4 +1,16 @@
+import type { Metadata } from "next";
 import PageHeader from "@/components/PageHeader";
+
+export const metadata: Metadata = {
+    title: "About Sureodds | Football News & Analysis",
+    description: "Sureodds is a football media brand built by fans, for fans. Sharp takes, real analysis, and zero fluff on EPL, La Liga, UCL, AFCON and more.",
+    alternates: { canonical: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://sureodds.ng"}/about` },
+    openGraph: {
+        type: "website",
+        title: "About Sureodds",
+        description: "Built by fans, for fans. Expert football coverage with zero fluff.",
+    },
+};
 
 const f = '"Proxima Nova", Arial, sans-serif';
 const fd = '"Druk Text Wide", "Arial Black", sans-serif';
