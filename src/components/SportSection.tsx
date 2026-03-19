@@ -19,7 +19,7 @@ interface Props {
 export default function SportSection({ title, featured, grid, reverse = false, viewAllHref }: Props) {
     return (
         <div style={{ background: "linear-gradient(to bottom, #e8ebed 0%, #ffffff 100%)" }}>
-            <section style={{ maxWidth: "132.48rem", margin: "0 auto", padding: "5rem 1.2rem 5rem" }}>
+            <section style={{ maxWidth: "132.48rem", margin: "0 auto", padding: "5rem 1.2rem 5rem" }} className="sport-section-wrap">
 
                 {/* Section title */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.6rem" }}>

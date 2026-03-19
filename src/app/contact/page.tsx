@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import PageHeader from "@/components/PageHeader";
 
 const f = '"Proxima Nova", Arial, sans-serif';
 const fd = '"Druk Text Wide", "Arial Black", sans-serif';
@@ -45,16 +46,11 @@ export default function ContactPage() {
         <div style={{ backgroundColor: "#fff", minHeight: "100vh" }}>
 
             {/* Black page header */}
-            <div style={{ backgroundColor: "#000", padding: "5rem 1.2rem" }}>
-                <div style={{ maxWidth: "132.48rem", margin: "0 auto" }}>
-                    <h1 style={{ fontFamily: fd, fontWeight: 700, fontSize: "5rem", color: "#fff", lineHeight: 1.05 }}>
-                        Contact Us
-                    </h1>
-                    <p style={{ fontFamily: f, fontSize: "1.7rem", color: "#68676d", marginTop: "1.2rem" }}>
-                        We read every message. Reach out and we'll get back to you within 1–2 business days.
-                    </p>
-                </div>
-            </div>
+            <PageHeader
+                title="Contact Us"
+                subtitle="We read every message. Reach out and we'll get back to you within 1–2 business days."
+                image="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=1600&q=80"
+            />
 
             {/* Contact form */}
             <div style={{ maxWidth: "132.48rem", margin: "0 auto", padding: "7rem 1.2rem 6rem" }}>

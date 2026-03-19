@@ -46,7 +46,7 @@ export default function LatestSection({ posts }: Props) {
     };
 
     return (
-        <section style={{ background: "linear-gradient(to bottom, #e8ebed 0%, #ffffff 100%)", padding: "5rem 0" }}>
+        <section style={{ background: "linear-gradient(to bottom, #e8ebed 0%, #ffffff 100%)", padding: "5rem 0" }} className="latest-section">
             <div style={{ maxWidth: "132.48rem", margin: "0 auto", padding: "0 1.2rem" }}>
 
                 {/* Header */}
@@ -84,12 +84,7 @@ export default function LatestSection({ posts }: Props) {
 
                 {/* Scrollable cards */}
                 <div ref={scrollRef} onScroll={onScroll} className="scrollbar-hide" style={{ overflowX: "auto" }}>
-                    <div style={{
-                        display: "grid",
-                        gridTemplateColumns: `repeat(${posts.length}, calc((132.48rem - 2.4rem - 3 * 2.84rem) / 4))`,
-                        gap: "2.84rem",
-                        width: "max-content", minWidth: "100%",
-                    }}>
+                    <div className="latest-track">
                         {posts.map((post) => {
                             const isHovered = hovered === post.slug;
                             const color = badgeColors[post.category] ?? "#68676d";
@@ -99,7 +94,7 @@ export default function LatestSection({ posts }: Props) {
                                     href={`/article/${post.slug}`}
                                     onMouseEnter={() => setHovered(post.slug)}
                                     onMouseLeave={() => setHovered(null)}
-                                    style={{ display: "flex", flexDirection: "column", textDecoration: "none" }}
+                                    className="latest-card"
                                 >
                                     {/* Image with play overlay */}
                                     <div style={{ position: "relative", width: "100%", aspectRatio: "16/9", overflow: "hidden", borderRadius: "0.8rem" }}>

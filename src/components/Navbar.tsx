@@ -1,18 +1,19 @@
 "use client";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 
 const f = '"Proxima Nova", Arial, sans-serif';
 const fd = '"Druk Text Wide", "Arial Black", sans-serif';
 
 const navItems = [
-    { label: "News", slug: "news", hasDropdown: false },
-    { label: "Transfer", slug: "transfer", hasDropdown: false },
-    { label: "Breaking News", slug: "breaking-news", hasDropdown: false },
-    { label: "Football Stories", slug: "football-stories", hasDropdown: false },
-    { label: "La Liga", slug: "la-liga", hasDropdown: false },
-    { label: "EPL", slug: "epl", hasDropdown: false },
-    { label: "UCL", slug: "ucl", hasDropdown: false },
-    { label: "AFCON", slug: "afcon", hasDropdown: false },
+    { label: "News", slug: "news" },
+    { label: "Transfer", slug: "transfer" },
+    { label: "Breaking News", slug: "breaking-news" },
+    { label: "Football Stories", slug: "football-stories" },
+    { label: "La Liga", slug: "la-liga" },
+    { label: "EPL", slug: "epl" },
+    { label: "UCL", slug: "ucl" },
+    { label: "AFCON", slug: "afcon" },
 ];
 
 const megaMenuSports = [
@@ -28,11 +29,17 @@ const megaMenuSports = [
     { icon: "📝", label: "Blog", slug: "blog" },
 ];
 
-const rightLinks = ["Betting", "About", "Contact"];
+const rightLinks = [
+    { label: "Betting", href: "/betting" },
+    { label: "About", href: "/about" },
+    { label: "Contact", href: "/contact" },
+];
 
 export default function Navbar() {
-    const [activeRight, setActiveRight] = useState("Betting");
     const [megaOpen, setMegaOpen] = useState(false);
+    const pathname = usePathname();
+
+    const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
 
     return (
         <header style={{ position: "sticky", top: 0, zIndex: 50, backgroundColor: "#000" }}>
@@ -63,39 +70,47 @@ export default function Navbar() {
 
                     {/* Desktop nav links */}
                     <nav className="nav-links">
-                        {navItems.map((item) => (
-                            <a key={item.label} href={`/category/${item.slug}`} style={{
-                                display: "flex", alignItems: "center", gap: "0.3rem",
-                                padding: "0.8rem 1.2rem", height: "7.2rem",
-                                fontFamily: f, fontWeight: 700, fontSize: "1.6rem",
-                                color: "#fff", whiteSpace: "nowrap",
-                                borderBottom: "2px solid transparent",
-                                transition: "border-color 0.15s",
-                            }}
-                                onMouseEnter={e => (e.currentTarget.style.borderBottomColor = "#e9173d")}
-                                onMouseLeave={e => (e.currentTarget.style.borderBottomColor = "transparent")}
-                            >
-                                {item.label}
-                            </a>
-                        ))}
+                        {navItems.map((item) => {
+                            const href = `/category/${item.slug}`;
+                            const active = isActive(href);
+                            return (
+                                <a key={item.label} href={href} style={{
+                                    display: "flex", alignItems: "center",
+                                    padding: "0.8rem 1.2rem", height: "7.2rem",
+                                    fontFamily: f, fontWeight: 700, fontSize: "1.6rem",
+                                    color: "#fff", whiteSpace: "nowrap",
+                                    borderBottom: active ? "2px solid #e9173d" : "2px solid transparent",
+                                    transition: "border-color 0.15s",
+                                }}
+                                    onMouseEnter={e => { if (!active) e.currentTarget.style.borderBottomColor = "#e9173d"; }}
+                                    onMouseLeave={e => { if (!active) e.currentTarget.style.borderBottomColor = "transparent"; }}
+                                >
+                                    {item.label}
+                                </a>
+                            );
+                        })}
                     </nav>
 
-                    {/* Desktop right links */}
+                    {/* Right links */}
                     <div className="nav-right">
-                        {rightLinks.map((link) => (
-                            <a key={link} href={link === "About" ? "/about" : link === "Contact" ? "/contact" : "#"} style={{
-                                display: "flex", alignItems: "center",
-                                padding: "0.8rem 1.2rem", height: "7.2rem",
-                                fontFamily: f, fontWeight: 700, fontSize: "1.6rem",
-                                color: "#fff", whiteSpace: "nowrap",
-                                borderBottom: activeRight === link ? "2px solid #e9173d" : "2px solid transparent",
-                                transition: "border-color 0.15s",
-                            }}
-                                onClick={() => setActiveRight(link)}
-                            >
-                                {link}
-                            </a>
-                        ))}
+                        {rightLinks.map((link) => {
+                            const active = isActive(link.href);
+                            return (
+                                <a key={link.label} href={link.href} style={{
+                                    display: "flex", alignItems: "center",
+                                    padding: "0.8rem 1.2rem", height: "7.2rem",
+                                    fontFamily: f, fontWeight: 700, fontSize: "1.6rem",
+                                    color: "#fff", whiteSpace: "nowrap",
+                                    borderBottom: active ? "2px solid #e9173d" : "2px solid transparent",
+                                    transition: "border-color 0.15s",
+                                }}
+                                    onMouseEnter={e => { if (!active) e.currentTarget.style.borderBottomColor = "#e9173d"; }}
+                                    onMouseLeave={e => { if (!active) e.currentTarget.style.borderBottomColor = "transparent"; }}
+                                >
+                                    {link.label}
+                                </a>
+                            );
+                        })}
                     </div>
                 </div>
             </div>
@@ -103,9 +118,12 @@ export default function Navbar() {
             {/* Mega menu / mobile drawer */}
             {megaOpen && (
                 <div style={{ backgroundColor: "#fff", boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}>
-                    {/* Mobile-only nav links at top */}
-                    <div style={{ display: "none" }} className="mobile-nav-links">
-                        {[...navItems.map(i => ({ label: i.label, href: `/category/${i.slug}` })), ...rightLinks.map(l => ({ label: l, href: l === "About" ? "/about" : l === "Contact" ? "/contact" : "#" }))].map(item => (
+                    {/* Mobile-only nav links (shown at ≤1024px via CSS) */}
+                    <div className="mobile-nav-links">
+                        {[
+                            ...navItems.map(i => ({ label: i.label, href: `/category/${i.slug}` })),
+                            ...rightLinks,
+                        ].map(item => (
                             <a key={item.label} href={item.href} style={{
                                 display: "block", padding: "1.2rem 2rem",
                                 fontFamily: f, fontWeight: 700, fontSize: "1.6rem",
@@ -113,10 +131,10 @@ export default function Navbar() {
                             }}>{item.label}</a>
                         ))}
                     </div>
+                    {/* Desktop mega grid */}
                     <div style={{
                         maxWidth: "132.48rem", margin: "0 auto", padding: "2.4rem 2rem",
-                        display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "0.4rem 0",
-                    }} className="mega-grid">
+                    }} className="mega-grid desktop-mega">
                         {megaMenuSports.map((sport) => (
                             <a key={sport.label} href={`/category/${sport.slug}`} style={{
                                 display: "flex", alignItems: "center", gap: "1rem",

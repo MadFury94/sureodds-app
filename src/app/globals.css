@@ -262,14 +262,28 @@ button {
   grid-template-columns: repeat(5, 1fr);
 }
 
+/* Mobile nav links — hidden on desktop, shown on mobile */
+.mobile-nav-links {
+  display: none;
+}
+
+/* Desktop mega grid — shown on desktop, hidden on mobile */
+.desktop-mega {
+  display: grid;
+}
+
 @media (max-width: 1024px) {
   .mega-grid {
     grid-template-columns: repeat(3, 1fr);
   }
 
   .mobile-nav-links {
-    display: block !important;
+    display: block;
     border-bottom: 2px solid #eee;
+  }
+
+  .desktop-mega {
+    display: none;
   }
 }
 
@@ -289,6 +303,10 @@ button {
 }
 
 /* SportSection responsive */
+.sport-section-wrap {
+  padding: 5rem 1.2rem;
+}
+
 .sport-section-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -303,20 +321,121 @@ button {
 }
 
 @media (max-width: 768px) {
+  .sport-section-wrap {
+    padding: 3.2rem 1.2rem;
+  }
+
   .sport-section-grid {
     grid-template-columns: 1fr;
+    gap: 2rem;
   }
 
   .sport-section-subgrid {
     grid-template-columns: 1fr 1fr;
+    gap: 1.6rem;
   }
 }
 
 @media (max-width: 480px) {
   .sport-section-subgrid {
     grid-template-columns: 1fr;
+    gap: 1.6rem;
   }
 }
+
+/* MostRead scrollable cards */
+.most-read-track {
+  display: grid;
+  grid-template-columns: repeat(4, calc(25% - 0.9rem));
+  gap: 2.84rem;
+  width: max-content;
+  min-width: 100%;
+}
+
+.most-read-card {
+  width: calc((min(100vw, 132.48rem) - 2.4rem - 3 * 2.84rem) / 4);
+  min-width: 22rem;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+}
+
+@media (max-width: 768px) {
+  .most-read-card {
+    width: 22rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .most-read-card {
+    width: 18rem;
+  }
+}
+
+/* LatestSection scrollable cards */
+.latest-track {
+  display: flex;
+  gap: 2.84rem;
+  width: max-content;
+  min-width: 100%;
+}
+
+.latest-card {
+  width: calc((min(100vw, 132.48rem) - 2.4rem - 3 * 2.84rem) / 4);
+  min-width: 24rem;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+}
+
+@media (max-width: 768px) {
+  .latest-card {
+    width: 26rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .latest-card {
+    width: 22rem;
+  }
+}
+
+/* PageHeader logo responsive */
+.page-header-logo {
+  width: 10rem;
+  height: 10rem;
+  flex-shrink: 0;
+}
+
+.page-header-content {
+  padding: 0 1.2rem 5.6rem;
+}
+
+.page-header-inner {
+  display: flex;
+  align-items: flex-end;
+  gap: 2.8rem;
+}
+
+@media (max-width: 640px) {
+  .page-header-logo {
+    width: 6rem;
+    height: 6rem;
+    padding: 0.8rem !important;
+  }
+
+  .page-header-content {
+    padding: 0 1.2rem 3.2rem !important;
+  }
+
+  .page-header-inner {
+    gap: 1.6rem;
+    align-items: flex-end;
+  }
+}
+
+/* Category page: content + sidebar */
 
 /* WordPress article body styles */
 .wp-content {
@@ -475,6 +594,56 @@ button {
 .wp-content .wp-block-embed,
 .wp-content .embed-responsive {
   margin: 3.2rem 0;
+}
+
+/* Category page: content + sidebar */
+.category-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 34rem;
+  gap: 4rem;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .category-content-grid {
+    grid-template-columns: 1fr;
+    gap: 3.2rem;
+  }
+}
+
+/* Standings table — shrink columns on mobile */
+.standings-table {
+  display: grid;
+  grid-template-columns: 2.2rem 1fr 2.6rem 2.6rem 3.2rem 3.2rem;
+}
+
+@media (max-width: 480px) {
+  .standings-table {
+    grid-template-columns: 2rem 1fr 2.4rem 2.4rem 2.8rem 2.8rem;
+  }
+}
+
+/* Section padding responsive */
+@media (max-width: 768px) {
+  .section-pad {
+    padding: 3.2rem 1.2rem !important;
+  }
+
+  .most-read-section,
+  .latest-section {
+    padding: 3.2rem 0 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-pad {
+    padding: 2.4rem 1.2rem !important;
+  }
+
+  .most-read-section,
+  .latest-section {
+    padding: 2.4rem 0 !important;
+  }
 }
 
 /* Article page responsive */

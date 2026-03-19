@@ -1,6 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
 import { decodeTitle, formatDate } from "@/lib/wordpress";
+import PageHeader from "@/components/PageHeader";
 
 const f = '"Proxima Nova", Arial, sans-serif';
 const fd = '"Druk Text Wide", "Arial Black", sans-serif';
@@ -61,11 +62,11 @@ export default function SearchPage() {
     return (
         <div style={{ backgroundColor: "#fff", minHeight: "100vh" }}>
             {/* Black page header */}
-            <div style={{ backgroundColor: "#1a1a1a", padding: "3.2rem 1.2rem" }}>
-                <div style={{ maxWidth: "132.48rem", margin: "0 auto" }}>
-                    <h1 style={{ fontFamily: fd, fontWeight: 700, fontSize: "3.6rem", color: "#fff" }}>Search</h1>
-                </div>
-            </div>
+            <PageHeader
+                title="Search"
+                subtitle="Find articles, transfers, match reports and more."
+                image="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1600&q=80"
+            />
 
             <div style={{ maxWidth: "132.48rem", margin: "0 auto", padding: "4rem 1.2rem 6rem" }}>
 

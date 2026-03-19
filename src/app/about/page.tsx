@@ -1,3 +1,5 @@
+import PageHeader from "@/components/PageHeader";
+
 const f = '"Proxima Nova", Arial, sans-serif';
 const fd = '"Druk Text Wide", "Arial Black", sans-serif';
 
@@ -12,15 +14,11 @@ export default function AboutPage() {
     return (
         <div style={{ backgroundColor: "#fff", minHeight: "100vh" }}>
 
-            {/* Black page header */}
-            <div style={{ backgroundColor: "#1a1a1a", padding: "3.2rem 1.2rem" }}>
-                <div style={{ maxWidth: "132.48rem", margin: "0 auto" }}>
-                    <h1 style={{ fontFamily: fd, fontWeight: 700, fontSize: "4rem", color: "#fff" }}>About</h1>
-                    <p style={{ fontFamily: f, fontSize: "1.7rem", color: "#aaa", marginTop: "0.8rem", maxWidth: "56rem", lineHeight: 1.5 }}>
-                        Sureodds is a sports blog built for fans who want sharp takes, real analysis, and zero fluff.
-                    </p>
-                </div>
-            </div>
+            <PageHeader
+                title="About Sureodds"
+                subtitle="A sports blog built for fans who want sharp takes, real analysis, and zero fluff."
+                image="https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=1600&q=80"
+            />
 
             <div style={{ maxWidth: "132.48rem", margin: "0 auto", padding: "6rem 1.2rem" }}>
 

@@ -43,7 +43,7 @@ export default function MostRead({ posts }: { posts?: MostReadItem[] }) {
     };
 
     return (
-        <section style={{ background: "linear-gradient(to bottom, #e8ebed 0%, #ffffff 100%)", padding: "5rem 0" }}>
+        <section style={{ background: "linear-gradient(to bottom, #e8ebed 0%, #ffffff 100%)", padding: "5rem 0" }} className="most-read-section">
             <div style={{ maxWidth: "132.48rem", margin: "0 auto", padding: "0 1.2rem" }}>
 
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.6rem" }}>
@@ -61,9 +61,9 @@ export default function MostRead({ posts }: { posts?: MostReadItem[] }) {
                 </div>
 
                 <div ref={scrollRef} onScroll={onScroll} className="scrollbar-hide" style={{ overflowX: "auto" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, calc(25% - 0.9rem))", gap: "2.84rem", width: "max-content", minWidth: "100%" }}>
+                    <div className="most-read-track">
                         {items.map((item) => (
-                            <a key={item.num} href={`/article/${item.slug}`} style={{ display: "flex", flexDirection: "column", textDecoration: "none", width: "calc((132.48rem - 4rem - 3 * 1.2rem) / 4)" }}>
+                            <a key={item.num} href={`/article/${item.slug}`} className="most-read-card">
                                 <div style={{ width: "100%", aspectRatio: "16/9", overflow: "hidden", borderRadius: "0.8rem" }}>
                                     <img src={item.image} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                                 </div>
