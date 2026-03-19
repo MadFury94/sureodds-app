@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import TrendingBar from "@/components/TrendingBar";
 import Footer from "@/components/Footer";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sureodds.ng";
@@ -114,6 +115,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body style={{ minHeight: "100vh", backgroundColor: "#f2f5f6" }}>
         <Navbar />
+        <TrendingBar />
         {children}
         <Footer />
       </body>

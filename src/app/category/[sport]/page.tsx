@@ -3,7 +3,7 @@ import {
     getCategoryBySlug, getPosts, getFeaturedImage, getPostCategory,
     formatDate, decodeTitle, WPPost
 } from "@/lib/wordpress";
-import { getLeagueData, LEAGUE_IDS } from "@/lib/sportsdb";
+import { getLeaguePageData, FD_LEAGUE_CODES, type MatchCard, type StandingRow } from "@/lib/footballdata";
 import PageHeader from "@/components/PageHeader";
 import HeroSection from "@/components/HeroSection";
 import MostRead from "@/components/MostRead";
@@ -13,9 +13,11 @@ import { CategoryScoresTicker, FixturesRow, default as CategorySidebar } from "@
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sureodds.ng";
 
-const fallbackImages: Record<string, string> = {
-    epl: "https://images.unsplash.com/photo-1522778526097-ce0a22ceb253?w=1800&q=85",
-    "la-liga": "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=1800&q=85",
+// ── Static, verified league assets (no API dependency) ────────────────────
+// Background fanart images
+const HEADER_IMAGES: Record<string, string> = {
+    epl: "https://r2.thesportsdb.com/images/media/league/fanart/odberp1725731801.jpg",
+    "la-liga": "https://r2.thesportsdb.com/images/media/league/fanart/6am8r81707716890.jpg",
     ucl: "https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?w=1800&q=85",
     afcon: "https://images.unsplash.com/photo-1551958219-acbc595d9e47?w=1800&q=85",
     news: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1800&q=85",
@@ -24,6 +26,14 @@ const fallbackImages: Record<string, string> = {
     "football-stories": "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=1800&q=85",
     "international-football": "https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=1800&q=85",
     blog: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1800&q=85",
+};
+
+// League badge/logo — only for leagues that have one
+const HEADER_LOGOS: Record<string, string> = {
+    epl: "https://r2.thesportsdb.com/images/media/league/badge/gasy9d1737743125.png",
+    "la-liga": "https://r2.thesportsdb.com/images/media/league/badge/ja4it51687628717.png",
+    ucl: "https://upload.wikimedia.org/wikipedia/en/b/bf/UEFA_Champions_League_logo_2.svg",
+    afcon: "https://upload.wikimedia.org/wikipedia/en/thumb/5/5e/Africa_Cup_of_Nations_logo.svg/800px-Africa_Cup_of_Nations_logo.svg.png",
 };
 
 const categoryLabels: Record<string, string> = {
@@ -84,7 +94,7 @@ export async function generateMetadata(
     const description = categoryDescriptions[sport] ?? `Latest ${label} news, analysis and updates on Sureodds.`;
     const keywords = categoryKeywords[sport] ?? [label, "football", "sureodds"];
     const url = `${SITE_URL}/category/${sport}`;
-    const ogImage = fallbackImages[sport] ?? fallbackImages.news;
+    const ogImage = HEADER_IMAGES[sport] ?? HEADER_IMAGES.news;
 
     return {
         title: `${label} — Latest News & Analysis`,
@@ -113,19 +123,24 @@ export default async function CategoryPage({ params }: { params: Promise<{ sport
 
     const label = categoryLabels[sport] ?? sport.replace(/-/g, " ").toUpperCase();
     const color = badgeColors[sport] ?? "#68676d";
-    const leagueId = LEAGUE_IDS[sport];
     const description = categoryDescriptions[sport] ?? `Latest ${label} news and analysis.`;
     const url = `${SITE_URL}/category/${sport}`;
 
     let posts: WPPost[] = [];
     let totalCount = 0;
-    let headerImage = fallbackImages[sport] ?? fallbackImages.news;
-    let headerLogo: string | undefined;
+    let recent: MatchCard[] = [];
+    let upcoming: MatchCard[] = [];
+    let standings: StandingRow[] = [];
+
+    // Static assets — no API call needed
+    const headerImage = HEADER_IMAGES[sport] ?? HEADER_IMAGES.news;
+    const headerLogo = HEADER_LOGOS[sport];
+    const fdCode = FD_LEAGUE_CODES[sport];
 
     try {
-        const [cat, leagueData] = await Promise.all([
+        const [cat, fdData] = await Promise.all([
             getCategoryBySlug(sport),
-            leagueId ? getLeagueData(leagueId) : Promise.resolve(null),
+            fdCode ? getLeaguePageData(fdCode) : Promise.resolve({ recent: [], upcoming: [], standings: [] }),
         ]);
 
         if (cat) {
@@ -133,12 +148,9 @@ export default async function CategoryPage({ params }: { params: Promise<{ sport
             posts = await getPosts({ categoryId: cat.id, perPage: 20 });
         }
 
-        if (leagueData) {
-            const fanart = leagueData.strFanart1 ?? leagueData.strFanart2 ?? leagueData.strBanner;
-            if (fanart) headerImage = fanart;
-            const badge = leagueData.strBadge ?? leagueData.strLogo;
-            if (badge) headerLogo = badge;
-        }
+        recent = fdData.recent;
+        upcoming = fdData.upcoming;
+        standings = fdData.standings;
     } catch { /* fallback to defaults */ }
 
     const totalCountLabel = totalCount > 0 ? `${totalCount} articles` : undefined;
@@ -146,8 +158,10 @@ export default async function CategoryPage({ params }: { params: Promise<{ sport
     // Section slices — all from category posts
     const heroPost = posts[0] ?? null;
     const leftPosts = posts.slice(1, 3);
-    // Top headlines: posts 3–8 from THIS category
-    const topHeadlines = posts.slice(3, 9);
+    // Top headlines: posts 3–8 from THIS category, fall back to any available posts
+    const topHeadlines = posts.length > 3
+        ? posts.slice(3, 9)
+        : posts.slice(0, 6);  // if few posts, reuse from top
     const mostReadPosts = posts.slice(0, 4);
     const latestPosts = posts.slice(0, 8);
     const sportFeatured = posts[0] ?? null;
@@ -206,7 +220,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ sport
             />
 
             {/* 2. Scores ticker */}
-            <CategoryScoresTicker sport={sport} color={color} />
+            <CategoryScoresTicker recent={recent} upcoming={upcoming} color={color} />
 
             {posts.length === 0 ? (
                 <div style={{ maxWidth: "132.48rem", margin: "0 auto", padding: "8rem 1.2rem", textAlign: "center" }}>
@@ -265,12 +279,12 @@ export default async function CategoryPage({ params }: { params: Promise<{ sport
                                             viewAllHref={`/category/${sport}`}
                                         />
                                     )}
-                                    <FixturesRow sport={sport} color={color} label={label} />
+                                    <FixturesRow fixtures={upcoming} color={color} label={label} />
                                 </div>
 
                                 {/* Sidebar: standings or other leagues + AdSense slot */}
                                 <div style={{ display: "flex", flexDirection: "column", gap: "2.4rem" }}>
-                                    <CategorySidebar sport={sport} color={color} />
+                                    <CategorySidebar sport={sport} color={color} standings={standings} recent={recent} />
 
                                     {/* AdSense placeholder */}
                                     <div style={{

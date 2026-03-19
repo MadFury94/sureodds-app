@@ -43,8 +43,8 @@ const fallbackHeadlines = [
 
 export default function HeroSection({ heroPost, leftPosts, topHeadlines }: Props) {
     const hero = heroPost ?? { image: fallbackImage, category: "NFL", title: "Biggest FA Overreactions", slug: "#" };
-    const left = leftPosts.length >= 2 ? leftPosts.slice(0, 2) : fallbackLeft;
-    const headlines = topHeadlines.length >= 4 ? topHeadlines.slice(0, 6) : fallbackHeadlines;
+    const left = leftPosts.length >= 1 ? leftPosts.slice(0, 2) : fallbackLeft;
+    const headlines = topHeadlines.length >= 1 ? topHeadlines.slice(0, 6) : fallbackHeadlines;
 
     return (
         <section className="hero-section">
