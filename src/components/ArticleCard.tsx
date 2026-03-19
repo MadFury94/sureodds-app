@@ -31,7 +31,7 @@ export default function ArticleCard({ image, category, title, time, emoji, size 
     if (size === "thumb") {
         return (
             <a href="#" style={{ display: "flex", flexDirection: "column", textDecoration: "none" }}>
-                <div style={{ width: "100%", aspectRatio: "16/9", overflow: "hidden", borderRadius: "0.8rem" }}>
+                <div style={{ width: "100%", aspectRatio: "4/2.295", overflow: "hidden", borderRadius: "0.8rem" }}>
                     <img src={image} alt={title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 </div>
                 <div style={{ display: "flex", alignItems: "flex-start", gap: "0.8rem", padding: "1rem 0 0" }}>

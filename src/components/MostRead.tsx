@@ -4,14 +4,23 @@ import { useRef, useState } from "react";
 const f = '"Proxima Nova", Arial, sans-serif';
 const fd = '"Druk Text Wide", "Arial Black", sans-serif';
 
-const items = [
-    { num: 2, title: "New Mock for March Madness 🗒️", image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&q=80" },
-    { num: 3, title: "Latest Signings and Trades 🧢", image: "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=800&q=80" },
-    { num: 4, title: "Post-Combine Mock 🏈", image: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=800&q=80" },
-    { num: 5, title: "Fresh NBA Power Rankings 📊", image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&q=80" },
+interface MostReadItem {
+    num: number;
+    title: string;
+    image: string;
+    slug: string;
+}
+
+const fallbackItems: MostReadItem[] = [
+    { num: 1, title: "New Mock for March Madness 🗒️", image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&q=80", slug: "#" },
+    { num: 2, title: "Latest Signings and Trades 🧢", image: "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=800&q=80", slug: "#" },
+    { num: 3, title: "Post-Combine Mock 🏈", image: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=800&q=80", slug: "#" },
+    { num: 4, title: "Fresh NBA Power Rankings 📊", image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&q=80", slug: "#" },
 ];
 
-export default function MostRead() {
+export default function MostRead({ posts }: { posts?: MostReadItem[] }) {
+    const items = (posts && posts.length > 0) ? posts : fallbackItems;
+
     const scrollRef = useRef<HTMLDivElement>(null);
     const [canLeft, setCanLeft] = useState(false);
     const [canRight, setCanRight] = useState(true);
@@ -34,10 +43,9 @@ export default function MostRead() {
     };
 
     return (
-        <section style={{ background: "linear-gradient(to bottom, #e8ebed 0%, #ffffff 100%)", padding: "2.4rem 0" }}>
-            <div style={{ maxWidth: "144rem", margin: "0 auto", padding: "0 2rem" }}>
+        <section style={{ background: "linear-gradient(to bottom, #e8ebed 0%, #ffffff 100%)", padding: "5rem 0" }}>
+            <div style={{ maxWidth: "132.48rem", margin: "0 auto", padding: "0 1.2rem" }}>
 
-                {/* Header row */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.6rem" }}>
                     <span style={{ fontFamily: f, fontWeight: 700, fontSize: "1.6rem", color: "#1a1a1a", display: "flex", alignItems: "center", gap: "0.6rem" }}>
                         Most Read <span style={{ fontSize: "1.4rem" }}>✏️</span>
@@ -52,11 +60,10 @@ export default function MostRead() {
                     </div>
                 </div>
 
-                {/* Scrollable cards — 4 visible, each ~25% width */}
                 <div ref={scrollRef} onScroll={onScroll} className="scrollbar-hide" style={{ overflowX: "auto" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, calc(25% - 0.9rem))", gap: "1.2rem", width: "max-content", minWidth: "100%" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, calc(25% - 0.9rem))", gap: "2.84rem", width: "max-content", minWidth: "100%" }}>
                         {items.map((item) => (
-                            <a key={item.num} href="#" style={{ display: "flex", flexDirection: "column", textDecoration: "none", width: "calc((144rem - 4rem - 3 * 1.2rem) / 4)" }}>
+                            <a key={item.num} href={`/article/${item.slug}`} style={{ display: "flex", flexDirection: "column", textDecoration: "none", width: "calc((132.48rem - 4rem - 3 * 1.2rem) / 4)" }}>
                                 <div style={{ width: "100%", aspectRatio: "16/9", overflow: "hidden", borderRadius: "0.8rem" }}>
                                     <img src={item.image} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                                 </div>
@@ -64,7 +71,7 @@ export default function MostRead() {
                                     <span style={{ fontFamily: fd, fontWeight: 700, fontSize: "2rem", color: "#99989f", flexShrink: 0, lineHeight: 1 }}>
                                         {item.num}
                                     </span>
-                                    <span className="clamp2" style={{ fontFamily: f, fontSize: "1.4rem", fontWeight: 700, color: "#1a1a1a", lineHeight: 1.3 }}>
+                                    <span className="clamp2" style={{ fontFamily: f, fontSize: "1.875rem", fontWeight: 700, color: "#1a1a1a", lineHeight: 1.25 }}>
                                         {item.title}
                                     </span>
                                 </div>

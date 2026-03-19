@@ -123,12 +123,12 @@ button {
 
 /* Navbar */
 .nav-inner {
-  max-width: 144rem;
+  max-width: 132.48rem;
   margin: 0 auto;
   display: flex;
   align-items: center;
   height: 7.2rem;
-  padding: 0 2rem;
+  padding: 0 1.2rem;
 }
 
 .nav-links {
@@ -147,16 +147,16 @@ button {
 /* Hero section grid */
 .hero-section {
   display: grid;
-  grid-template-columns: 27.5rem 0.85fr 22rem;
-  gap: 1.26rem;
-  padding: 2rem 2rem 3rem;
+  grid-template-columns: 22.61rem 0.96fr 22.44rem;
+  gap: 2.84rem;
+  padding: 5rem 1.2rem 5rem;
   align-items: start;
 }
 
 .hero-left {
   display: flex;
   flex-direction: column;
-  gap: 1.26rem;
+  gap: 2.84rem;
 }
 
 .hero-headlines {
@@ -166,7 +166,7 @@ button {
 
 /* Footer */
 .footer-inner {
-  max-width: 144rem;
+  max-width: 132.48rem;
   margin: 0 auto;
   padding: 4.8rem 2rem 3.2rem;
   display: flex;
@@ -286,4 +286,202 @@ button {
   .hero-section .clamp2 {
     font-size: 1.4rem !important;
   }
+}
+
+/* SportSection responsive */
+.sport-section-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.84rem;
+  align-items: start;
+}
+
+.sport-section-subgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.84rem;
+}
+
+@media (max-width: 768px) {
+  .sport-section-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sport-section-subgrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .sport-section-subgrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* WordPress article body styles */
+.wp-content {
+  max-width: 72rem;
+  overflow: visible;
+}
+
+.wp-content h2,
+.wp-content h3,
+.wp-content h4 {
+  font-family: "Druk Text Wide", "Arial Black", sans-serif;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.15;
+  margin: 4rem 0 1.4rem;
+}
+
+.wp-content h2 {
+  font-size: 3rem;
+}
+
+.wp-content h3 {
+  font-size: 2.4rem;
+}
+
+.wp-content h4 {
+  font-size: 2rem;
+}
+
+/* Divider line before h2 */
+.wp-content h2 {
+  padding-top: 3.2rem;
+  border-top: 1px solid #e8ebed;
+}
+
+.wp-content p {
+  font-family: "Proxima Nova", Arial, sans-serif;
+  font-size: 1.9rem;
+  line-height: 1.8;
+  color: #3d3c41;
+  margin-bottom: 2.4rem;
+}
+
+/* Drop cap on first paragraph */
+.wp-content>p:first-of-type::first-letter {
+  font-family: "Druk Text Wide", "Arial Black", sans-serif;
+  font-size: 6rem;
+  font-weight: 700;
+  line-height: 0.85;
+  float: left;
+  margin: 0.2rem 0.8rem 0 0;
+  color: #1a1a1a;
+}
+
+.wp-content a {
+  color: #e9173d;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.wp-content a:hover {
+  color: #b60122;
+}
+
+.wp-content img {
+  display: block;
+  width: calc(100% + 8rem);
+  max-width: calc(100% + 8rem);
+  margin-left: -4rem;
+  margin-right: -4rem;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 0.6rem;
+  margin-top: 3.6rem;
+  margin-bottom: 0;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+}
+
+.wp-content figure {
+  margin: 3.6rem -4rem 3.6rem;
+  width: calc(100% + 8rem);
+}
+
+.wp-content figure img {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  border-radius: 0.6rem 0.6rem 0 0;
+}
+
+.wp-content figcaption,
+.wp-content .wp-caption-text {
+  font-family: "Proxima Nova", Arial, sans-serif;
+  font-size: 1.25rem;
+  color: #99989f;
+  padding: 0.8rem 1.2rem;
+  background: #f2f5f6;
+  border-radius: 0 0 0.6rem 0.6rem;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.wp-content ul,
+.wp-content ol {
+  font-family: "Proxima Nova", Arial, sans-serif;
+  font-size: 1.9rem;
+  line-height: 1.8;
+  color: #3d3c41;
+  padding-left: 2.8rem;
+  margin-bottom: 2.4rem;
+}
+
+.wp-content li {
+  margin-bottom: 0.8rem;
+}
+
+.wp-content ul li::marker {
+  color: #e9173d;
+}
+
+.wp-content blockquote {
+  position: relative;
+  border-left: 4px solid #e9173d;
+  background: #f9f9f9;
+  padding: 2rem 2.4rem;
+  margin: 3.2rem 0;
+  border-radius: 0 0.4rem 0.4rem 0;
+}
+
+.wp-content blockquote p {
+  font-family: "Proxima Nova", Arial, sans-serif;
+  font-size: 2rem;
+  font-style: italic;
+  color: #27262a;
+  line-height: 1.65;
+  margin-bottom: 0;
+}
+
+.wp-content strong {
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.wp-content em {
+  font-style: italic;
+}
+
+.wp-content hr {
+  border: none;
+  border-top: 1px solid #e8ebed;
+  margin: 4rem 0;
+}
+
+/* WP embed / iframe wrappers */
+.wp-content .wp-block-embed,
+.wp-content .embed-responsive {
+  margin: 3.2rem 0;
+}
+
+/* WP caption */
+.wp-content .wp-caption-text {
+  font-family: "Proxima Nova", Arial, sans-serif;
+  font-size: 1.3rem;
+  color: #99989f;
+  margin-top: 0.6rem;
+  font-style: italic;
 }

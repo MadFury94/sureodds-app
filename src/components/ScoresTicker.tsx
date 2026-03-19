@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useRef, useState } from "react";
 
 type Team = { rank?: number; code: string; record: string; score: number; isFinal: boolean };
@@ -24,7 +24,6 @@ const grouped = games.reduce<Record<string, Game[]>>((acc, g) => {
     (acc[g.league] ??= []).push(g); return acc;
 }, {});
 
-// Exact BR CSS token values
 const f = '"Proxima Nova", Arial, sans-serif';
 
 function TeamRow({ team }: { team: Team }) {
@@ -34,7 +33,7 @@ function TeamRow({ team }: { team: Team }) {
                 <span style={{ fontFamily: f, fontSize: "1.1rem", fontWeight: 600, color: "#99989f", minWidth: "1.2rem", textAlign: "right", flexShrink: 0 }}>
                     {team.rank ?? ""}
                 </span>
-                <span style={{ fontSize: "1.6rem", lineHeight: 1, flexShrink: 0 }}>⚽</span>
+                <span style={{ fontSize: "1.6rem", lineHeight: 1, flexShrink: 0 }}>{"⚽"}</span>
                 <span style={{ fontFamily: f, fontSize: "1.2rem", fontWeight: 700, color: "#1a1a1a", whiteSpace: "nowrap" }}>{team.code}</span>
                 <span style={{ fontFamily: f, fontSize: "1.1rem", fontWeight: 400, color: "#68676d", whiteSpace: "nowrap" }}>{team.record}</span>
             </div>
@@ -76,29 +75,23 @@ export default function ScoresTicker() {
 
     return (
         <div style={{ backgroundColor: "#f2f5f6", borderBottom: "1px solid #ddd" }}>
-            <div style={{ maxWidth: "144rem", margin: "0 auto", position: "relative" }}>
+            <div style={{ maxWidth: "132.48rem", margin: "0 auto", position: "relative" }}>
 
-                {/* Scrollable row — no scrollbar */}
                 <div ref={scrollRef} onScroll={onScroll} style={{ overflowX: "auto", overflowY: "visible" }} className="scrollbar-hide">
-                    <div style={{ display: "flex", alignItems: "flex-start", width: "max-content", padding: "0.8rem 5.6rem 0.8rem 2rem" }}>
+                    <div style={{ display: "flex", alignItems: "flex-start", width: "max-content", padding: "0.8rem 5.6rem 0.8rem 1.2rem" }}>
 
                         {leagueOrder.map((league) => (
                             <div key={league} style={{ display: "flex", flexDirection: "column", marginLeft: "1.6rem" }}>
-                                {/* League label */}
                                 <span style={{ fontFamily: f, fontWeight: 700, fontSize: "1.1rem", color: "#68676d", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.6rem" }}>
                                     {league}
                                 </span>
-                                {/* Game cards */}
                                 <div style={{ display: "flex", gap: "0.4rem" }}>
                                     {grouped[league]?.map((game, gi) => (
                                         <a key={gi} href="#" style={{
                                             display: "flex", flexDirection: "column", gap: "0.2rem",
-                                            backgroundColor: "#fff",
-                                            border: "1px solid #ddd",
-                                            borderRadius: "0.4rem",
-                                            padding: "0.6rem 1rem",
-                                            textDecoration: "none",
-                                            minWidth: "16rem",
+                                            backgroundColor: "#fff", border: "1px solid #ddd",
+                                            borderRadius: "0.4rem", padding: "0.6rem 1rem",
+                                            textDecoration: "none", minWidth: "16rem",
                                         }}>
                                             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.3rem" }}>
                                                 <span style={{ fontFamily: f, fontSize: "1.1rem", color: "#68676d" }}>{game.date}</span>
@@ -115,7 +108,6 @@ export default function ScoresTicker() {
                     </div>
                 </div>
 
-                {/* Left fade + arrow */}
                 {canScrollLeft && (
                     <div style={{
                         position: "absolute", top: 0, left: 0, bottom: 0, width: "8rem",
@@ -131,7 +123,6 @@ export default function ScoresTicker() {
                     </div>
                 )}
 
-                {/* Right fade + arrow */}
                 {canScrollRight && (
                     <div style={{
                         position: "absolute", top: 0, right: 0, bottom: 0, width: "8rem",

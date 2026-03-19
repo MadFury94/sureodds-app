@@ -1,135 +1,115 @@
 import ScoresTicker from "@/components/ScoresTicker";
-import ArticleCard from "@/components/ArticleCard";
 import MostRead from "@/components/MostRead";
 import SportSection from "@/components/SportSection";
+import HeroSection from "@/components/HeroSection";
+import LatestSection from "@/components/LatestSection";
+import {
+  getPosts, getCategories, getFeaturedImage, getPostCategory,
+  formatDate, decodeTitle, WPPost, WPCategory
+} from "@/lib/wordpress";
 
-const f = '"Proxima Nova", Arial, sans-serif';
+function toArticle(post: WPPost) {
+  return {
+    image: getFeaturedImage(post),
+    category: getPostCategory(post),
+    title: decodeTitle(post.title.rendered),
+    slug: post.slug,
+  };
+}
 
-const leftCards = [
-  {
-    image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=600&q=80",
-    category: "NBA",
-    emoji: "🏀",
-    title: "Final Takeaways from WBC 🏆",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600&q=80",
-    category: "Soccer",
-    emoji: "⚽",
-    title: "Every Team's Biggest X-Factor ❎",
-  },
-];
+async function getPostsBySlug(catSlug: string, cats: WPCategory[], perPage = 5): Promise<WPPost[]> {
+  const cat = cats.find(c => c.slug === catSlug);
+  if (!cat) return [];
+  try {
+    return await getPosts({ categoryId: cat.id, perPage });
+  } catch { return []; }
+}
 
-const hero = {
-  image: "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=900&q=80",
-  category: "NFL",
-  emoji: "🏈",
-  title: "Biggest FA Overreactions 👢👢",
-};
+export default async function Home() {
+  // Fetch categories + latest posts in parallel
+  let cats: WPCategory[] = [];
+  let latestPosts: WPPost[] = [];
 
-// Right col — top headlines with sport emojis like BR
-const topHeadlines = [
-  { emoji: "🏈", category: "NFL", title: "Chiefs Dynasty Continues: Can Anyone Stop Kansas City?" },
-  { emoji: "🏀", category: "NBA", title: "LeBron James Passes Michael Jordan on All-Time Scoring List" },
-  { emoji: "⚽", category: "Soccer", title: "Champions League Quarter-Final Draw Announced" },
-  { emoji: "⚾", category: "MLB", title: "Yankees Sign Star Pitcher to Record-Breaking $400M Deal" },
-  { emoji: "🥊", category: "Boxing", title: "Canelo vs Benavidez: Fight Date, Odds, and Predictions" },
-  { emoji: "🏒", category: "NHL", title: "Avalanche Dominate Oilers in Western Conference Showdown" },
-];
+  try {
+    [cats, latestPosts] = await Promise.all([
+      getCategories(),
+      getPosts({ perPage: 20 }),
+    ]);
+  } catch { /* fallback to empty */ }
 
-const badgeColors: Record<string, string> = {
-  NFL: "#e9173d", NBA: "#e9173d", MLB: "#003087", NHL: "#003087",
-  Soccer: "#1a1a1a", Boxing: "#1a1a1a", MMA: "#1a1a1a", Golf: "#1a6b3c",
-};
+  // Per-category sections
+  const [transferPosts, breakingPosts, laLigaPosts, eplPosts, latestNewsPosts] = await Promise.all([
+    getPostsBySlug("transfer", cats, 5),
+    getPostsBySlug("breaking-news", cats, 5),
+    getPostsBySlug("la-liga", cats, 5),
+    getPostsBySlug("epl", cats, 5),
+    getPostsBySlug("news", cats, 8),
+  ]);
 
-type Article = { image: string; category: string; emoji?: string; title: string };
+  const heroPost = latestPosts[0] ?? null;
+  const leftPosts = latestPosts.slice(1, 3);
+  const topHeadlines = latestPosts.slice(3, 9);
+  const mostReadPosts = latestPosts.slice(0, 4);
 
-const nflSection: { title: string; featured: Article; grid: [Article, Article, Article, Article] } = {
-  title: "Around the NFL",
-  featured: {
-    image: "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=900&q=80",
-    category: "NFL",
-    emoji: "✌️",
-    title: "Re-Ranking Best WR Duos ✌️",
-  },
-  grid: [
-    { image: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=500&q=80", category: "NFL", emoji: "🏈", title: "Steelers Icon's Take on Rodgers 🏈" },
-    { image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&q=80", category: "NFL", emoji: "🎬", title: "Hollywood Defends Hurts 🎬" },
-    { image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=500&q=80", category: "NFL", emoji: "🛒", title: "Vikings' Reported Spending Strategy 🛒" },
-    { image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=500&q=80", category: "NFL", emoji: "💥", title: "7 Players Set to Break Out on New Teams 💥" },
-  ],
-};
+  function toSection(title: string, posts: WPPost[], catSlug: string) {
+    if (posts.length < 2) return null;
+    const featured = toArticle(posts[0]);
+    const grid = posts.slice(1, 5).map(toArticle);
+    // pad to 4 if needed
+    while (grid.length < 4) grid.push(grid[grid.length - 1] ?? featured);
+    return {
+      title,
+      featured,
+      grid: grid.slice(0, 4) as [ReturnType<typeof toArticle>, ReturnType<typeof toArticle>, ReturnType<typeof toArticle>, ReturnType<typeof toArticle>],
+      viewAllHref: `/category/${catSlug}`,
+    };
+  }
 
-export default function Home() {
+  const transferSection = toSection("Transfers", transferPosts, "transfer");
+  const breakingSection = toSection("Breaking News", breakingPosts, "breaking-news");
+  const laLigaSection = toSection("La Liga", laLigaPosts, "la-liga");
+  const eplSection = toSection("EPL", eplPosts, "epl");
+
   return (
     <>
       <ScoresTicker />
 
-      {/* Gradient background wrapping the hero */}
       <div style={{ background: "linear-gradient(to bottom, #e8ebed 0%, #ffffff 100%)" }}>
-        <main style={{ maxWidth: "144rem", margin: "0 auto" }}>
-
-          {/* ── Hero: left thumbs | center big | right headlines ── */}
-          <section className="hero-section">
-
-            {/* Left col — 2 stacked thumb cards */}
-            <div className="hero-left">
-              {leftCards.map((c, i) => (
-                <ArticleCard key={i} {...c} size="thumb" />
-              ))}
-            </div>
-
-            {/* Center — big hero */}
-            <a href="#" className="hero-center" style={{ display: "flex", flexDirection: "column", textDecoration: "none" }}>
-              <div style={{ width: "100%", aspectRatio: "16/9", overflow: "hidden", borderRadius: "0.8rem" }}>
-                <img src={hero.image} alt={hero.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              </div>
-              <div style={{ display: "flex", alignItems: "flex-start", gap: "0.8rem", padding: "1rem 0 0", flexShrink: 0 }}>
-                <span style={{ fontSize: "2rem", lineHeight: 1, flexShrink: 0, marginTop: "0.2rem" }}>{hero.emoji}</span>
-                <h2 style={{ fontFamily: f, fontWeight: 700, fontSize: "2.5rem", lineHeight: 1.2, color: "#1a1a1a" }}>
-                  {hero.title}
-                </h2>
-              </div>
-            </a>
-
-            {/* Right col — TOP HEADLINES */}
-            <div className="hero-headlines">
-              <p style={{
-                fontFamily: '"Druk Text Wide", "Arial Black", sans-serif',
-                fontWeight: 700, fontSize: "1.6rem",
-                textTransform: "uppercase", letterSpacing: "0.04em",
-                color: "#1a1a1a", marginBottom: "0.8rem",
-              }}>
-                Top Headlines
-              </p>
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                {topHeadlines.map((h, i) => (
-                  <a key={i} href="#" style={{
-                    display: "flex", alignItems: "flex-start", gap: "0.8rem",
-                    padding: "0.9rem 0",
-                    borderBottom: i < topHeadlines.length - 1 ? "1px solid #ddd" : "none",
-                    textDecoration: "none",
-                  }}>
-                    <span style={{ fontSize: "1.6rem", lineHeight: 1, flexShrink: 0, marginTop: "0.1rem" }}>{h.emoji}</span>
-                    <span className="clamp2" style={{
-                      fontFamily: f, fontSize: "1.625rem", fontWeight: 600,
-                      color: "#1a1a1a", lineHeight: 1.3,
-                    }}>
-                      {h.title}
-                    </span>
-                  </a>
-                ))}
-              </div>
-            </div>
-
-          </section>
-
+        <main style={{ maxWidth: "132.48rem", margin: "0 auto" }}>
+          <HeroSection
+            heroPost={heroPost ? toArticle(heroPost) : null}
+            leftPosts={leftPosts.map(toArticle)}
+            topHeadlines={topHeadlines.map(p => ({
+              category: getPostCategory(p),
+              title: decodeTitle(p.title.rendered),
+              slug: p.slug,
+            }))}
+          />
         </main>
       </div>
 
-      <MostRead />
-      <SportSection {...nflSection} />
+      <MostRead posts={mostReadPosts.map((p, i) => ({
+        num: i + 1,
+        title: decodeTitle(p.title.rendered),
+        image: getFeaturedImage(p),
+        slug: p.slug,
+      }))} />
 
+      {transferSection && <SportSection {...transferSection} />}
+
+      {latestNewsPosts.length > 0 && (
+        <LatestSection posts={latestNewsPosts.map(p => ({
+          slug: p.slug,
+          title: decodeTitle(p.title.rendered),
+          image: getFeaturedImage(p),
+          category: getPostCategory(p),
+          date: formatDate(p.date),
+        }))} />
+      )}
+
+      {breakingSection && <SportSection {...breakingSection} reverse />}
+      {laLigaSection && <SportSection {...laLigaSection} />}
+      {eplSection && <SportSection {...eplSection} reverse />}
     </>
   );
 }

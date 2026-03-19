@@ -4,6 +4,7 @@ interface Article {
     image: string;
     category: string;
     title: string;
+    slug?: string;
     emoji?: string;
 }
 
@@ -11,24 +12,33 @@ interface Props {
     title: string;
     featured: Article;
     grid: [Article, Article, Article, Article];
+    reverse?: boolean;
+    viewAllHref?: string;
 }
 
-export default function SportSection({ title, featured, grid }: Props) {
+export default function SportSection({ title, featured, grid, reverse = false, viewAllHref }: Props) {
     return (
         <div style={{ background: "linear-gradient(to bottom, #e8ebed 0%, #ffffff 100%)" }}>
-            <section style={{ maxWidth: "144rem", margin: "0 auto", padding: "2.4rem 2rem 3.2rem" }}>
+            <section style={{ maxWidth: "132.48rem", margin: "0 auto", padding: "5rem 1.2rem 5rem" }}>
 
                 {/* Section title */}
-                <h2 style={{ fontFamily: f, fontWeight: 700, fontSize: "1.6rem", color: "#1a1a1a", marginBottom: "1.6rem" }}>
-                    {title}
-                </h2>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.6rem" }}>
+                    <h2 style={{ fontFamily: f, fontWeight: 700, fontSize: "1.6rem", color: "#1a1a1a" }}>
+                        {title}
+                    </h2>
+                    {viewAllHref && (
+                        <a href={viewAllHref} style={{ fontFamily: f, fontSize: "1.3rem", fontWeight: 600, color: "#e9173d", textDecoration: "none" }}>
+                            View All →
+                        </a>
+                    )}
+                </div>
 
-                {/* 2-col: big featured left | 2×2 grid right */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.26rem", alignItems: "start" }}>
+                {/* 2-col: optionally reversed */}
+                <div className="sport-section-grid" style={{ direction: reverse ? "rtl" : "ltr" }}>
 
-                    {/* Featured — same as hero center */}
-                    <a href="#" style={{ display: "flex", flexDirection: "column", textDecoration: "none" }}>
-                        <div style={{ width: "100%", aspectRatio: "16/9", overflow: "hidden", borderRadius: "0.8rem" }}>
+                    {/* Featured */}
+                    <a href={featured.slug ? `/article/${featured.slug}` : "#"} style={{ display: "flex", flexDirection: "column", textDecoration: "none", direction: "ltr" }}>
+                        <div style={{ width: "100%", aspectRatio: "16/10.8", overflow: "hidden", borderRadius: "0.8rem" }}>
                             <img src={featured.image} alt={featured.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                         </div>
                         <div style={{ display: "flex", alignItems: "flex-start", gap: "0.8rem", padding: "1rem 0 0" }}>
@@ -39,10 +49,10 @@ export default function SportSection({ title, featured, grid }: Props) {
                         </div>
                     </a>
 
-                    {/* 2×2 grid — same as hero left thumb cards */}
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.26rem" }}>
+                    {/* 2×2 grid */}
+                    <div className="sport-section-subgrid" style={{ direction: "ltr" }}>
                         {grid.map((article, i) => (
-                            <a key={i} href="#" style={{ display: "flex", flexDirection: "column", textDecoration: "none" }}>
+                            <a key={i} href={article.slug ? `/article/${article.slug}` : "#"} style={{ display: "flex", flexDirection: "column", textDecoration: "none" }}>
                                 <div style={{ width: "100%", aspectRatio: "16/9", overflow: "hidden", borderRadius: "0.8rem" }}>
                                     <img src={article.image} alt={article.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                                 </div>
