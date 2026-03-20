@@ -1,7 +1,8 @@
 "use client";
+import { colors, fonts, CATEGORY_COLORS } from "@/lib/config";
 
-const f = '"Proxima Nova", Arial, sans-serif';
-const fd = '"Druk Text Wide", "Arial Black", sans-serif';
+const f = fonts.body;
+const fd = fonts.display;
 
 interface Article {
     image: string;
@@ -120,6 +121,12 @@ export default function HeroSection({ heroPost, leftPosts, topHeadlines }: Props
                                         width: "2.4rem", height: "2.4rem", flexShrink: 0,
                                         marginTop: "0.2rem", display: "flex",
                                         alignItems: "center", justifyContent: "center",
+                                        // Local SVGs (AFCON etc.) need a coloured bg to be visible
+                                        ...(h.logo.startsWith("/") && {
+                                            backgroundColor: CATEGORY_COLORS[h.category.toLowerCase().replace(/\s+/g, "-")] ?? colors.gray500,
+                                            borderRadius: "0.2rem",
+                                            padding: "0.2rem",
+                                        }),
                                     }}>
                                         <img src={h.logo} alt={h.category}
                                             style={{ width: "100%", height: "100%", objectFit: "contain" }} />

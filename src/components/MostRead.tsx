@@ -1,8 +1,9 @@
 "use client";
 import { useRef, useState } from "react";
+import { colors, fonts } from "@/lib/config";
 
-const f = '"Proxima Nova", Arial, sans-serif';
-const fd = '"Druk Text Wide", "Arial Black", sans-serif';
+const f = fonts.body;
+const fd = fonts.display;
 
 interface MostReadItem {
     num: number;

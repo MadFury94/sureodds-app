@@ -1,5 +1,7 @@
-const f = '"Proxima Nova", Arial, sans-serif';
-const fd = '"Druk Text Wide", "Arial Black", sans-serif';
+import { colors, fonts } from "@/lib/config";
+
+const f = fonts.body;
+const fd = fonts.display;
 
 interface Props {
     title: string;

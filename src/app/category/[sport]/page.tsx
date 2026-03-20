@@ -4,50 +4,17 @@ import {
     formatDate, decodeTitle, WPPost
 } from "@/lib/wordpress";
 import { getLeaguePageData, FD_LEAGUE_CODES, type MatchCard, type StandingRow } from "@/lib/footballdata";
+import {
+    SITE_URL, CATEGORY_IMAGES, CATEGORY_LABELS, CATEGORY_COLORS,
+    LEAGUE_LOGOS, fonts, colors, MAX_WIDTH, TWITTER_FEEDS,
+} from "@/lib/config";
 import PageHeader from "@/components/PageHeader";
 import HeroSection from "@/components/HeroSection";
 import MostRead from "@/components/MostRead";
 import LatestSection from "@/components/LatestSection";
 import SportSection from "@/components/SportSection";
+import TwitterFeed from "@/components/TwitterFeed";
 import { CategoryScoresTicker, FixturesRow, default as CategorySidebar } from "@/components/CategoryScores";
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sureodds.ng";
-
-// ── Static, verified league assets (no API dependency) ────────────────────
-// Background fanart images
-const HEADER_IMAGES: Record<string, string> = {
-    epl: "https://r2.thesportsdb.com/images/media/league/fanart/odberp1725731801.jpg",
-    "la-liga": "https://r2.thesportsdb.com/images/media/league/fanart/6am8r81707716890.jpg",
-    ucl: "https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?w=1800&q=85",
-    afcon: "/afconbg.webp",
-    news: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1800&q=85",
-    transfer: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=1800&q=85",
-    "breaking-news": "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1800&q=85",
-    "football-stories": "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=1800&q=85",
-    "international-football": "https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=1800&q=85",
-    blog: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1800&q=85",
-};
-
-// League badge/logo — reliable sources only
-const HEADER_LOGOS: Record<string, string> = {
-    epl: "https://r2.thesportsdb.com/images/media/league/badge/gasy9d1737743125.png",
-    "la-liga": "https://r2.thesportsdb.com/images/media/league/badge/ja4it51687628717.png",
-    ucl: "https://crests.football-data.org/CL.png",
-    afcon: "/afconlogo.svg",
-};
-
-const categoryLabels: Record<string, string> = {
-    news: "Football News",
-    transfer: "Transfer News",
-    "breaking-news": "Breaking News",
-    "football-stories": "Football Stories",
-    "la-liga": "La Liga",
-    epl: "English Premier League",
-    ucl: "UEFA Champions League",
-    afcon: "Africa Cup of Nations",
-    "international-football": "International Football",
-    blog: "Blog",
-};
 
 const categoryDescriptions: Record<string, string> = {
     news: "Latest football news, match reports, and analysis from around the world.",
@@ -60,12 +27,6 @@ const categoryDescriptions: Record<string, string> = {
     afcon: "Africa Cup of Nations news, results, fixtures and team updates.",
     "international-football": "International football news, World Cup qualifiers, friendlies and national team updates.",
     blog: "Football opinion, analysis and fan perspectives from the Sureodds team.",
-};
-
-const badgeColors: Record<string, string> = {
-    news: "#68676d", transfer: "#e9173d", "breaking-news": "#e9173d",
-    "football-stories": "#1a1a1a", "la-liga": "#ff4b00", epl: "#38003c",
-    ucl: "#1a1f71", afcon: "#009a44", "international-football": "#68676d", blog: "#68676d",
 };
 
 const categoryKeywords: Record<string, string[]> = {
@@ -96,11 +57,11 @@ export async function generateMetadata(
 ): Promise<Metadata> {
     const { sport: rawSport } = await params;
     const sport = rawSport.toLowerCase();
-    const label = categoryLabels[sport] ?? sport.replace(/-/g, " ").toUpperCase();
+    const label = CATEGORY_LABELS[sport] ?? sport.replace(/-/g, " ").toUpperCase();
     const description = categoryDescriptions[sport] ?? `Latest ${label} news, analysis and updates on Sureodds.`;
     const keywords = categoryKeywords[sport] ?? [label, "football", "sureodds"];
     const url = `${SITE_URL}/category/${sport}`;
-    const ogImage = HEADER_IMAGES[sport] ?? HEADER_IMAGES.news;
+    const ogImage = CATEGORY_IMAGES[sport] ?? CATEGORY_IMAGES.news;
 
     return {
         title: `${label} — Latest News & Analysis`,
@@ -127,8 +88,8 @@ export default async function CategoryPage({ params }: { params: Promise<{ sport
     const { sport: rawSport } = await params;
     const sport = rawSport.toLowerCase();
 
-    const label = categoryLabels[sport] ?? sport.replace(/-/g, " ").toUpperCase();
-    const color = badgeColors[sport] ?? "#68676d";
+    const label = CATEGORY_LABELS[sport] ?? sport.replace(/-/g, " ").toUpperCase();
+    const color = CATEGORY_COLORS[sport] ?? colors.gray500;
     const description = categoryDescriptions[sport] ?? `Latest ${label} news and analysis.`;
     const url = `${SITE_URL}/category/${sport}`;
 
@@ -138,9 +99,8 @@ export default async function CategoryPage({ params }: { params: Promise<{ sport
     let upcoming: MatchCard[] = [];
     let standings: StandingRow[] = [];
 
-    // Static assets — no API call needed
-    const headerImage = HEADER_IMAGES[sport] ?? HEADER_IMAGES.news;
-    const headerLogo = HEADER_LOGOS[sport];
+    const headerImage = CATEGORY_IMAGES[sport] ?? CATEGORY_IMAGES.news;
+    const headerLogo = LEAGUE_LOGOS[sport];
     const fdCode = FD_LEAGUE_CODES[sport];
 
     try {
@@ -177,8 +137,8 @@ export default async function CategoryPage({ params }: { params: Promise<{ sport
         paddedGrid.push(paddedGrid[paddedGrid.length - 1]);
     }
 
-    const f = '"Proxima Nova", Arial, sans-serif';
-    const fd = '"Druk Text Wide", "Arial Black", sans-serif';
+    const f = fonts.body;
+    const fd = fonts.display;
 
     // JSON-LD: CollectionPage
     const jsonLd = {
@@ -246,7 +206,13 @@ export default async function CategoryPage({ params }: { params: Promise<{ sport
                         }))} />
                     )}
 
-                    {/* 4. Hero — 3-col layout, top headlines from THIS category */}
+                    {/* 4. Twitter feed — category-specific list or fallback to default */}
+                    <TwitterFeed
+                        listUrl={TWITTER_FEEDS[sport] ?? TWITTER_FEEDS.default}
+                        title="Latest on X"
+                    />
+
+                    {/* 5. Hero — 3-col layout, top headlines from THIS category */}
                     <div style={{ background: "linear-gradient(to bottom, #e8ebed 0%, #ffffff 100%)" }}>
                         <main style={{ maxWidth: "132.48rem", margin: "0 auto" }}>
                             <HeroSection
@@ -256,7 +222,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ sport
                                     category: getPostCategory(p),
                                     title: decodeTitle(p.title.rendered),
                                     slug: p.slug,
-                                    logo: HEADER_LOGOS[getPostCategory(p).toLowerCase().replace(/\s+/g, "-")] ?? HEADER_LOGOS[sport],
+                                    logo: LEAGUE_LOGOS[getPostCategory(p).toLowerCase().replace(/\s+/g, "-")] ?? LEAGUE_LOGOS[sport],
                                 }))}
                             />
                         </main>

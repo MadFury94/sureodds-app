@@ -3,8 +3,10 @@ import { useState } from "react";
 
 interface Item { title: string; slug: string; image: string; date: string; }
 
-const f = '"Proxima Nova", Arial, sans-serif';
-const fd = '"Druk Text Wide", "Arial Black", sans-serif';
+import { colors, fonts } from "@/lib/config";
+
+const f = fonts.body;
+const fd = fonts.display;
 
 export default function TrendingBarScroll({ items }: { items: Item[] }) {
     const [paused, setPaused] = useState(false);

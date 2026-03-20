@@ -1,4 +1,6 @@
-const BASE = process.env.NEXT_PUBLIC_WP_API ?? "https://sureodds.ng/wp-json/wp/v2";
+import { WP_API_BASE, FALLBACK_IMAGE } from "@/lib/config";
+
+const BASE = WP_API_BASE;
 
 export interface WPPost {
     id: number;
@@ -24,7 +26,6 @@ export interface WPCategory {
     count: number;
 }
 
-const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=900&q=80";
 
 async function wpFetch<T>(path: string, options?: RequestInit): Promise<T> {
     const res = await fetch(`${BASE}${path}`, {

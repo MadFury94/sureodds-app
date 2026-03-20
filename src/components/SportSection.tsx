@@ -1,4 +1,6 @@
-const f = '"Proxima Nova", Arial, sans-serif';
+import { colors, fonts } from "@/lib/config";
+
+const f = fonts.body;
 
 interface Article {
     image: string;

@@ -3,9 +3,8 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import TrendingBar from "@/components/TrendingBar";
 import Footer from "@/components/Footer";
+import { SITE_URL, SITE_NAME } from "@/lib/config";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sureodds.ng";
-const SITE_NAME = "Sureodds";
 const DEFAULT_DESCRIPTION =
   "Sureodds — expert football analysis, transfer news, match previews, betting tips, La Liga, EPL, UCL and AFCON coverage. Stay ahead of the game.";
 const DEFAULT_OG_IMAGE = `${SITE_URL}/og-default.jpg`;

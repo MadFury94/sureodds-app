@@ -1,9 +1,10 @@
 "use client";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
+import { fonts, LEAGUE_LOGOS, CATEGORY_COLORS } from "@/lib/config";
 
-const f = '"Proxima Nova", Arial, sans-serif';
-const fd = '"Druk Text Wide", "Arial Black", sans-serif';
+const f = fonts.body;
+const fd = fonts.display;
 
 const navItems = [
     { label: "News", slug: "news" },
@@ -17,16 +18,16 @@ const navItems = [
 ];
 
 const megaMenuSports = [
-    { icon: "📰", label: "News", slug: "news" },
-    { icon: "🔄", label: "Transfer", slug: "transfer" },
-    { icon: "🚨", label: "Breaking News", slug: "breaking-news" },
-    { icon: "⚽", label: "Football Stories", slug: "football-stories" },
-    { icon: "🇪🇸", label: "La Liga", slug: "la-liga" },
-    { icon: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", label: "EPL", slug: "epl" },
-    { icon: "🏆", label: "UCL", slug: "ucl" },
-    { icon: "🌍", label: "AFCON", slug: "afcon" },
-    { icon: "🌐", label: "International Football", slug: "international-football" },
-    { icon: "📝", label: "Blog", slug: "blog" },
+    { label: "News", slug: "news" },
+    { label: "Transfer", slug: "transfer" },
+    { label: "Breaking News", slug: "breaking-news" },
+    { label: "Football Stories", slug: "football-stories" },
+    { label: "La Liga", slug: "la-liga" },
+    { label: "EPL", slug: "epl" },
+    { label: "UCL", slug: "ucl" },
+    { label: "AFCON", slug: "afcon" },
+    { label: "International Football", slug: "international-football" },
+    { label: "Blog", slug: "blog" },
 ];
 
 const rightLinks = [
@@ -34,6 +35,40 @@ const rightLinks = [
     { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
 ];
+
+/** Renders a league logo img, or a coloured abbreviation box as fallback */
+function MegaIcon({ slug, label }: { slug: string; label: string }) {
+    const logo = LEAGUE_LOGOS[slug];
+    const accentColor = CATEGORY_COLORS[slug] ?? "#68676d";
+    const isLocal = logo?.startsWith("/");
+
+    if (logo) {
+        return (
+            <div style={{
+                width: "2.8rem", height: "2.8rem", flexShrink: 0,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                borderRadius: "0.4rem",
+                backgroundColor: isLocal ? accentColor : "transparent",
+                padding: isLocal ? "0.3rem" : "0",
+            }}>
+                <img src={logo} alt={label} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+            </div>
+        );
+    }
+
+    // Fallback: coloured box with 2-letter abbreviation
+    return (
+        <div style={{
+            width: "2.8rem", height: "2.8rem", flexShrink: 0,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            borderRadius: "0.4rem", backgroundColor: accentColor,
+        }}>
+            <span style={{ fontFamily: f, fontSize: "1rem", fontWeight: 700, color: "#fff", lineHeight: 1 }}>
+                {label.slice(0, 2).toUpperCase()}
+            </span>
+        </div>
+    );
+}
 
 export default function Navbar() {
     const [megaOpen, setMegaOpen] = useState(false);
@@ -118,7 +153,7 @@ export default function Navbar() {
             {/* Mega menu / mobile drawer */}
             {megaOpen && (
                 <div style={{ backgroundColor: "#fff", boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}>
-                    {/* Mobile-only nav links (shown at ≤1024px via CSS) */}
+                    {/* Mobile-only nav links */}
                     <div className="mobile-nav-links">
                         {[
                             ...navItems.map(i => ({ label: i.label, href: `/category/${i.slug}` })),
@@ -131,6 +166,7 @@ export default function Navbar() {
                             }}>{item.label}</a>
                         ))}
                     </div>
+
                     {/* Desktop mega grid */}
                     <div style={{
                         maxWidth: "132.48rem", margin: "0 auto", padding: "2.4rem 2rem",
@@ -141,8 +177,9 @@ export default function Navbar() {
                                 padding: "1rem 0.8rem",
                                 fontFamily: f, fontWeight: 600, fontSize: "1.4rem",
                                 color: "#1a1a1a", borderBottom: "1px solid #eee",
+                                textDecoration: "none",
                             }}>
-                                <span style={{ fontSize: "1.8rem" }}>{sport.icon}</span>
+                                <MegaIcon slug={sport.slug} label={sport.label} />
                                 {sport.label}
                             </a>
                         ))}

@@ -1,9 +1,10 @@
 "use client";
 import { useRef, useState } from "react";
 import type { MatchCard, StandingRow } from "@/lib/footballdata";
+import { colors, fonts } from "@/lib/config";
 
-const f = '"Proxima Nova", Arial, sans-serif';
-const fd = '"Druk Text Wide", "Arial Black", sans-serif';
+const f = fonts.body;
+const fd = fonts.display;
 
 const OTHER_LEAGUES = [
     { name: "Premier League", href: "/category/epl", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },

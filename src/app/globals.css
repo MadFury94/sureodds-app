@@ -1,6 +1,39 @@
 @import "tailwindcss";
 
-/* ── Exact BR design tokens ── */
+/* ── Tailwind v4 theme tokens ── */
+@theme {
+  /* Primary */
+  --color-primary: #e9173d;
+  --color-primary-dark: #b60122;
+
+  /* Neutrals */
+  --color-white: #ffffff;
+  --color-gray-50: #f2f5f6;
+  --color-gray-100: #e8ebed;
+  --color-gray-200: #ddd;
+  --color-gray-300: #c9c9c9;
+  --color-gray-400: #99989f;
+  --color-gray-500: #68676d;
+  --color-gray-600: #3d3c41;
+  --color-gray-700: #27262a;
+  --color-gray-800: #1a1a1a;
+  --color-black: #000000;
+
+  /* League accents */
+  --color-epl: #38003c;
+  --color-laliga: #ff4b00;
+  --color-ucl: #1a1f71;
+  --color-afcon: #009a44;
+
+  /* Fonts */
+  --font-body: "Proxima Nova", Arial, sans-serif;
+  --font-display: "Druk Text Wide", "Arial Black", sans-serif;
+
+  /* Site max-width */
+  --max-w-site: 132.48rem;
+}
+
+/* ── Legacy CSS custom properties (kept for wp-content styles) ── */
 :root {
   --n50: #fff;
   --n100: #f2f5f6;
