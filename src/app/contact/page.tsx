@@ -189,7 +189,7 @@ export default function ContactPage() {
                             </p>
                             <p style={{ fontFamily: f, fontSize: "1.4rem", color: "#68676d" }}>
                                 Need help? Email us at{" "}
-                                <a href="mailto:support@sureodds.com" style={{ color: "#a855f7", textDecoration: "none", borderBottom: "1px solid #a855f7" }}>
+                                <a href="mailto:support@sureodds.com" style={{ color: "#BD4110", textDecoration: "none", borderBottom: "1px solid #BD4110" }}>
                                     support@sureodds.com
                                 </a>
                             </p>

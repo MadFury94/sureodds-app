@@ -1009,3 +1009,99 @@ button:active {
   outline-offset: 3px;
   border-radius: 0.2rem;
 }
+
+/* ── PhoneMarquee ── */
+@keyframes marqueeLeft {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-33.333%);
+  }
+}
+
+@keyframes marqueeRight {
+  0% {
+    transform: translateX(-33.333%);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.marquee-left {
+  animation: marqueeLeft 28s linear infinite;
+  will-change: transform;
+}
+
+.marquee-right {
+  animation: marqueeRight 36s linear infinite;
+  will-change: transform;
+}
+
+/* Pause on hover */
+.marquee-left:hover,
+.marquee-right:hover {
+  animation-play-state: paused;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+  .marquee-left,
+  .marquee-right {
+    animation: none;
+  }
+}
+
+/* ── PhoneMarquee ── */
+@keyframes pmLeft {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes pmRight {
+  from {
+    transform: translateX(-50%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+.pm-track-left {
+  display: flex;
+  gap: 1.6rem;
+  width: max-content;
+  animation: pmLeft 24s linear infinite;
+  will-change: transform;
+}
+
+.pm-track-right {
+  display: flex;
+  gap: 2rem;
+  width: max-content;
+  animation: pmRight 32s linear infinite;
+  will-change: transform;
+}
+
+.pm-track-left:hover,
+.pm-track-right:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .pm-track-left,
+  .pm-track-right {
+    animation: none;
+  }
+}

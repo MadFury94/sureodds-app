@@ -29,8 +29,8 @@ export default function Footer() {
                     </h3>
                     <p style={{ fontFamily: f, fontSize: "1.2rem", color: "#68676d", textAlign: "center", lineHeight: 1.6 }}>
                         By entering your email address, you agree to the Sureodds{" "}
-                        <a href="#" style={{ color: "#a855f7" }}>Terms of Use</a> and{" "}
-                        <a href="#" style={{ color: "#a855f7" }}>Privacy Policy</a>.
+                        <a href="#" style={{ color: "#BD4110" }}>Terms of Use</a> and{" "}
+                        <a href="#" style={{ color: "#BD4110" }}>Privacy Policy</a>.
                     </p>
                     <div className="footer-email-row">
                         <input
@@ -45,7 +45,7 @@ export default function Footer() {
                             }}
                         />
                         <button style={{
-                            padding: "1.2rem 2.4rem", backgroundColor: "#a855f7", border: "none",
+                            padding: "1.2rem 2.4rem", backgroundColor: "#BD4110", border: "none",
                             borderRadius: "0.4rem", fontFamily: f, fontSize: "1.4rem",
                             fontWeight: 700, color: "#fff", cursor: "pointer", whiteSpace: "nowrap",
                         }}>

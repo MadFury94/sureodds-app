@@ -4,6 +4,7 @@ import MostRead from "@/components/MostRead";
 import SportSection from "@/components/SportSection";
 import HeroSection from "@/components/HeroSection";
 import LatestSection from "@/components/LatestSection";
+import PhoneMarquee from "@/components/PhoneMarquee";
 import {
   getPosts, getCategories, getFeaturedImage, getPostCategory,
   formatDate, decodeTitle, WPPost, WPCategory
@@ -119,6 +120,7 @@ export default async function Home() {
         }))} />
       )}
 
+      <PhoneMarquee />
 
       {breakingSection && <SportSection {...breakingSection} reverse />}
       {laLigaSection && <SportSection {...laLigaSection} />}
