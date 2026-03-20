@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readFileSync, writeFileSync } from "fs";
 import path from "path";
+import { verifyUserToken } from "@/lib/auth";
 
 const TIPS_FILE = path.join(process.cwd(), "src/data/tips.json");
 
@@ -16,10 +17,19 @@ function writeTips(tips: unknown[]) {
     writeFileSync(TIPS_FILE, JSON.stringify(tips, null, 2));
 }
 
-function getSession(req: NextRequest) {
-    const raw = req.cookies.get("so_admin_session")?.value;
-    if (!raw) return null;
-    try { return JSON.parse(raw); } catch { return null; }
+async function isAuthorized(req: NextRequest): Promise<boolean> {
+    // WP admin session
+    const adminRaw = req.cookies.get("so_admin_session")?.value;
+    if (adminRaw) {
+        try { if (JSON.parse(adminRaw)?.token) return true; } catch { /* */ }
+    }
+    // Punter / tips-admin session
+    const userToken = req.cookies.get("so_user_session")?.value;
+    if (userToken) {
+        const payload = await verifyUserToken(userToken);
+        if (payload?.role === "punter" || payload?.role === "tips-admin") return true;
+    }
+    return false;
 }
 
 export async function GET() {
@@ -27,8 +37,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-    const session = getSession(req);
-    if (!session?.token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!(await isAuthorized(req))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await req.json();
     const tips = readTips();

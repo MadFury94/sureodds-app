@@ -1,0 +1,14 @@
+{
+    "subscriptionPrice": 2000,
+    "subscriptionCurrency": "NGN",
+    "subscriptionDurationDays": 30,
+    "bankAccounts": [
+        {
+            "bankName": "First Bank",
+            "accountName": "Sureodds Ltd",
+            "accountNumber": "0000000000"
+        }
+    ],
+    "paystackPublicKey": "",
+    "manualPaymentInstructions": "Transfer the subscription fee to any account below, then submit your payment reference for admin approval."
+}

@@ -6,27 +6,38 @@ import { fonts } from "@/lib/config";
 const f = fonts.body;
 const fd = fonts.display;
 
-const NAV = [
+const FULL_NAV = [
     { label: "Dashboard", href: "/admin-dashboard", icon: "▦", indent: false },
     { label: "Posts", href: "/admin-dashboard/posts", icon: "📄", indent: false },
     { label: "Add New Post", href: "/admin-dashboard/new-post", icon: "✎", indent: true },
-    { label: "Edit Post", href: "/admin-dashboard/posts", icon: "✏", indent: true },
     { label: "All Posts", href: "/admin-dashboard/posts", icon: "≡", indent: true },
     { label: "Categories", href: "/admin-dashboard/categories", icon: "◈", indent: true },
-    { label: "Add Category", href: "/admin-dashboard/categories#new", icon: "+", indent: true },
     { label: "Media", href: "/admin-dashboard/media", icon: "⊞", indent: false },
     { label: "Betting Tips", href: "/admin-dashboard/tips", icon: "🎯", indent: false },
-    { label: "Team", href: "/admin-dashboard/team", icon: "👥", indent: false },
+    { label: "Users", href: "/admin-dashboard/users", icon: "👥", indent: false },
     { label: "Settings", href: "/admin-dashboard/settings", icon: "⚙", indent: false },
+];
+
+// Tips-admin only sees the Betting Tips page
+const TIPS_ADMIN_NAV = [
+    { label: "Betting Tips", href: "/admin-dashboard/tips", icon: "🎯", indent: false },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const router = useRouter();
     const [sidebarOpen, setSidebarOpen] = useState(true);
-    const [user, setUser] = useState<{ name: string; email: string; avatar?: string } | null>(null);
+    const [user, setUser] = useState<{ name: string; email: string; avatar?: string; role?: string } | null>(null);
 
     useEffect(() => {
+        // Check for punter/tips-admin session first (so_user_session)
+        fetch("/api/auth/me")
+            .then(r => r.json())
+            .then(d => {
+                if (d.user?.role === "tips-admin" || d.user?.role === "punter") { setUser({ ...d.user }); return; }
+            })
+            .catch(() => { });
+        // Also check WP admin session
         fetch("/api/wordpress-auth")
             .then(r => r.json())
             .then(d => { if (d.valid) setUser(d.user); })
@@ -37,6 +48,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         await fetch("/api/wordpress-auth", { method: "DELETE" });
         router.push("/admin-login");
     }
+
+    const isTipsAdmin = user?.role === "tips-admin" || user?.role === "punter";
+    const NAV = isTipsAdmin ? TIPS_ADMIN_NAV : FULL_NAV;
 
     const isActive = (href: string) =>
         href === "/admin-dashboard" ? pathname === href : pathname.startsWith(href);

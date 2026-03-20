@@ -1,0 +1,30 @@
+[
+  {
+    "id": "97e4423d-62fb-4ece-b6fc-3faead1f9c50",
+    "name": "Fury",
+    "email": "onochieazukaeme@gmail.com",
+    "passwordHash": "$2b$12$PhjqvXEO3y9hX.yAd/WQVuK3ljOMAEeNFSvideWL2XDc1JEsvjtuy",
+    "role": "subscriber",
+    "status": "active",
+    "subscriptionExpiry": "2026-04-19T23:20:30.189Z",
+    "paymentMethod": null,
+    "paymentRef": null,
+    "createdAt": "2026-03-20T23:17:32.722Z",
+    "approvedAt": "2026-03-20T23:20:30.189Z",
+    "approvedBy": "admin"
+  },
+  {
+    "id": "d8ce82f6-aed9-472c-b76a-da0b4adadedb",
+    "name": "Mike",
+    "email": "webdeveloperbrian@gmail.com",
+    "passwordHash": "$2b$12$YH3hsr1yCE9bzkOgMCpAgeNqE2qFzF6/b5kQi7nHipkXCPmwITTbO",
+    "role": "subscriber",
+    "status": "pending",
+    "subscriptionExpiry": null,
+    "paymentMethod": "manual",
+    "paymentRef": "r4545454545454",
+    "createdAt": "2026-03-20T23:30:03.748Z",
+    "approvedAt": null,
+    "approvedBy": null
+  }
+]

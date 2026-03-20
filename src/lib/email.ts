@@ -1,0 +1,106 @@
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+const FROM = process.env.FROM_EMAIL ?? "noreply@sureodds.ng";
+const ADMIN = process.env.ADMIN_EMAIL ?? "admin@sureodds.ng";
+const SITE = process.env.NEXT_PUBLIC_APP_URL ?? "https://sureodds.ng";
+
+// ── Shared styles ─────────────────────────────────────────────────────────
+const base = (content: string) => `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f2f5f6;font-family:Arial,sans-serif">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f2f5f6;padding:40px 20px">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;max-width:560px;width:100%">
+        <tr><td style="background:#0f0f0f;padding:28px 32px;text-align:center">
+          <img src="${SITE}/logo.png" alt="Sureodds" height="36" style="display:block;margin:0 auto">
+        </td></tr>
+        <tr><td style="padding:32px">${content}</td></tr>
+        <tr><td style="background:#f9fafb;padding:20px 32px;text-align:center;border-top:1px solid #e8ebed">
+          <p style="margin:0;font-size:12px;color:#99989f">© ${new Date().getFullYear()} Sureodds · <a href="${SITE}" style="color:#ff6b00;text-decoration:none">sureodds.ng</a></p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+const h1 = (t: string) => `<h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#1a1a1a;text-transform:uppercase;letter-spacing:0.02em">${t}</h1>`;
+const p = (t: string) => `<p style="margin:0 0 16px;font-size:15px;color:#3d3c41;line-height:1.6">${t}</p>`;
+const btn = (label: string, href: string) => `<a href="${href}" style="display:inline-block;padding:14px 32px;background:#ff6b00;color:#fff;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none;text-transform:uppercase;letter-spacing:0.04em;margin-top:8px">${label}</a>`;
+const badge = (t: string, color = "#ff6b00") => `<span style="display:inline-block;padding:4px 12px;background:${color}22;border:1px solid ${color};border-radius:100px;font-size:12px;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:0.06em">${t}</span>`;
+
+// ── 1. Welcome email — sent on registration ───────────────────────────────
+export async function sendWelcomeEmail(to: string, name: string) {
+    await resend.emails.send({
+        from: `Sureodds <${FROM}>`,
+        to,
+        subject: "Welcome to Sureodds — Complete Your Subscription",
+        html: base(`
+            ${h1(`Welcome, ${name.split(" ")[0]}!`)}
+            ${p("Your account has been created. You're one step away from accessing expert daily betting tips.")}
+            ${p("Complete your payment to activate your subscription and unlock the members dashboard.")}
+            ${btn("Complete Payment →", `${SITE}/subscribe`)}
+            <hr style="border:none;border-top:1px solid #e8ebed;margin:28px 0">
+            ${p('<span style="font-size:13px;color:#68676d">Once your payment is confirmed, you\'ll receive another email with access to your dashboard.</span>')}
+        `),
+    }).catch(console.error);
+}
+
+// ── 2. Payment submitted — notify admin ───────────────────────────────────
+export async function sendPaymentSubmittedToAdmin(user: { name: string; email: string }, paymentRef: string, proofUrl?: string) {
+    await resend.emails.send({
+        from: `Sureodds <${FROM}>`,
+        to: ADMIN,
+        subject: `New Payment Submission — ${user.name}`,
+        html: base(`
+            ${badge("Action Required")}
+            <br><br>
+            ${h1("New Payment Submitted")}
+            ${p(`<strong>${user.name}</strong> (${user.email}) has submitted a manual payment and is awaiting approval.`)}
+            <table style="width:100%;border-collapse:collapse;margin:16px 0 24px">
+                <tr><td style="padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:14px;color:#68676d;width:140px">Payment Reference</td><td style="padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:14px;font-weight:700;color:#1a1a1a">${paymentRef}</td></tr>
+                ${proofUrl ? `<tr><td style="padding:10px 0;font-size:14px;color:#68676d">Proof of Payment</td><td style="padding:10px 0"><a href="${proofUrl}" style="color:#ff6b00;font-size:14px">View Image →</a></td></tr>` : ""}
+            </table>
+            ${btn("Review & Approve →", `${SITE}/admin-dashboard/users`)}
+        `),
+    }).catch(console.error);
+}
+
+// ── 3. Subscription approved — notify user ────────────────────────────────
+export async function sendApprovalEmail(to: string, name: string, expiryDate: string) {
+    await resend.emails.send({
+        from: `Sureodds <${FROM}>`,
+        to,
+        subject: "✅ Subscription Activated — Welcome to Sureodds!",
+        html: base(`
+            ${badge("Subscription Active", "#16a34a")}
+            <br><br>
+            ${h1(`You're in, ${name.split(" ")[0]}!`)}
+            ${p("Your payment has been confirmed and your subscription is now active.")}
+            <table style="width:100%;border-collapse:collapse;margin:16px 0 24px">
+                <tr><td style="padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:14px;color:#68676d;width:140px">Status</td><td style="padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:14px;font-weight:700;color:#16a34a">Active ✓</td></tr>
+                <tr><td style="padding:10px 0;font-size:14px;color:#68676d">Expires</td><td style="padding:10px 0;font-size:14px;font-weight:700;color:#1a1a1a">${expiryDate}</td></tr>
+            </table>
+            ${p("You now have full access to daily expert tips, analysis, and your members dashboard.")}
+            ${btn("Go to Dashboard →", `${SITE}/dashboard`)}
+        `),
+    }).catch(console.error);
+}
+
+// ── 4. Subscription suspended ─────────────────────────────────────────────
+export async function sendSuspensionEmail(to: string, name: string) {
+    await resend.emails.send({
+        from: `Sureodds <${FROM}>`,
+        to,
+        subject: "Your Sureodds subscription has been suspended",
+        html: base(`
+            ${h1("Account Suspended")}
+            ${p(`Hi ${name.split(" ")[0]}, your Sureodds subscription has been suspended.`)}
+            ${p("If you believe this is an error or would like to reactivate, please contact us.")}
+            ${btn("Contact Support →", `${SITE}/contact`)}
+        `),
+    }).catch(console.error);
+}

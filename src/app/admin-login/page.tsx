@@ -18,18 +18,32 @@ export default function AdminLoginPage() {
         if (!email || !password) { setError("Please fill in all fields."); return; }
         setLoading(true);
         try {
-            const res = await fetch("/api/wordpress-auth", {
+            // First try WP auth (super-admin)
+            const wpRes = await fetch("/api/wordpress-auth", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username: email, password }),
             });
-            const data = await res.json();
-            if (!res.ok) {
-                setError(data.error ?? "Login failed. Please try again.");
-            } else {
-                // Redirect to admin dashboard on success
+            const wpData = await wpRes.json().catch(() => ({}));
+            if (wpRes.ok) {
                 window.location.href = "/admin-dashboard";
+                return;
             }
+
+            // Fallback: try tips-admin auth (users.json)
+            const userRes = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+            });
+            const userData = await userRes.json();
+            if (userRes.ok && (userData.user?.role === "tips-admin" || userData.user?.role === "punter")) {
+                window.location.href = "/admin-dashboard/tips";
+                return;
+            }
+
+            // Both failed
+            setError(wpData.error ?? userData.error ?? "Invalid credentials. Please try again.");
         } catch {
             setError("Network error. Please check your connection.");
         } finally {
