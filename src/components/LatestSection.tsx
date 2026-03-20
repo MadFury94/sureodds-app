@@ -47,7 +47,7 @@ export default function LatestSection({ posts }: Props) {
     };
 
     return (
-        <section style={{ background: "linear-gradient(to bottom, #e8ebed 0%, #ffffff 100%)", padding: "5rem 0" }} className="latest-section">
+        <section style={{ background: "linear-gradient(to bottom, #e8ebed 0%, #ffffff 100%)", padding: "5rem 0" }} className="latest-section reveal">
             <div style={{ maxWidth: "132.48rem", margin: "0 auto", padding: "0 1.2rem" }}>
 
                 {/* Header */}

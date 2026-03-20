@@ -4,7 +4,7 @@ interface Props {
     children: React.ReactNode;
     className?: string;
     style?: React.CSSProperties;
-    as?: keyof JSX.IntrinsicElements;
+    as?: keyof React.JSX.IntrinsicElements;
 }
 
 /** Full-width wrapper constrained to the site max-width with horizontal padding */

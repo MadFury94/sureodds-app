@@ -92,16 +92,16 @@ export const CATEGORY_COLORS: Record<string, string> = {
 
 export const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=900&q=80";
 
-// ── Twitter / X feed URLs ─────────────────────────────────────────────────
-// Replace with your real profile URL and list URLs once set up on Twitter.
-// Leave as undefined to show the dummy tweet cards placeholder.
-export const TWITTER_FEEDS: Record<string, string | undefined> = {
-    default: undefined, // e.g. "https://twitter.com/sureoddsng"
-    epl: undefined, // e.g. "https://twitter.com/i/lists/YOUR_EPL_LIST_ID"
-    "la-liga": undefined,
-    ucl: undefined,
-    afcon: undefined,
-    transfer: undefined,
-    "breaking-news": undefined,
-    news: undefined,
+// ── Twitter / X list IDs (from x.com/i/lists/XXXXXXXXX) ──────────────────
+// Set a listId to embed a public list timeline, or a username for a profile.
+// Leave listId undefined to fall back to username profile embed.
+export const X_FEEDS: Record<string, { listId?: string; username?: string }> = {
+    default: { listId: "73285597", username: "BleacherReport" }, // BR Soccer list
+    epl: { listId: undefined, username: "premierleague" },
+    "la-liga": { listId: undefined, username: "LaLiga_EN" },
+    ucl: { listId: undefined, username: "ChampionsLeague" },
+    afcon: { listId: undefined, username: "CAF_Online" },
+    transfer: { listId: undefined, username: "FabrizioRomano" },
+    "breaking-news": { listId: undefined, username: "BleacherReport" },
+    news: { listId: undefined, username: "BleacherReport" },
 };

@@ -369,16 +369,17 @@ button {
 
 /* MostRead scrollable cards */
 .most-read-track {
-  display: grid;
-  grid-template-columns: repeat(4, calc(25% - 0.9rem));
-  gap: 2.84rem;
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
   width: max-content;
   min-width: 100%;
 }
 
 .most-read-card {
-  width: calc((min(100vw, 132.48rem) - 2.4rem - 3 * 2.84rem) / 4);
+  width: calc((min(100vw, 132.48rem) - 2.4rem - 3 * 2rem) / 4);
   min-width: 22rem;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   text-decoration: none;
@@ -387,12 +388,14 @@ button {
 @media (max-width: 768px) {
   .most-read-card {
     width: 22rem;
+    min-width: 22rem;
   }
 }
 
 @media (max-width: 480px) {
   .most-read-card {
-    width: 18rem;
+    width: 72vw;
+    min-width: 18rem;
   }
 }
 
@@ -818,4 +821,191 @@ button {
   .title-headline {
     font-size: 1.3rem;
   }
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   SITE-WIDE ANIMATIONS
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Keyframes ── */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(2rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-2rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -60rem 0;
+  }
+
+  100% {
+    background-position: 60rem 0;
+  }
+}
+
+/* ── Page-level fade-in (applied to <main> via template.tsx) ── */
+.page-enter {
+  animation: fadeIn 0.35s ease both;
+}
+
+/* ── Scroll-reveal utility — add .reveal to any section ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(2.4rem);
+  transition: opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger children inside a reveal parent */
+.reveal-stagger>* {
+  opacity: 0;
+  transform: translateY(1.6rem);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.reveal-stagger.in-view>*:nth-child(1) {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0ms;
+}
+
+.reveal-stagger.in-view>*:nth-child(2) {
+  opacity: 1;
+  transform: none;
+  transition-delay: 60ms;
+}
+
+.reveal-stagger.in-view>*:nth-child(3) {
+  opacity: 1;
+  transform: none;
+  transition-delay: 120ms;
+}
+
+.reveal-stagger.in-view>*:nth-child(4) {
+  opacity: 1;
+  transform: none;
+  transition-delay: 180ms;
+}
+
+.reveal-stagger.in-view>*:nth-child(5) {
+  opacity: 1;
+  transform: none;
+  transition-delay: 240ms;
+}
+
+.reveal-stagger.in-view>*:nth-child(n+6) {
+  opacity: 1;
+  transform: none;
+  transition-delay: 300ms;
+}
+
+/* ── Article / content cards — lift on hover ── */
+.card-hover {
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.card-hover:hover {
+  transform: translateY(-0.4rem);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* ── Image zoom on card hover ── */
+.img-zoom {
+  overflow: hidden;
+}
+
+.img-zoom img {
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.img-zoom:hover img {
+  transform: scale(1.04);
+}
+
+/* ── Skeleton shimmer (loading states) ── */
+.skeleton {
+  background: linear-gradient(90deg, #e8ebed 25%, #f5f5f5 50%, #e8ebed 75%);
+  background-size: 120rem 100%;
+  animation: shimmer 1.6s infinite linear;
+  border-radius: 0.4rem;
+}
+
+/* ── Smooth image load fade-in ── */
+img {
+  transition: opacity 0.3s ease;
+}
+
+img[loading] {
+  opacity: 0;
+}
+
+img.loaded {
+  opacity: 1;
+}
+
+/* ── Button / link press feedback ── */
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+/* ── Focus ring (accessibility + polish) ── */
+:focus-visible {
+  outline: 2px solid #e9173d;
+  outline-offset: 3px;
+  border-radius: 0.2rem;
 }

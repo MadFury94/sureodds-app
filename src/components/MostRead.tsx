@@ -44,7 +44,7 @@ export default function MostRead({ posts }: { posts?: MostReadItem[] }) {
     };
 
     return (
-        <section style={{ background: "linear-gradient(to bottom, #e8ebed 0%, #ffffff 100%)", padding: "5rem 0" }} className="most-read-section">
+        <section style={{ background: "linear-gradient(to bottom, #e8ebed 0%, #ffffff 100%)", padding: "5rem 0" }} className="most-read-section reveal">
             <div style={{ maxWidth: "132.48rem", margin: "0 auto", padding: "0 1.2rem" }}>
 
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.6rem" }}>

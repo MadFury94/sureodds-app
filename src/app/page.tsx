@@ -4,12 +4,12 @@ import MostRead from "@/components/MostRead";
 import SportSection from "@/components/SportSection";
 import HeroSection from "@/components/HeroSection";
 import LatestSection from "@/components/LatestSection";
-import TwitterFeed from "@/components/TwitterFeed";
 import {
   getPosts, getCategories, getFeaturedImage, getPostCategory,
   formatDate, decodeTitle, WPPost, WPCategory
 } from "@/lib/wordpress";
-import { SITE_URL, LEAGUE_LOGOS, TWITTER_FEEDS } from "@/lib/config";
+import { SITE_URL, LEAGUE_LOGOS } from "@/lib/config";
+
 export const metadata: Metadata = {
   title: "Sureodds | Football News, Betting Tips & Match Analysis",
   description: "Your home for football news, transfer updates, match previews, betting tips and live scores. EPL, La Liga, UCL, AFCON and more.",
@@ -40,7 +40,6 @@ async function getPostsBySlug(catSlug: string, cats: WPCategory[], perPage = 5):
 }
 
 export default async function Home() {
-  // Fetch categories + latest posts in parallel
   let cats: WPCategory[] = [];
   let latestPosts: WPPost[] = [];
 
@@ -51,7 +50,6 @@ export default async function Home() {
     ]);
   } catch { /* fallback to empty */ }
 
-  // Per-category sections
   const [transferPosts, breakingPosts, laLigaPosts, eplPosts, latestNewsPosts] = await Promise.all([
     getPostsBySlug("transfer", cats, 5),
     getPostsBySlug("breaking-news", cats, 5),
@@ -69,7 +67,6 @@ export default async function Home() {
     if (posts.length < 2) return null;
     const featured = toArticle(posts[0]);
     const grid = posts.slice(1, 5).map(toArticle);
-    // pad to 4 if needed
     while (grid.length < 4) grid.push(grid[grid.length - 1] ?? featured);
     return {
       title,
@@ -122,10 +119,6 @@ export default async function Home() {
         }))} />
       )}
 
-      <TwitterFeed
-        listUrl={TWITTER_FEEDS.default}
-        title="Latest on X"
-      />
 
       {breakingSection && <SportSection {...breakingSection} reverse />}
       {laLigaSection && <SportSection {...laLigaSection} />}

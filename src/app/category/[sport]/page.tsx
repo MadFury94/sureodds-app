@@ -6,14 +6,13 @@ import {
 import { getLeaguePageData, FD_LEAGUE_CODES, type MatchCard, type StandingRow } from "@/lib/footballdata";
 import {
     SITE_URL, CATEGORY_IMAGES, CATEGORY_LABELS, CATEGORY_COLORS,
-    LEAGUE_LOGOS, fonts, colors, MAX_WIDTH, TWITTER_FEEDS,
+    LEAGUE_LOGOS, fonts, colors, MAX_WIDTH,
 } from "@/lib/config";
 import PageHeader from "@/components/PageHeader";
 import HeroSection from "@/components/HeroSection";
 import MostRead from "@/components/MostRead";
 import LatestSection from "@/components/LatestSection";
 import SportSection from "@/components/SportSection";
-import TwitterFeed from "@/components/TwitterFeed";
 import { CategoryScoresTicker, FixturesRow, default as CategorySidebar } from "@/components/CategoryScores";
 
 const categoryDescriptions: Record<string, string> = {
@@ -206,13 +205,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ sport
                         }))} />
                     )}
 
-                    {/* 4. Twitter feed — category-specific list or fallback to default */}
-                    <TwitterFeed
-                        listUrl={TWITTER_FEEDS[sport] ?? TWITTER_FEEDS.default}
-                        title="Latest on X"
-                    />
-
-                    {/* 5. Hero — 3-col layout, top headlines from THIS category */}
+                    {/* 4. Hero — 3-col layout, top headlines from THIS category */}
                     <div style={{ background: "linear-gradient(to bottom, #e8ebed 0%, #ffffff 100%)" }}>
                         <main style={{ maxWidth: "132.48rem", margin: "0 auto" }}>
                             <HeroSection

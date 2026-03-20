@@ -17,9 +17,9 @@ export default function Footer() {
 
                 {/* Logo */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <div style={{ border: "2px solid #fff", borderRadius: "0.4rem", padding: "0.4rem 1rem", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                        <span style={{ fontFamily: fd, fontWeight: 700, fontSize: "2rem", color: "#fff", letterSpacing: "-0.02em", lineHeight: 1 }}>S·O</span>
-                    </div>
+                    <a href="/">
+                        <img src="/logo.png" alt="Sureodds" style={{ height: "5rem", width: "auto", display: "block" }} />
+                    </a>
                 </div>
 
                 {/* Newsletter */}

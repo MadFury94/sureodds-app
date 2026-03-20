@@ -21,7 +21,7 @@ interface Props {
 export default function SportSection({ title, featured, grid, reverse = false, viewAllHref }: Props) {
     return (
         <div style={{ background: "linear-gradient(to bottom, #e8ebed 0%, #ffffff 100%)" }}>
-            <section style={{ maxWidth: "132.48rem", margin: "0 auto", padding: "5rem 1.2rem 5rem" }} className="sport-section-wrap">
+            <section style={{ maxWidth: "132.48rem", margin: "0 auto", padding: "5rem 1.2rem 5rem" }} className="sport-section-wrap reveal">
 
                 {/* Section title */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.6rem" }}>
@@ -39,8 +39,8 @@ export default function SportSection({ title, featured, grid, reverse = false, v
                 <div className="sport-section-grid" style={{ direction: reverse ? "rtl" : "ltr" }}>
 
                     {/* Featured */}
-                    <a href={featured.slug ? `/article/${featured.slug}` : "#"} style={{ display: "flex", flexDirection: "column", textDecoration: "none", direction: "ltr" }}>
-                        <div style={{ width: "100%", aspectRatio: "16/10.8", overflow: "hidden", borderRadius: "0.8rem" }}>
+                    <a href={featured.slug ? `/article/${featured.slug}` : "#"} style={{ display: "flex", flexDirection: "column", textDecoration: "none", direction: "ltr" }} className="card-hover">
+                        <div style={{ width: "100%", aspectRatio: "16/10.8", overflow: "hidden", borderRadius: "0.8rem" }} className="img-zoom">
                             <img src={featured.image} alt={featured.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                         </div>
                         <div style={{ display: "flex", alignItems: "flex-start", gap: "0.8rem", padding: "1rem 0 0" }}>
@@ -54,8 +54,8 @@ export default function SportSection({ title, featured, grid, reverse = false, v
                     {/* 2×2 grid */}
                     <div className="sport-section-subgrid" style={{ direction: "ltr" }}>
                         {grid.map((article, i) => (
-                            <a key={i} href={article.slug ? `/article/${article.slug}` : "#"} style={{ display: "flex", flexDirection: "column", textDecoration: "none" }}>
-                                <div style={{ width: "100%", aspectRatio: "16/9", overflow: "hidden", borderRadius: "0.8rem" }}>
+                            <a key={i} href={article.slug ? `/article/${article.slug}` : "#"} style={{ display: "flex", flexDirection: "column", textDecoration: "none" }} className="card-hover">
+                                <div style={{ width: "100%", aspectRatio: "16/9", overflow: "hidden", borderRadius: "0.8rem" }} className="img-zoom">
                                     <img src={article.image} alt={article.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                                 </div>
                                 <div style={{ display: "flex", alignItems: "flex-start", gap: "0.8rem", padding: "1rem 0 0" }}>
