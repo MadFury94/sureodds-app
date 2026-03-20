@@ -90,7 +90,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                 gap: "1.2rem",
                                 padding: item.indent ? "0.75rem 1.6rem 0.75rem 3.4rem" : "1.1rem 1.6rem",
                                 color: active ? "#fff" : item.indent ? "#b0afb5" : "#ffffff",
-                                backgroundColor: active ? "#ff6b00" : "transparent",
+                                backgroundColor: active ? "rgba(255,107,0,0.15)" : "transparent",
                                 textDecoration: "none", whiteSpace: "nowrap",
                                 borderRadius: "0.6rem",
                                 margin: item.indent ? "0 0.8rem" : "0.2rem 0.8rem",
@@ -98,6 +98,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                 fontFamily: f,
                                 fontWeight: active ? 700 : item.indent ? 400 : 600,
                                 fontSize: item.indent ? "1.3rem" : "1.4rem",
+                                borderLeft: active ? "3px solid #ff6b00" : "3px solid transparent",
                             }}
                                 onMouseEnter={e => { if (!active) { e.currentTarget.style.backgroundColor = "#1e1e1e"; e.currentTarget.style.color = "#fff"; } }}
                                 onMouseLeave={e => { if (!active) { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = active ? "#fff" : item.indent ? "#b0afb5" : "#ffffff"; } }}

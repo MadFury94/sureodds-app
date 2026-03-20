@@ -53,7 +53,8 @@ export default function LatestSection({ posts }: Props) {
                 {/* Header */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.6rem" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                        <span style={{ fontFamily: fd, fontWeight: 700, fontSize: "1.6rem", color: "#1a1a1a", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                        <span style={{ fontFamily: fd, fontWeight: 700, fontSize: "2.2rem", color: "#1a1a1a", textTransform: "uppercase", letterSpacing: "0.04em", display: "flex", alignItems: "center", gap: "1rem" }}>
+                            <span style={{ fontSize: "2.4rem", lineHeight: 1 }}>⚽</span>
                             Latest
                         </span>
                         {/* Live pulse dot */}

@@ -51,11 +51,12 @@ export default async function Home() {
     ]);
   } catch { /* fallback to empty */ }
 
-  const [transferPosts, breakingPosts, laLigaPosts, eplPosts, latestNewsPosts] = await Promise.all([
+  const [transferPosts, breakingPosts, laLigaPosts, eplPosts, serieAPosts, latestNewsPosts] = await Promise.all([
     getPostsBySlug("transfer", cats, 5),
     getPostsBySlug("breaking-news", cats, 5),
     getPostsBySlug("la-liga", cats, 5),
     getPostsBySlug("epl", cats, 5),
+    getPostsBySlug("serie-a", cats, 5),
     getPostsBySlug("news", cats, 8),
   ]);
 
@@ -71,6 +72,7 @@ export default async function Home() {
     while (grid.length < 4) grid.push(grid[grid.length - 1] ?? featured);
     return {
       title,
+      slug: catSlug,
       featured,
       grid: grid.slice(0, 4) as [ReturnType<typeof toArticle>, ReturnType<typeof toArticle>, ReturnType<typeof toArticle>, ReturnType<typeof toArticle>],
       viewAllHref: `/category/${catSlug}`,
@@ -80,7 +82,8 @@ export default async function Home() {
   const transferSection = toSection("Transfers", transferPosts, "transfer");
   const breakingSection = toSection("Breaking News", breakingPosts, "breaking-news");
   const laLigaSection = toSection("La Liga", laLigaPosts, "la-liga");
-  const eplSection = toSection("EPL", eplPosts, "epl");
+  const eplSection = toSection("Premier League", eplPosts, "epl");
+  const serieASection = toSection("Serie A", serieAPosts, "serie-a");
 
   return (
     <>
@@ -125,6 +128,7 @@ export default async function Home() {
       {breakingSection && <SportSection {...breakingSection} reverse />}
       {laLigaSection && <SportSection {...laLigaSection} />}
       {eplSection && <SportSection {...eplSection} reverse />}
+      {serieASection && <SportSection {...serieASection} />}
     </>
   );
 }

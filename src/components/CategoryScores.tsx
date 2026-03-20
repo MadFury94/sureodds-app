@@ -167,7 +167,7 @@ export function FixturesRow({ fixtures, color, label }: FixturesProps) {
         <section style={{ padding: "4rem 0 0" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.6rem" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                    <span style={{ fontFamily: fd, fontWeight: 700, fontSize: "1.6rem", color: "#1a1a1a", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                    <span style={{ fontFamily: fd, fontWeight: 700, fontSize: "2rem", color: "#1a1a1a", textTransform: "uppercase", letterSpacing: "0.04em" }}>
                         Upcoming Fixtures
                     </span>
                     <span style={{

@@ -48,8 +48,9 @@ export default function MostRead({ posts }: { posts?: MostReadItem[] }) {
             <div style={{ maxWidth: "132.48rem", margin: "0 auto", padding: "0 1.2rem" }}>
 
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.6rem" }}>
-                    <span style={{ fontFamily: f, fontWeight: 700, fontSize: "1.6rem", color: "#1a1a1a", display: "flex", alignItems: "center", gap: "0.6rem" }}>
-                        Most Read <span style={{ fontSize: "1.4rem" }}>✏️</span>
+                    <span style={{ fontFamily: fd, fontWeight: 700, fontSize: "2.2rem", color: "#1a1a1a", display: "flex", alignItems: "center", gap: "1rem" }}>
+                        <span style={{ fontSize: "2.4rem", lineHeight: 1 }}>🔥</span>
+                        Most Read
                     </span>
                     <div style={{ display: "flex", gap: "0.8rem" }}>
                         <button onClick={() => scroll(-1)} disabled={!canLeft} style={{ ...arrowStyle, opacity: canLeft ? 1 : 0.35 }} aria-label="Previous">

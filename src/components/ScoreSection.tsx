@@ -48,7 +48,7 @@ export default function ScoreSection({ title, cards }: Props) {
 
                 {/* Header — identical to MostRead */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.6rem" }}>
-                    <span style={{ fontFamily: f, fontWeight: 700, fontSize: "1.6rem", color: "#1a1a1a" }}>
+                    <span style={{ fontFamily: fd, fontWeight: 700, fontSize: "2.2rem", color: "#1a1a1a", textTransform: "uppercase", letterSpacing: "0.04em" }}>
                         {title}
                     </span>
                     <div style={{ display: "flex", gap: "0.8rem" }}>
