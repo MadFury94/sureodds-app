@@ -28,7 +28,7 @@ export default function OddsWidget() {
                 <span style={{ fontWeight: 700, fontSize: "1.3rem", textTransform: "uppercase", letterSpacing: "0.06em", color: "#f2f5f6" }}>
                     Today&apos;s Odds
                 </span>
-                <a href="#" style={{ color: "#e9173d", fontSize: "1.1rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                <a href="#" style={{ color: "#ff6b00", fontSize: "1.1rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em" }}>
                     View All
                 </a>
             </div>
@@ -39,7 +39,7 @@ export default function OddsWidget() {
                     borderBottom: i < games.length - 1 ? "1px solid #3d3c41" : "none",
                 }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ color: "#e9173d", fontSize: "1rem", fontWeight: 700, textTransform: "uppercase" }}>{g.sport}</div>
+                        <div style={{ color: "#ff6b00", fontSize: "1rem", fontWeight: 700, textTransform: "uppercase" }}>{g.sport}</div>
                         <div style={{ color: "#f2f5f6", fontSize: "1.3rem", fontWeight: 700, marginTop: "0.2rem" }}>{g.matchup}</div>
                         <div style={{ color: "#68676d", fontSize: "1.1rem", marginTop: "0.2rem" }}>{g.time}</div>
                     </div>

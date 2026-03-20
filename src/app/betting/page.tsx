@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PageHeader from "@/components/PageHeader";
 import { fonts, colors } from "@/lib/config";
 
@@ -36,7 +36,7 @@ const LEAGUE_ACCENT: Record<string, string> = {
 };
 
 const CONFIDENCE_COLOR: Record<string, string> = {
-    Low: "#99989f", Medium: "#f59e0b", High: "#22c55e", Banker: "#e9173d",
+    Low: "#99989f", Medium: "#f59e0b", High: "#22c55e", Banker: "#ff6b00",
 };
 
 // Our specialists
@@ -62,67 +62,6 @@ interface Tip {
     result?: "won" | "lost" | "pending";
 }
 
-const TIPS: Tip[] = [
-    {
-        id: 1, specialist: SPECIALISTS[0],
-        league: "Champions League", home: "Real Madrid", away: "Man City",
-        outcome: "Home Win", odds: "2.10", confidence: "High",
-        analysis: "Madrid always deliver at the Bernabeu. Vinicius is in electric form and City's defence has been shaky in away fixtures this season.",
-        time: "2h ago", matchDate: "Today, 20:00", result: "pending",
-    },
-    {
-        id: 2, specialist: SPECIALISTS[1],
-        league: "Premier League", home: "Arsenal", away: "Chelsea",
-        outcome: "Home Win", odds: "1.85", confidence: "Banker",
-        analysis: "Arsenal's home record this season is unreal — 9W 1D 0L. Chelsea have conceded in every away game this month.",
-        time: "3h ago", matchDate: "Today, 17:30", result: "won",
-    },
-    {
-        id: 3, specialist: SPECIALISTS[2],
-        league: "La Liga", home: "Barcelona", away: "Atletico",
-        outcome: "Draw", odds: "3.40", confidence: "Medium",
-        analysis: "Atletico always make it tight at the Camp Nou. Value in the draw here — both teams are evenly matched on current form.",
-        time: "5h ago", matchDate: "Tomorrow, 21:00", result: "pending",
-    },
-    {
-        id: 4, specialist: SPECIALISTS[3],
-        league: "Serie A", home: "Inter Milan", away: "Juventus",
-        outcome: "Home Win", odds: "2.25", confidence: "High",
-        analysis: "Inter are the best team in Italy right now. Juventus have been inconsistent away from home all season.",
-        time: "6h ago", matchDate: "Tomorrow, 18:00", result: "pending",
-    },
-    {
-        id: 5, specialist: SPECIALISTS[0],
-        league: "Premier League", home: "Liverpool", away: "Tottenham",
-        outcome: "Home Win", odds: "1.65", confidence: "Banker",
-        analysis: "Liverpool at Anfield is a fortress. Tottenham have lost 4 of their last 5 away games against top-6 sides.",
-        time: "8h ago", matchDate: "Saturday, 12:30", result: "won",
-    },
-    {
-        id: 6, specialist: SPECIALISTS[1],
-        league: "Bundesliga", home: "Bayern Munich", away: "Dortmund",
-        outcome: "Home Win", odds: "1.75", confidence: "High",
-        analysis: "Der Klassiker at the Allianz. Bayern have won 7 of the last 10 home meetings. Dortmund's away form is poor.",
-        time: "10h ago", matchDate: "Saturday, 17:30", result: "lost",
-    },
-    {
-        id: 7, specialist: SPECIALISTS[2],
-        league: "Champions League", home: "PSG", away: "Dortmund",
-        outcome: "Home Win", odds: "2.00", confidence: "Medium",
-        analysis: "PSG need a win to advance. Home crowd will be electric. Dortmund's away record in UCL knockouts is poor.",
-        time: "12h ago", matchDate: "Sunday, 21:00", result: "pending",
-    },
-    {
-        id: 8, specialist: SPECIALISTS[3],
-        league: "Serie A", home: "AC Milan", away: "Napoli",
-        outcome: "Draw", odds: "3.10", confidence: "Medium",
-        analysis: "Both teams are mid-table and have drawn 3 of their last 5 head-to-heads. Value in the draw market.",
-        time: "1d ago", matchDate: "Sunday, 15:00", result: "pending",
-    },
-];
-
-const ALL_LEAGUES = ["All", ...Array.from(new Set(TIPS.map(t => t.league)))];
-
 function TeamCrest({ name, size = 36 }: { name: string; size?: number }) {
     const src = TEAM_CRESTS[name];
     if (src) return <img src={src} alt={name} width={size} height={size} style={{ objectFit: "contain", flexShrink: 0 }} />;
@@ -140,23 +79,30 @@ function TeamCrest({ name, size = 36 }: { name: string; size?: number }) {
 
 const RESULT_STYLE: Record<string, React.CSSProperties> = {
     won: { backgroundColor: "#f0fdf4", border: "1.5px solid #22c55e", color: "#16a34a" },
-    lost: { backgroundColor: "#fff1f2", border: "1.5px solid #e9173d", color: "#e9173d" },
+    lost: { backgroundColor: "#fff1f2", border: "1.5px solid #ff6b00", color: "#ff6b00" },
     pending: { backgroundColor: "#f2f5f6", border: "1.5px solid #e8ebed", color: "#68676d" },
 };
 const RESULT_LABEL: Record<string, string> = { won: "✓ Won", lost: "✗ Lost", pending: "⏳ Pending" };
 
 export default function BettingPage() {
+    const [tips, setTips] = useState<Tip[]>([]);
     const [activeLeague, setActiveLeague] = useState("All");
     const [activeConf, setActiveConf] = useState("All");
 
-    const filtered = TIPS.filter(t =>
+    useEffect(() => {
+        fetch("/api/tips").then(r => r.json()).then(setTips).catch(() => setTips([]));
+    }, []);
+
+    const allLeagues = ["All", ...Array.from(new Set(tips.map(t => t.league)))];
+
+    const filtered = tips.filter(t =>
         (activeLeague === "All" || t.league === activeLeague) &&
         (activeConf === "All" || t.confidence === activeConf)
     );
 
-    const bankers = TIPS.filter(t => t.confidence === "Banker").length;
-    const highConf = TIPS.filter(t => t.confidence === "High").length;
-    const wonToday = TIPS.filter(t => t.result === "won").length;
+    const bankers = tips.filter(t => t.confidence === "Banker").length;
+    const highConf = tips.filter(t => t.confidence === "High").length;
+    const wonToday = tips.filter(t => t.result === "won").length;
 
     return (
         <div style={{ backgroundColor: "#fff", minHeight: "100vh" }}>
@@ -177,7 +123,7 @@ export default function BettingPage() {
                     gap: "1.6rem", marginBottom: "4rem",
                 }} className="betting-stats-grid">
                     {[
-                        { label: "Tips Today", value: TIPS.length, icon: "📋" },
+                        { label: "Tips Today", value: tips.length, icon: "📋" },
                         { label: "Banker Tips", value: bankers, icon: "🔥" },
                         { label: "High Confidence", value: highConf, icon: "⚡" },
                         { label: "Won Today", value: wonToday, icon: "✅" },
@@ -200,7 +146,7 @@ export default function BettingPage() {
                     <div>
                         <p style={{ fontFamily: f, fontSize: "1.2rem", fontWeight: 700, color: "#68676d", marginBottom: "0.8rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>League</p>
                         <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
-                            {ALL_LEAGUES.map(l => (
+                            {allLeagues.map(l => (
                                 <button key={l} onClick={() => setActiveLeague(l)} style={{
                                     padding: "0.6rem 1.4rem", borderRadius: "2rem",
                                     border: `2px solid ${activeLeague === l ? "#1a1a1a" : "#e8ebed"}`,

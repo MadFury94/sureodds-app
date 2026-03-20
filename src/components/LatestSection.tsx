@@ -18,7 +18,7 @@ interface Props {
 }
 
 const badgeColors: Record<string, string> = {
-    News: "#e9173d", Transfer: "#e9173d", "Breaking News": "#e9173d",
+    News: "#ff6b00", Transfer: "#ff6b00", "Breaking News": "#ff6b00",
     "La Liga": "#003087", EPL: "#003087", UCL: "#6b21a8",
     AFCON: "#1a6b3c", "Football Stories": "#1a1a1a", Blog: "#68676d",
 };
@@ -60,16 +60,16 @@ export default function LatestSection({ posts }: Props) {
                         <span style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
                             <span style={{
                                 width: "0.8rem", height: "0.8rem", borderRadius: "50%",
-                                backgroundColor: "#e9173d",
+                                backgroundColor: "#ff6b00",
                                 boxShadow: "0 0 0 0 rgba(233,23,61,0.4)",
                                 animation: "livePulse 1.6s ease-in-out infinite",
                                 display: "inline-block",
                             }} />
-                            <span style={{ fontFamily: f, fontSize: "1.2rem", fontWeight: 700, color: "#e9173d", textTransform: "uppercase", letterSpacing: "0.08em" }}>Live</span>
+                            <span style={{ fontFamily: f, fontSize: "1.2rem", fontWeight: 700, color: "#ff6b00", textTransform: "uppercase", letterSpacing: "0.08em" }}>Live</span>
                         </span>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "1.6rem" }}>
-                        <a href="/category/news" style={{ fontFamily: f, fontSize: "1.3rem", fontWeight: 600, color: "#e9173d", textDecoration: "none" }}>
+                        <a href="/category/news" style={{ fontFamily: f, fontSize: "1.3rem", fontWeight: 600, color: "#ff6b00", textDecoration: "none" }}>
                             View All →
                         </a>
                         <div style={{ display: "flex", gap: "0.8rem" }}>

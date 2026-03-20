@@ -60,15 +60,15 @@ export default function TickerScroll({ matches }: { matches: MatchCard[] }) {
                                         <span style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
                                             <span style={{
                                                 width: "0.6rem", height: "0.6rem", borderRadius: "50%",
-                                                backgroundColor: "#e9173d", display: "inline-block",
+                                                backgroundColor: "#ff6b00", display: "inline-block",
                                                 animation: "livePulse 1.6s ease-in-out infinite",
                                             }} />
-                                            <span style={{ fontFamily: f, fontSize: "1rem", fontWeight: 700, color: "#e9173d" }}>LIVE</span>
+                                            <span style={{ fontFamily: f, fontSize: "1rem", fontWeight: 700, color: "#ff6b00" }}>LIVE</span>
                                         </span>
                                     ) : (
                                         <span style={{
                                             fontFamily: f, fontSize: "1rem", fontWeight: 600,
-                                            color: isFT ? "#68676d" : "#e9173d", flexShrink: 0,
+                                            color: isFT ? "#68676d" : "#ff6b00", flexShrink: 0,
                                         }}>
                                             {isFT ? "FT" : m.status === "PP" ? "PP" : m.time}
                                         </span>

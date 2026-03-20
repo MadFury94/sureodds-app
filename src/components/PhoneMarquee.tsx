@@ -39,7 +39,7 @@ const LEAGUE_ACCENT: Record<string, string> = {
 };
 
 const CONFIDENCE_COLOR: Record<string, string> = {
-    Low: "#99989f", Medium: "#f59e0b", High: "#22c55e", Banker: "#e9173d",
+    Low: "#99989f", Medium: "#f59e0b", High: "#22c55e", Banker: "#ff6b00",
 };
 
 const TIPS = [
@@ -218,32 +218,34 @@ function PhoneCard({ tip }: { tip: typeof TIPS[0] }) {
     );
 }
 
-export default function PhoneMarquee() {
+export default function PhoneMarquee({ showHeading = true }: { showHeading?: boolean }) {
     return (
-        <section style={{ backgroundColor: "#0a0a0a", overflow: "hidden", padding: "5rem 0 6rem" }}>
+        <section style={{ backgroundColor: "#0a0a0a", overflow: "hidden", padding: showHeading ? "5rem 0 6rem" : "3.2rem 0" }}>
 
-            {/* Heading */}
-            <div style={{ textAlign: "center", marginBottom: "3.2rem", padding: "0 1.2rem" }}>
-                <h2 style={{
-                    fontFamily: fd, fontWeight: 700,
-                    fontSize: "clamp(2rem, 4vw, 3.2rem)",
-                    color: "#fff", textTransform: "uppercase", letterSpacing: "0.06em", margin: 0,
-                }}>
-                    Sure Odds. <span style={{ color: "#BD4110" }}>Every Day.</span>
-                </h2>
-                <p style={{ fontFamily: f, fontSize: "1.4rem", color: "#68676d", marginTop: "0.8rem" }}>
-                    Community predictions from punters who know the game
-                </p>
-                <a href="/betting" style={{
-                    display: "inline-flex", alignItems: "center", gap: "0.6rem",
-                    marginTop: "1.6rem", padding: "1rem 2.4rem",
-                    backgroundColor: "#BD4110", color: "#fff",
-                    fontFamily: f, fontWeight: 700, fontSize: "1.4rem",
-                    borderRadius: "10rem", textDecoration: "none",
-                }}>
-                    Drop Your Tip →
-                </a>
-            </div>
+            {/* Heading — shown on public site, hidden in admin preview */}
+            {showHeading && (
+                <div style={{ textAlign: "center", marginBottom: "3.2rem", padding: "0 1.2rem" }}>
+                    <h2 style={{
+                        fontFamily: fd, fontWeight: 700,
+                        fontSize: "clamp(2rem, 4vw, 3.2rem)",
+                        color: "#fff", textTransform: "uppercase", letterSpacing: "0.06em", margin: 0,
+                    }}>
+                        Sure Odds. <span style={{ color: "#BD4110" }}>Every Day.</span>
+                    </h2>
+                    <p style={{ fontFamily: f, fontSize: "1.4rem", color: "#68676d", marginTop: "0.8rem" }}>
+                        Community predictions from punters who know the game
+                    </p>
+                    <a href="/betting" style={{
+                        display: "inline-flex", alignItems: "center", gap: "0.6rem",
+                        marginTop: "1.6rem", padding: "1rem 2.4rem",
+                        backgroundColor: "#BD4110", color: "#fff",
+                        fontFamily: f, fontWeight: 700, fontSize: "1.4rem",
+                        borderRadius: "10rem", textDecoration: "none",
+                    }}>
+                        See All Tips →
+                    </a>
+                </div>
+            )}
 
             {/* ── Row 1: pill ticker LEFT ── */}
             <div style={{ overflow: "hidden", marginBottom: "3.2rem" }}>

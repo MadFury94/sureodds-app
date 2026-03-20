@@ -25,7 +25,7 @@ interface Props {
 }
 
 const badgeColors: Record<string, string> = {
-    NFL: "#e9173d", NBA: "#e9173d", MLB: "#003087", NHL: "#003087",
+    NFL: "#ff6b00", NBA: "#ff6b00", MLB: "#003087", NHL: "#003087",
     Soccer: "#1a1a1a", Boxing: "#1a1a1a",
 };
 

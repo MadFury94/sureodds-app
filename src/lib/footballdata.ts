@@ -6,10 +6,11 @@ export const FD_LEAGUE_CODES: Record<string, string> = {
     epl: "PL",
     "la-liga": "PD",
     ucl: "CL",
+    "serie-a": "SA",
 };
 
 // Competitions that have league-format standings
-export const HAS_STANDINGS = new Set(["PL", "PD"]);
+export const HAS_STANDINGS = new Set(["PL", "PD", "SA"]);
 
 async function fdFetch<T>(path: string, revalidate = 300): Promise<T | null> {
     if (!KEY) return null;

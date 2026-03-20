@@ -29,7 +29,7 @@ export default function TrendingBarScroll({ items }: { items: Item[] }) {
                 }}>
                     <span style={{
                         width: "0.65rem", height: "0.65rem", borderRadius: "50%",
-                        backgroundColor: "#e9173d", flexShrink: 0,
+                        backgroundColor: "#ff6b00", flexShrink: 0,
                         animation: "tickerDot 1.8s ease-in-out infinite",
                         display: "inline-block",
                     }} />
@@ -128,11 +128,11 @@ export default function TrendingBarScroll({ items }: { items: Item[] }) {
                         borderLeft: "1px solid #e8ebed",
                         display: "flex", alignItems: "center", justifyContent: "center",
                         cursor: "pointer",
-                        color: paused ? "#e9173d" : "#99989f",
+                        color: paused ? "#ff6b00" : "#99989f",
                         transition: "color 0.2s",
                     }}
                     onMouseEnter={e => (e.currentTarget.style.color = "#1a1a1a")}
-                    onMouseLeave={e => (e.currentTarget.style.color = paused ? "#e9173d" : "#99989f")}
+                    onMouseLeave={e => (e.currentTarget.style.color = paused ? "#ff6b00" : "#99989f")}
                 >
                     {paused ? (
                         <svg width="11" height="13" viewBox="0 0 11 13" fill="currentColor">

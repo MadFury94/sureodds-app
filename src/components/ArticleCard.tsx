@@ -2,7 +2,7 @@ const f = '"Proxima Nova", Arial, sans-serif';
 
 function SportBadge({ category }: { category: string }) {
     const colors: Record<string, string> = {
-        NFL: "#e9173d", NBA: "#e9173d", MLB: "#003087", NHL: "#003087",
+        NFL: "#ff6b00", NBA: "#ff6b00", MLB: "#003087", NHL: "#003087",
         Soccer: "#1a1a1a", Boxing: "#1a1a1a", MMA: "#1a1a1a", Golf: "#1a6b3c",
     };
     return (
@@ -70,7 +70,7 @@ export default function ArticleCard({ image, category, title, time, emoji, size 
                     <img src={image} alt={title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", minWidth: 0 }}>
-                    <span style={{ fontFamily: f, color: "#e9173d", fontSize: "1rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{category}</span>
+                    <span style={{ fontFamily: f, color: "#ff6b00", fontSize: "1rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{category}</span>
                     <p className="clamp2" style={{ fontFamily: f, fontSize: "1.3rem", fontWeight: 700, lineHeight: 1.3, color: "#1a1a1a" }}>{title}</p>
                     <span style={{ fontFamily: f, color: "#68676d", fontSize: "1.1rem" }}>{time}</span>
                 </div>
@@ -84,7 +84,7 @@ export default function ArticleCard({ image, category, title, time, emoji, size 
                 <img src={image} alt={title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             </div>
             <div style={{ padding: "1.2rem" }}>
-                <span style={{ fontFamily: f, color: "#e9173d", fontSize: "1rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{category}</span>
+                <span style={{ fontFamily: f, color: "#ff6b00", fontSize: "1rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>{category}</span>
                 <h3 className="clamp2" style={{ fontFamily: f, fontSize: "1.5rem", fontWeight: 700, lineHeight: 1.25, color: "#1a1a1a", marginTop: "0.4rem" }}>{title}</h3>
                 <span style={{ fontFamily: f, color: "#68676d", fontSize: "1.1rem", marginTop: "0.6rem", display: "block" }}>{time}</span>
             </div>

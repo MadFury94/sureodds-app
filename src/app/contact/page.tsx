@@ -78,7 +78,7 @@ export default function ContactPage() {
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem" }}>
                                 <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
                                     <label style={{ fontFamily: f, fontSize: "1.3rem", fontWeight: 700, color: "#3d3c41", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                                        Full Name <span style={{ color: "#e9173d" }}>*</span>
+                                        Full Name <span style={{ color: "#ff6b00" }}>*</span>
                                     </label>
                                     <input
                                         type="text" required placeholder="Jane Smith"
@@ -90,7 +90,7 @@ export default function ContactPage() {
                                 </div>
                                 <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
                                     <label style={{ fontFamily: f, fontSize: "1.3rem", fontWeight: 700, color: "#3d3c41", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                                        Email Address <span style={{ color: "#e9173d" }}>*</span>
+                                        Email Address <span style={{ color: "#ff6b00" }}>*</span>
                                     </label>
                                     <input
                                         type="email" required placeholder="jane@example.com"
@@ -104,7 +104,7 @@ export default function ContactPage() {
 
                             <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
                                 <label style={{ fontFamily: f, fontSize: "1.3rem", fontWeight: 700, color: "#3d3c41", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                                    Subject <span style={{ color: "#e9173d" }}>*</span>
+                                    Subject <span style={{ color: "#ff6b00" }}>*</span>
                                 </label>
                                 <input
                                     type="text" required placeholder="What's this about?"
@@ -117,7 +117,7 @@ export default function ContactPage() {
 
                             <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
                                 <label style={{ fontFamily: f, fontSize: "1.3rem", fontWeight: 700, color: "#3d3c41", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                                    Message <span style={{ color: "#e9173d" }}>*</span>
+                                    Message <span style={{ color: "#ff6b00" }}>*</span>
                                 </label>
                                 <textarea
                                     required rows={8}
@@ -131,14 +131,14 @@ export default function ContactPage() {
 
                             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1.6rem" }}>
                                 <p style={{ fontFamily: f, fontSize: "1.3rem", color: "#99989f" }}>
-                                    Fields marked <span style={{ color: "#e9173d" }}>*</span> are required
+                                    Fields marked <span style={{ color: "#ff6b00" }}>*</span> are required
                                 </p>
                                 <button type="submit" style={{
                                     padding: "1.4rem 4rem", backgroundColor: "#1a1a1a", border: "none",
                                     borderRadius: "0.6rem", fontFamily: f, fontSize: "1.5rem", fontWeight: 700,
                                     color: "#fff", cursor: "pointer", transition: "background-color 0.15s",
                                 }}
-                                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = "#e9173d")}
+                                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = "#ff6b00")}
                                     onMouseLeave={e => (e.currentTarget.style.backgroundColor = "#1a1a1a")}
                                 >
                                     Send Message
@@ -173,7 +173,7 @@ export default function ContactPage() {
                                         fontFamily: f, fontSize: "1.4rem", color: "#1a1a1a",
                                         textDecoration: "none", borderBottom: "1px solid #1a1a1a", paddingBottom: "0.1rem",
                                     }}
-                                        onMouseEnter={e => { e.currentTarget.style.color = "#e9173d"; e.currentTarget.style.borderBottomColor = "#e9173d"; }}
+                                        onMouseEnter={e => { e.currentTarget.style.color = "#ff6b00"; e.currentTarget.style.borderBottomColor = "#ff6b00"; }}
                                         onMouseLeave={e => { e.currentTarget.style.color = "#1a1a1a"; e.currentTarget.style.borderBottomColor = "#1a1a1a"; }}
                                     >
                                         {item.email}

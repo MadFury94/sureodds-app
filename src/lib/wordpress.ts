@@ -56,6 +56,29 @@ export async function getPosts(opts: {
     return wpFetch<WPPost[]>(`/posts?${params}`, fetchOpts);
 }
 
+/** Fetch a single page of posts, returning posts + total page count */
+export async function getPostsPage(page: number, perPage = 50): Promise<{ posts: WPPost[]; totalPages: number }> {
+    const params = new URLSearchParams({ _embed: "1", per_page: String(perPage), page: String(page) });
+    const res = await fetch(`${BASE}/posts?${params}`, { cache: "no-store" });
+    if (!res.ok) {
+        if (res.status === 400) return { posts: [], totalPages: 0 }; // page out of range
+        throw new Error(`WP API error: ${res.status}`);
+    }
+    const totalPages = Number(res.headers.get("X-WP-TotalPages") ?? "1");
+    const posts: WPPost[] = await res.json();
+    return { posts, totalPages };
+}
+
+/** Fetch ALL posts by looping through every page */
+export async function getAllPosts(): Promise<WPPost[]> {
+    const first = await getPostsPage(1, 100);
+    if (first.totalPages <= 1) return first.posts;
+    const rest = await Promise.all(
+        Array.from({ length: first.totalPages - 1 }, (_, i) => getPostsPage(i + 2, 100))
+    );
+    return [first.posts, ...rest.map(r => r.posts)].flat();
+}
+
 export async function getPostBySlug(slug: string): Promise<WPPost | null> {
     const params = new URLSearchParams({ _embed: "1", per_page: "1", slug });
     const res = await fetch(`${BASE}/posts?${params}`, { cache: "no-store" });

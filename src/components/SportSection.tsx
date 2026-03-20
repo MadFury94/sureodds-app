@@ -29,7 +29,7 @@ export default function SportSection({ title, featured, grid, reverse = false, v
                         {title}
                     </h2>
                     {viewAllHref && (
-                        <a href={viewAllHref} style={{ fontFamily: f, fontSize: "1.3rem", fontWeight: 600, color: "#e9173d", textDecoration: "none" }}>
+                        <a href={viewAllHref} style={{ fontFamily: f, fontSize: "1.3rem", fontWeight: 600, color: "#ff6b00", textDecoration: "none" }}>
                             View All →
                         </a>
                     )}

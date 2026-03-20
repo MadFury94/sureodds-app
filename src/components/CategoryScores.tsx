@@ -76,8 +76,8 @@ export function CategoryScoresTicker({ recent, upcoming, color }: TickerProps) {
                                         </span>
                                         {isLive ? (
                                             <span style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
-                                                <span style={{ width: "0.6rem", height: "0.6rem", borderRadius: "50%", backgroundColor: "#e9173d", display: "inline-block", animation: "livePulse 1.6s ease-in-out infinite" }} />
-                                                <span style={{ fontFamily: f, fontSize: "1rem", fontWeight: 700, color: "#e9173d" }}>LIVE</span>
+                                                <span style={{ width: "0.6rem", height: "0.6rem", borderRadius: "50%", backgroundColor: "#ff6b00", display: "inline-block", animation: "livePulse 1.6s ease-in-out infinite" }} />
+                                                <span style={{ fontFamily: f, fontSize: "1rem", fontWeight: 700, color: "#ff6b00" }}>LIVE</span>
                                             </span>
                                         ) : (
                                             <span style={{ fontFamily: f, fontSize: "1rem", fontWeight: 600, color: isFT ? "#68676d" : color, flexShrink: 0 }}>
@@ -305,7 +305,7 @@ function StandingsSidebar({ rows, color }: StandingsProps) {
                         </div>
                         <span style={{ fontFamily: f, fontSize: "1.2rem", color: "#68676d", textAlign: "center", alignSelf: "center" }}>{row.played}</span>
                         <span style={{ fontFamily: f, fontSize: "1.2rem", color: "#68676d", textAlign: "center", alignSelf: "center" }}>{row.won}</span>
-                        <span style={{ fontFamily: f, fontSize: "1.2rem", fontWeight: 600, textAlign: "center", alignSelf: "center", color: row.gd > 0 ? "#1a6b3c" : row.gd < 0 ? "#e9173d" : "#68676d" }}>
+                        <span style={{ fontFamily: f, fontSize: "1.2rem", fontWeight: 600, textAlign: "center", alignSelf: "center", color: row.gd > 0 ? "#1a6b3c" : row.gd < 0 ? "#ff6b00" : "#68676d" }}>
                             {row.gd > 0 ? `+${row.gd}` : row.gd}
                         </span>
                         <span style={{ fontFamily: fd, fontSize: "1.4rem", fontWeight: 700, color: "#1a1a1a", textAlign: "center", alignSelf: "center" }}>{row.pts}</span>

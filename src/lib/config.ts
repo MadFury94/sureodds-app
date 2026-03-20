@@ -6,8 +6,8 @@ export const WP_API_BASE = process.env.NEXT_PUBLIC_WP_API ?? "https://sureodds.n
 // ── Design tokens ─────────────────────────────────────────────────────────
 export const colors = {
     // Primary
-    primary: "#e9173d",   // red — CTAs, badges, accents
-    primaryDark: "#b60122",   // red hover / dark variant
+    primary: "#ff6b00",   // orange — CTAs, badges, accents
+    primaryDark: "#cc5500",   // orange hover / dark variant
 
     // Neutrals
     white: "#ffffff",
@@ -47,6 +47,7 @@ export const LEAGUE_LOGOS: Record<string, string> = {
     "uefa-champions-league": "https://crests.football-data.org/CL.png",
     afcon: "/afconlogo.svg",
     "africa-cup-of-nations": "/afconlogo.svg",
+    "serie-a": "/serie-a.svg",
 };
 
 // ── Category page header background images ────────────────────────────────
@@ -55,12 +56,12 @@ export const CATEGORY_IMAGES: Record<string, string> = {
     "la-liga": "https://r2.thesportsdb.com/images/media/league/fanart/6am8r81707716890.jpg",
     ucl: "https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?w=1800&q=85",
     afcon: "/afconbg.webp",
+    "serie-a": "https://images.unsplash.com/photo-1522778526097-ce0a22ceb253?w=1800&q=85",
     news: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1800&q=85",
     transfer: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=1800&q=85",
     "breaking-news": "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1800&q=85",
     "football-stories": "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=1800&q=85",
     "international-football": "https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=1800&q=85",
-    blog: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1800&q=85",
 };
 
 // ── Category metadata ─────────────────────────────────────────────────────
@@ -74,7 +75,7 @@ export const CATEGORY_LABELS: Record<string, string> = {
     ucl: "UEFA Champions League",
     afcon: "Africa Cup of Nations",
     "international-football": "International Football",
-    blog: "Blog",
+    "serie-a": "Serie A",
 };
 
 export const CATEGORY_COLORS: Record<string, string> = {
@@ -87,7 +88,7 @@ export const CATEGORY_COLORS: Record<string, string> = {
     ucl: colors.ucl,
     afcon: colors.afcon,
     "international-football": colors.gray500,
-    blog: colors.gray500,
+    "serie-a": "#003399",
 };
 
 export const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=900&q=80";

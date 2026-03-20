@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import TrendingBar from "@/components/TrendingBar";
 import Footer from "@/components/Footer";
 import { SITE_URL, SITE_NAME } from "@/lib/config";
+import { headers } from "next/headers";
 
 const DEFAULT_DESCRIPTION =
   "Sureodds — expert football analysis, transfer news, match previews, betting tips, La Liga, EPL, UCL and AFCON coverage. Stay ahead of the game.";
@@ -64,7 +65,11 @@ export const metadata: Metadata = {
   category: "sports",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") ?? headersList.get("x-invoke-path") ?? "";
+  const isAdmin = pathname.startsWith("/admin-dashboard") || pathname.startsWith("/admin-login");
+
   return (
     <html lang="en">
       <head>
@@ -113,10 +118,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body style={{ minHeight: "100vh", backgroundColor: "#f2f5f6" }}>
-        <Navbar />
-        <TrendingBar />
+        {!isAdmin && <Navbar />}
+        {!isAdmin && <TrendingBar />}
         {children}
-        <Footer />
+        {!isAdmin && <Footer />}
       </body>
     </html>
   );

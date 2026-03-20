@@ -161,10 +161,10 @@ export default function Navbar() {
                                     padding: "0.8rem 1.2rem", height: "7.2rem",
                                     fontFamily: f, fontWeight: 700, fontSize: "1.6rem",
                                     color: "#fff", whiteSpace: "nowrap",
-                                    borderBottom: active ? "2px solid #e9173d" : "2px solid transparent",
+                                    borderBottom: active ? "2px solid #ff6b00" : "2px solid transparent",
                                     transition: "border-color 0.15s",
                                 }}
-                                    onMouseEnter={e => { if (!active) e.currentTarget.style.borderBottomColor = "#e9173d"; }}
+                                    onMouseEnter={e => { if (!active) e.currentTarget.style.borderBottomColor = "#ff6b00"; }}
                                     onMouseLeave={e => { if (!active) e.currentTarget.style.borderBottomColor = "transparent"; }}
                                 >
                                     {item.label}
@@ -183,10 +183,10 @@ export default function Navbar() {
                                     padding: "0.8rem 1.2rem", height: "7.2rem",
                                     fontFamily: f, fontWeight: 700, fontSize: "1.6rem",
                                     color: "#fff", whiteSpace: "nowrap",
-                                    borderBottom: active ? "2px solid #e9173d" : "2px solid transparent",
+                                    borderBottom: active ? "2px solid #ff6b00" : "2px solid transparent",
                                     transition: "border-color 0.15s",
                                 }}
-                                    onMouseEnter={e => { if (!active) e.currentTarget.style.borderBottomColor = "#e9173d"; }}
+                                    onMouseEnter={e => { if (!active) e.currentTarget.style.borderBottomColor = "#ff6b00"; }}
                                     onMouseLeave={e => { if (!active) e.currentTarget.style.borderBottomColor = "transparent"; }}
                                 >
                                     {link.label}
@@ -249,10 +249,10 @@ export default function Navbar() {
                                         display: "flex", alignItems: "center", gap: "1.4rem",
                                         padding: "1.4rem 2rem",
                                         fontFamily: f, fontWeight: 600, fontSize: "1.55rem",
-                                        color: active ? "#e9173d" : "#1a1a1a",
+                                        color: active ? "#ff6b00" : "#1a1a1a",
                                         borderBottom: "1px solid #f0f0f0",
                                         textDecoration: "none",
-                                        background: active ? "#fff5f7" : "transparent",
+                                        background: active ? "#fff7f0" : "transparent",
                                         transform: isVisible ? "translateX(0)" : "translateX(-1.6rem)",
                                         opacity: isVisible ? 1 : 0,
                                         transition: `transform 0.32s cubic-bezier(0.4,0,0.2,1) ${item.idx * 30}ms, opacity 0.24s ease ${item.idx * 30}ms`,
@@ -281,7 +281,7 @@ export default function Navbar() {
                                     ) : null}
                                     <span>{item.label}</span>
                                     {active && (
-                                        <svg style={{ marginLeft: "auto" }} width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="#e9173d" strokeWidth="2">
+                                        <svg style={{ marginLeft: "auto" }} width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="#ff6b00" strokeWidth="2">
                                             <path d="M1 1l4 4-4 4" />
                                         </svg>
                                     )}
@@ -302,7 +302,7 @@ export default function Navbar() {
                                 borderRadius: "0.4rem",
                                 transition: "color 0.15s, background 0.15s",
                             }}
-                                onMouseEnter={e => { e.currentTarget.style.color = "#e9173d"; e.currentTarget.style.background = "#fff5f7"; }}
+                                onMouseEnter={e => { e.currentTarget.style.color = "#ff6b00"; e.currentTarget.style.background = "#fff7f0"; }}
                                 onMouseLeave={e => { e.currentTarget.style.color = "#1a1a1a"; e.currentTarget.style.background = "transparent"; }}
                             >
                                 <MegaIcon slug={sport.slug} label={sport.label} />

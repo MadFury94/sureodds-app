@@ -16,9 +16,9 @@ const f = '"Proxima Nova", Arial, sans-serif';
 const fd = '"Druk Text Wide", "Arial Black", sans-serif';
 
 const badgeColors: Record<string, string> = {
-    NFL: "#e9173d", NBA: "#e9173d", MLB: "#003087", NHL: "#003087",
+    NFL: "#ff6b00", NBA: "#ff6b00", MLB: "#003087", NHL: "#003087",
     Soccer: "#1a1a1a", Boxing: "#1a1a1a", News: "#68676d",
-    Transfer: "#e9173d", "Breaking News": "#e9173d", "La Liga": "#ff4b00",
+    Transfer: "#ff6b00", "Breaking News": "#ff6b00", "La Liga": "#ff4b00",
     EPL: "#38003c", UCL: "#1a1f71", AFCON: "#009a44",
 };
 

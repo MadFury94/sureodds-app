@@ -37,7 +37,7 @@ export default function AboutPage() {
                 {/* Mission */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6rem", alignItems: "center", marginBottom: "8rem" }}>
                     <div>
-                        <p style={{ fontFamily: fd, fontWeight: 700, fontSize: "1.2rem", color: "#e9173d", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "1.2rem" }}>
+                        <p style={{ fontFamily: fd, fontWeight: 700, fontSize: "1.2rem", color: "#ff6b00", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "1.2rem" }}>
                             Our Mission
                         </p>
                         <h2 style={{ fontFamily: fd, fontWeight: 700, fontSize: "3.6rem", color: "#1a1a1a", lineHeight: 1.1, marginBottom: "2rem" }}>
@@ -88,7 +88,7 @@ export default function AboutPage() {
                             </div>
                             <div>
                                 <p style={{ fontFamily: f, fontWeight: 700, fontSize: "1.7rem", color: "#1a1a1a" }}>{member.name}</p>
-                                <p style={{ fontFamily: f, fontSize: "1.3rem", color: "#e9173d", fontWeight: 600, marginBottom: "0.6rem" }}>{member.role}</p>
+                                <p style={{ fontFamily: f, fontSize: "1.3rem", color: "#ff6b00", fontWeight: 600, marginBottom: "0.6rem" }}>{member.role}</p>
                                 <p style={{ fontFamily: f, fontSize: "1.4rem", color: "#68676d", lineHeight: 1.5 }}>{member.bio}</p>
                             </div>
                         </div>

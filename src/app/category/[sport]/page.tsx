@@ -13,7 +13,7 @@ import HeroSection from "@/components/HeroSection";
 import MostRead from "@/components/MostRead";
 import LatestSection from "@/components/LatestSection";
 import SportSection from "@/components/SportSection";
-import { CategoryScoresTicker, FixturesRow, default as CategorySidebar } from "@/components/CategoryScores";
+import CategorySidebar, { CategoryScoresTicker, FixturesRow } from "@/components/CategoryScores";
 
 const categoryDescriptions: Record<string, string> = {
     news: "Latest football news, match reports, and analysis from around the world.",

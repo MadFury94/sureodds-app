@@ -15,7 +15,7 @@ interface Props {
 
 const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1600&q=80";
 
-export default function PageHeader({ title, subtitle, image, badge, badgeColor = "#e9173d", logo, logoAlt }: Props) {
+export default function PageHeader({ title, subtitle, image, badge, badgeColor = "#ff6b00", logo, logoAlt }: Props) {
     const bg = image ?? DEFAULT_IMAGE;
 
     return (

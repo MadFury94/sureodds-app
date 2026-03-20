@@ -1,0 +1,146 @@
+[
+    {
+        "id": 1,
+        "specialist": {
+            "handle": "Analyst_SO",
+            "name": "SO Analyst",
+            "avatar": "AN"
+        },
+        "league": "Champions League",
+        "home": "Real Madrid",
+        "away": "Man City",
+        "outcome": "Home Win",
+        "odds": "2.10",
+        "confidence": "High",
+        "analysis": "Madrid always deliver at the Bernabeu. Vinicius is in electric form and City's defence has been shaky in away fixtures this season.",
+        "time": "2h ago",
+        "matchDate": "Today, 20:00",
+        "result": "pending"
+    },
+    {
+        "id": 2,
+        "specialist": {
+            "handle": "TipMaster",
+            "name": "Tip Master",
+            "avatar": "TM"
+        },
+        "league": "Premier League",
+        "home": "Arsenal",
+        "away": "Chelsea",
+        "outcome": "Home Win",
+        "odds": "1.85",
+        "confidence": "Banker",
+        "analysis": "Arsenal's home record this season is unreal — 9W 1D 0L. Chelsea have conceded in every away game this month.",
+        "time": "3h ago",
+        "matchDate": "Today, 17:30",
+        "result": "won"
+    },
+    {
+        "id": 3,
+        "specialist": {
+            "handle": "OddsEdge",
+            "name": "Odds Edge",
+            "avatar": "OE"
+        },
+        "league": "La Liga",
+        "home": "Barcelona",
+        "away": "Atletico",
+        "outcome": "Draw",
+        "odds": "3.40",
+        "confidence": "Medium",
+        "analysis": "Atletico always make it tight at the Camp Nou. Value in the draw here — both teams are evenly matched on current form.",
+        "time": "5h ago",
+        "matchDate": "Tomorrow, 21:00",
+        "result": "pending"
+    },
+    {
+        "id": 4,
+        "specialist": {
+            "handle": "ProPunter",
+            "name": "Pro Punter",
+            "avatar": "PP"
+        },
+        "league": "Serie A",
+        "home": "Inter Milan",
+        "away": "Juventus",
+        "outcome": "Home Win",
+        "odds": "2.25",
+        "confidence": "High",
+        "analysis": "Inter are the best team in Italy right now. Juventus have been inconsistent away from home all season.",
+        "time": "6h ago",
+        "matchDate": "Tomorrow, 18:00",
+        "result": "pending"
+    },
+    {
+        "id": 5,
+        "specialist": {
+            "handle": "Analyst_SO",
+            "name": "SO Analyst",
+            "avatar": "AN"
+        },
+        "league": "Premier League",
+        "home": "Liverpool",
+        "away": "Tottenham",
+        "outcome": "Home Win",
+        "odds": "1.65",
+        "confidence": "Banker",
+        "analysis": "Liverpool at Anfield is a fortress. Tottenham have lost 4 of their last 5 away games against top-6 sides.",
+        "time": "8h ago",
+        "matchDate": "Saturday, 12:30",
+        "result": "won"
+    },
+    {
+        "id": 6,
+        "specialist": {
+            "handle": "TipMaster",
+            "name": "Tip Master",
+            "avatar": "TM"
+        },
+        "league": "Bundesliga",
+        "home": "Bayern Munich",
+        "away": "Dortmund",
+        "outcome": "Home Win",
+        "odds": "1.75",
+        "confidence": "High",
+        "analysis": "Der Klassiker at the Allianz. Bayern have won 7 of the last 10 home meetings. Dortmund's away form is poor.",
+        "time": "10h ago",
+        "matchDate": "Saturday, 17:30",
+        "result": "lost"
+    },
+    {
+        "id": 7,
+        "specialist": {
+            "handle": "OddsEdge",
+            "name": "Odds Edge",
+            "avatar": "OE"
+        },
+        "league": "Champions League",
+        "home": "PSG",
+        "away": "Dortmund",
+        "outcome": "Home Win",
+        "odds": "2.00",
+        "confidence": "Medium",
+        "analysis": "PSG need a win to advance. Home crowd will be electric. Dortmund's away record in UCL knockouts is poor.",
+        "time": "12h ago",
+        "matchDate": "Sunday, 21:00",
+        "result": "pending"
+    },
+    {
+        "id": 8,
+        "specialist": {
+            "handle": "ProPunter",
+            "name": "Pro Punter",
+            "avatar": "PP"
+        },
+        "league": "Serie A",
+        "home": "AC Milan",
+        "away": "Napoli",
+        "outcome": "Draw",
+        "odds": "3.10",
+        "confidence": "Medium",
+        "analysis": "Both teams are mid-table and have drawn 3 of their last 5 head-to-heads. Value in the draw market.",
+        "time": "1d ago",
+        "matchDate": "Sunday, 15:00",
+        "result": "pending"
+    }
+]
