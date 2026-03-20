@@ -156,7 +156,7 @@ export async function getStandings(code: string): Promise<StandingRow[]> {
     if (!HAS_STANDINGS.has(code)) return [];
     const data = await fdFetch<{
         standings: Array<{ type: string; table: FDStandingRow[] }>;
-    }>(`/competitions/${code}/standings`, 1800);
+    }>(`/competitions/${code}/standings`, 600);
     if (!data?.standings) return [];
     const total = data.standings.find(s => s.type === "TOTAL");
     if (!total) return [];

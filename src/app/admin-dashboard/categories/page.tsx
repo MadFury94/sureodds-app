@@ -34,6 +34,9 @@ export default function CategoriesPage() {
     const [description, setDescription] = useState("");
     const [slugEdited, setSlugEdited] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [deleteId, setDeleteId] = useState<number | null>(null);
+    const [deleteName, setDeleteName] = useState("");
+    const [deleting, setDeleting] = useState(false);
     const [status, setStatus] = useState<string | null>(null);
 
     async function loadCategories() {
@@ -81,6 +84,32 @@ export default function CategoriesPage() {
         }
     }
 
+    async function handleDelete() {
+        if (!deleteId) return;
+        setDeleting(true);
+        try {
+            const tokenRes = await fetch("/api/admin-token");
+            const { token } = await tokenRes.json();
+            const res = await fetch(`${WP_API}/categories/${deleteId}?force=true`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.message ?? "Failed to delete");
+            }
+            setStatus(`✓ Category deleted`);
+            setDeleteId(null);
+            setDeleteName("");
+            await loadCategories();
+        } catch (e: unknown) {
+            setStatus(`✗ ${e instanceof Error ? e.message : "Error"}`);
+        } finally {
+            setDeleting(false);
+            setTimeout(() => setStatus(null), 5000);
+        }
+    }
+
     return (
         <div>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "2.4rem" }}>
@@ -99,20 +128,21 @@ export default function CategoriesPage() {
                 {/* Categories list */}
                 <div style={{ backgroundColor: "#fff", borderRadius: "1rem", border: "1.5px solid #e8ebed", overflow: "hidden" }}>
                     <div style={{
-                        display: "grid", gridTemplateColumns: "1fr 14rem 8rem",
+                        display: "grid", gridTemplateColumns: "1fr 14rem 8rem 6rem",
                         padding: "1.2rem 2rem", backgroundColor: "#f9f9f9", borderBottom: "1px solid #e8ebed",
                     }}>
-                        {["Name", "Slug", "Posts"].map((h, i) => (
+                        {["Name", "Slug", "Posts", ""].map((h, i) => (
                             <span key={i} style={{ fontFamily: f, fontSize: "1.2rem", fontWeight: 700, color: "#68676d", textTransform: "uppercase", letterSpacing: "0.06em" }}>{h}</span>
                         ))}
                     </div>
 
                     {loading ? (
                         Array.from({ length: 8 }).map((_, i) => (
-                            <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 14rem 8rem", padding: "1.4rem 2rem", borderBottom: "1px solid #f0f0f0" }}>
+                            <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 14rem 8rem 6rem", padding: "1.4rem 2rem", borderBottom: "1px solid #f0f0f0" }}>
                                 <div style={{ height: "1.4rem", backgroundColor: "#f0f0f0", borderRadius: "0.3rem", width: "60%" }} />
                                 <div style={{ height: "1.4rem", backgroundColor: "#f0f0f0", borderRadius: "0.3rem", width: "70%" }} />
                                 <div style={{ height: "1.4rem", backgroundColor: "#f0f0f0", borderRadius: "0.3rem", width: "40%" }} />
+                                <div />
                             </div>
                         ))
                     ) : categories.length === 0 ? (
@@ -121,7 +151,7 @@ export default function CategoriesPage() {
                         </div>
                     ) : categories.map((cat, i) => (
                         <div key={cat.id} style={{
-                            display: "grid", gridTemplateColumns: "1fr 14rem 8rem",
+                            display: "grid", gridTemplateColumns: "1fr 14rem 8rem 6rem",
                             padding: "1.4rem 2rem", alignItems: "center",
                             borderBottom: i < categories.length - 1 ? "1px solid #f0f0f0" : "none",
                         }}>
@@ -143,6 +173,15 @@ export default function CategoriesPage() {
                             >
                                 {cat.count} {cat.count === 1 ? "post" : "posts"} ↗
                             </a>
+                            <button
+                                onClick={() => { setDeleteId(cat.id); setDeleteName(cat.name); }}
+                                style={{
+                                    padding: "0.4rem 0.8rem", border: "1.5px solid #fecdd3",
+                                    borderRadius: "0.4rem", backgroundColor: "#fff1f2",
+                                    fontFamily: f, fontSize: "1.2rem", color: "#dc2626",
+                                    cursor: "pointer",
+                                }}
+                            >Del</button>
                         </div>
                     ))}
                 </div>
@@ -223,6 +262,34 @@ export default function CategoriesPage() {
                     </form>
                 </div>
             </div>
+
+            {/* Delete confirmation modal */}
+            {deleteId !== null && (
+                <div style={{
+                    position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)",
+                    display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100,
+                }}>
+                    <div style={{ backgroundColor: "#fff", borderRadius: "1.2rem", padding: "3.2rem", maxWidth: "40rem", width: "90%", textAlign: "center" }}>
+                        <p style={{ fontFamily: fd, fontWeight: 700, fontSize: "1.8rem", color: "#1a1a1a", marginBottom: "0.8rem" }}>
+                            Delete &ldquo;{deleteName}&rdquo;?
+                        </p>
+                        <p style={{ fontFamily: f, fontSize: "1.4rem", color: "#68676d", marginBottom: "2.4rem" }}>
+                            Posts in this category will be moved to Uncategorized. This cannot be undone.
+                        </p>
+                        <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
+                            <button
+                                onClick={() => { setDeleteId(null); setDeleteName(""); }}
+                                style={{ padding: "1rem 2.4rem", border: "1.5px solid #e8ebed", borderRadius: "0.6rem", backgroundColor: "#fff", fontFamily: f, fontWeight: 700, fontSize: "1.4rem", cursor: "pointer" }}
+                            >Cancel</button>
+                            <button
+                                onClick={handleDelete}
+                                disabled={deleting}
+                                style={{ padding: "1rem 2.4rem", border: "none", borderRadius: "0.6rem", backgroundColor: "#dc2626", color: "#fff", fontFamily: f, fontWeight: 700, fontSize: "1.4rem", cursor: deleting ? "not-allowed" : "pointer" }}
+                            >{deleting ? "Deleting…" : "Delete"}</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
