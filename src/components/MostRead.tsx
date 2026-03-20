@@ -71,7 +71,7 @@ export default function MostRead({ posts }: { posts?: MostReadItem[] }) {
                                     <span style={{ fontFamily: fd, fontWeight: 700, fontSize: "2rem", color: "#99989f", flexShrink: 0, lineHeight: 1 }}>
                                         {item.num}
                                     </span>
-                                    <span className="clamp2" style={{ fontFamily: f, fontSize: "1.875rem", fontWeight: 700, color: "#1a1a1a", lineHeight: 1.25 }}>
+                                    <span className="clamp2 title-card" style={{ fontFamily: f }}>
                                         {item.title}
                                     </span>
                                 </div>

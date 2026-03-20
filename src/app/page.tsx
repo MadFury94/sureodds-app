@@ -11,6 +11,16 @@ import {
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sureodds.ng";
 
+// League logos for top headlines badges — keyed by category slug
+const HEADLINE_LOGOS: Record<string, string> = {
+  epl: "https://r2.thesportsdb.com/images/media/league/badge/gasy9d1737743125.png",
+  "english-premier-league": "https://r2.thesportsdb.com/images/media/league/badge/gasy9d1737743125.png",
+  "la-liga": "https://r2.thesportsdb.com/images/media/league/badge/ja4it51687628717.png",
+  ucl: "https://crests.football-data.org/CL.png",
+  "uefa-champions-league": "https://crests.football-data.org/CL.png",
+  afcon: "/afconlogo.svg",
+  "africa-cup-of-nations": "/afconlogo.svg",
+};
 export const metadata: Metadata = {
   title: "Sureodds | Football News, Betting Tips & Match Analysis",
   description: "Your home for football news, transfer updates, match previews, betting tips and live scores. EPL, La Liga, UCL, AFCON and more.",
@@ -98,6 +108,7 @@ export default async function Home() {
               category: getPostCategory(p),
               title: decodeTitle(p.title.rendered),
               slug: p.slug,
+              logo: HEADLINE_LOGOS[getPostCategory(p).toLowerCase().replace(/\s+/g, "-")],
             }))}
           />
         </main>

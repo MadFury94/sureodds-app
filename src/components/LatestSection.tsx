@@ -148,10 +148,7 @@ export default function LatestSection({ posts }: Props) {
 
                                     {/* Title + date */}
                                     <div style={{ padding: "1rem 0 0" }}>
-                                        <p className="clamp2" style={{
-                                            fontFamily: f, fontSize: "1.75rem", fontWeight: 700,
-                                            color: "#1a1a1a", lineHeight: 1.25, marginBottom: "0.5rem",
-                                        }}>
+                                        <p className="clamp2 title-latest" style={{ fontFamily: f, marginBottom: "0.5rem" }}>
                                             {post.title}
                                         </p>
                                         <span style={{ fontFamily: f, fontSize: "1.2rem", color: "#99989f" }}>{post.date}</span>

@@ -182,3 +182,9 @@ export async function getLeaguePageData(code: string) {
     ]);
     return { recent, upcoming, standings };
 }
+
+/** Fetch just the competition emblem URL */
+export async function getCompetitionEmblem(code: string): Promise<string | null> {
+    const data = await fdFetch<{ emblem: string }>(`/competitions/${code}`, 86400);
+    return data?.emblem ?? null;
+}

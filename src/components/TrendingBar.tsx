@@ -1,4 +1,4 @@
-import { getPosts, decodeTitle } from "@/lib/wordpress";
+import { getPosts, getFeaturedImage, formatDate, decodeTitle } from "@/lib/wordpress";
 import TrendingBarScroll from "./TrendingBarScroll";
 
 async function getLatestHeadlines() {
@@ -7,6 +7,8 @@ async function getLatestHeadlines() {
         return posts.map(p => ({
             title: decodeTitle(p.title.rendered),
             slug: p.slug,
+            image: getFeaturedImage(p),
+            date: formatDate(p.date),
         }));
     } catch {
         return [];

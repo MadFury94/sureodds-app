@@ -1,68 +1,164 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
-interface Item { title: string; slug: string; }
+interface Item { title: string; slug: string; image: string; date: string; }
+
+const f = '"Proxima Nova", Arial, sans-serif';
+const fd = '"Druk Text Wide", "Arial Black", sans-serif';
 
 export default function TrendingBarScroll({ items }: { items: Item[] }) {
-    const scrollRef = useRef<HTMLDivElement>(null);
-    const [idx, setIdx] = useState(0);
+    const [paused, setPaused] = useState(false);
 
-    // Auto-scroll through headlines every 4s on mobile, free-scroll on desktop
-    useEffect(() => {
-        const el = scrollRef.current;
-        if (!el) return;
-        const timer = setInterval(() => {
-            setIdx(prev => {
-                const next = (prev + 1) % items.length;
-                const children = el.children;
-                if (children[next]) {
-                    (children[next] as HTMLElement).scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
-                }
-                return next;
-            });
-        }, 4000);
-        return () => clearInterval(timer);
-    }, [items.length]);
+    // Duplicate for seamless loop
+    const loop = [...items, ...items];
 
     return (
-        <div style={{ backgroundColor: "#e9173d", display: "flex", alignItems: "center", height: "3.2rem", overflow: "hidden" }}>
+        <div style={{ backgroundColor: "#fff", borderBottom: "1px solid #e8ebed" }}>
             <div style={{
-                flexShrink: 0, backgroundColor: "#b60122",
-                height: "100%", display: "flex", alignItems: "center",
-                padding: "0 1.2rem",
-                fontFamily: '"Proxima Nova", Arial, sans-serif',
-                fontWeight: 700, fontSize: "1.1rem",
-                textTransform: "uppercase", letterSpacing: "0.08em",
-                color: "#fff", whiteSpace: "nowrap",
+                maxWidth: "132.48rem", margin: "0 auto",
+                display: "flex", alignItems: "stretch", height: "5.6rem",
             }}>
-                Latest
-            </div>
-            <div
-                ref={scrollRef}
-                className="scrollbar-hide"
-                style={{ display: "flex", alignItems: "center", gap: "0", overflowX: "auto", flex: 1 }}
-            >
-                {items.map((item, i) => (
-                    <a
-                        key={i}
-                        href={`/article/${item.slug}`}
+
+                {/* Label */}
+                <div style={{
+                    flexShrink: 0, display: "flex", alignItems: "center",
+                    gap: "0.7rem", padding: "0 1.8rem 0 1.2rem",
+                    borderRight: "1px solid #e8ebed",
+                }}>
+                    <span style={{
+                        width: "0.65rem", height: "0.65rem", borderRadius: "50%",
+                        backgroundColor: "#e9173d", flexShrink: 0,
+                        animation: "tickerDot 1.8s ease-in-out infinite",
+                        display: "inline-block",
+                    }} />
+                    <span style={{
+                        fontFamily: fd, fontWeight: 700, fontSize: "1.15rem",
+                        color: "#1a1a1a", textTransform: "uppercase",
+                        letterSpacing: "0.07em", whiteSpace: "nowrap",
+                    }}>
+                        Top Stories
+                    </span>
+                </div>
+
+                {/* Marquee window */}
+                <div style={{ flex: 1, overflow: "hidden", position: "relative" }}>
+                    {/* Left fade */}
+                    <div style={{
+                        position: "absolute", left: 0, top: 0, bottom: 0, width: "4rem",
+                        background: "linear-gradient(to right, #fff, transparent)",
+                        zIndex: 2, pointerEvents: "none",
+                    }} />
+                    {/* Right fade */}
+                    <div style={{
+                        position: "absolute", right: 0, top: 0, bottom: 0, width: "4rem",
+                        background: "linear-gradient(to left, #fff, transparent)",
+                        zIndex: 2, pointerEvents: "none",
+                    }} />
+
+                    <div
+                        className="ticker-track"
                         style={{
-                            flexShrink: 0, color: "#fff",
-                            fontFamily: '"Proxima Nova", Arial, sans-serif',
-                            fontWeight: 600, fontSize: "1.2rem",
-                            whiteSpace: "nowrap", padding: "0 1.6rem",
-                            borderRight: "1px solid rgba(255,255,255,0.25)",
-                            textDecoration: "none",
-                            opacity: i === idx ? 1 : 0.8,
-                            transition: "opacity 0.3s",
+                            display: "flex", alignItems: "center", height: "100%",
+                            width: "max-content",
+                            animationPlayState: paused ? "paused" : "running",
                         }}
-                        onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
-                        onMouseLeave={e => (e.currentTarget.style.opacity = i === idx ? "1" : "0.8")}
                     >
-                        {item.title}
-                    </a>
-                ))}
+                        {loop.map((item, i) => (
+                            <a
+                                key={i}
+                                href={`/article/${item.slug}`}
+                                style={{
+                                    display: "flex", alignItems: "center", gap: "1rem",
+                                    padding: "0 2.4rem",
+                                    borderRight: "1px solid #e8ebed",
+                                    textDecoration: "none", height: "100%",
+                                    flexShrink: 0,
+                                }}
+                                onMouseEnter={e => {
+                                    (e.currentTarget as HTMLElement).style.backgroundColor = "#f9fafb";
+                                }}
+                                onMouseLeave={e => {
+                                    (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
+                                }}
+                            >
+                                {/* Thumbnail */}
+                                <div style={{
+                                    width: "3.6rem", height: "3.6rem",
+                                    borderRadius: "0.4rem", overflow: "hidden",
+                                    flexShrink: 0, backgroundColor: "#e8ebed",
+                                }}>
+                                    <img
+                                        src={item.image} alt=""
+                                        width={36} height={36}
+                                        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                                    />
+                                </div>
+
+                                {/* Text */}
+                                <div style={{ minWidth: 0 }}>
+                                    <p style={{
+                                        fontFamily: f, fontWeight: 700, fontSize: "1.25rem",
+                                        color: "#1a1a1a", lineHeight: 1.3, margin: 0,
+                                        whiteSpace: "nowrap",
+                                    }}>
+                                        {item.title}
+                                    </p>
+                                    <span style={{
+                                        fontFamily: f, fontSize: "1.05rem",
+                                        color: "#99989f", display: "block", marginTop: "0.2rem",
+                                        whiteSpace: "nowrap",
+                                    }}>
+                                        {item.date}
+                                    </span>
+                                </div>
+                            </a>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Pause / Play */}
+                <button
+                    onClick={() => setPaused(p => !p)}
+                    aria-label={paused ? "Play" : "Pause"}
+                    style={{
+                        flexShrink: 0, width: "5rem",
+                        backgroundColor: "transparent", border: "none",
+                        borderLeft: "1px solid #e8ebed",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        cursor: "pointer",
+                        color: paused ? "#e9173d" : "#99989f",
+                        transition: "color 0.2s",
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.color = "#1a1a1a")}
+                    onMouseLeave={e => (e.currentTarget.style.color = paused ? "#e9173d" : "#99989f")}
+                >
+                    {paused ? (
+                        <svg width="11" height="13" viewBox="0 0 11 13" fill="currentColor">
+                            <path d="M1 1l9 5.5-9 5.5V1z" />
+                        </svg>
+                    ) : (
+                        <svg width="11" height="13" viewBox="0 0 11 13" fill="currentColor">
+                            <rect x="0.5" y="0.5" width="3" height="12" rx="1" />
+                            <rect x="7.5" y="0.5" width="3" height="12" rx="1" />
+                        </svg>
+                    )}
+                </button>
+
             </div>
+
+            <style>{`
+                @keyframes tickerScroll {
+                    from { transform: translateX(0); }
+                    to   { transform: translateX(-50%); }
+                }
+                .ticker-track {
+                    animation: tickerScroll 80s linear infinite;
+                }
+                @keyframes tickerDot {
+                    0%, 100% { box-shadow: 0 0 0 0 rgba(233,23,61,0.5); }
+                    50%      { box-shadow: 0 0 0 5px rgba(233,23,61,0); }
+                }
+            `}</style>
         </div>
     );
 }

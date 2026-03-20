@@ -43,7 +43,7 @@ export default function SportSection({ title, featured, grid, reverse = false, v
                         </div>
                         <div style={{ display: "flex", alignItems: "flex-start", gap: "0.8rem", padding: "1rem 0 0" }}>
                             {featured.emoji && <span style={{ fontSize: "2rem", lineHeight: 1, flexShrink: 0, marginTop: "0.2rem" }}>{featured.emoji}</span>}
-                            <h3 style={{ fontFamily: f, fontWeight: 700, fontSize: "2.5rem", lineHeight: 1.2, color: "#1a1a1a" }}>
+                            <h3 className="title-featured" style={{ fontFamily: f }}>
                                 {featured.title}
                             </h3>
                         </div>
@@ -58,7 +58,7 @@ export default function SportSection({ title, featured, grid, reverse = false, v
                                 </div>
                                 <div style={{ display: "flex", alignItems: "flex-start", gap: "0.8rem", padding: "1rem 0 0" }}>
                                     {article.emoji && <span style={{ fontSize: "1.8rem", lineHeight: 1, flexShrink: 0, marginTop: "0.1rem" }}>{article.emoji}</span>}
-                                    <p className="clamp2" style={{ fontFamily: f, fontWeight: 700, fontSize: "1.875rem", lineHeight: 1.25, color: "#1a1a1a" }}>
+                                    <p className="clamp2 title-card" style={{ fontFamily: f }}>
                                         {article.title}
                                     </p>
                                 </div>

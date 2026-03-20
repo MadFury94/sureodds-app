@@ -47,10 +47,8 @@ export default function PageHeader({ title, subtitle, image, badge, badgeColor =
                     {logo && (
                         <div className="page-header-logo" style={{
                             display: "flex", alignItems: "center", justifyContent: "center",
-                            backgroundColor: "rgba(255,255,255,0.08)",
-                            backdropFilter: "blur(8px)",
+                            backgroundColor: "#fff",
                             borderRadius: "1.2rem",
-                            border: "1px solid rgba(255,255,255,0.15)",
                             padding: "1.2rem",
                             boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
                             marginBottom: "0.4rem",
@@ -58,7 +56,7 @@ export default function PageHeader({ title, subtitle, image, badge, badgeColor =
                             <img
                                 src={logo}
                                 alt={logoAlt ?? title}
-                                style={{ width: "100%", height: "100%", objectFit: "contain", filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.5))" }}
+                                style={{ width: "100%", height: "100%", objectFit: "contain" }}
                             />
                         </div>
                     )}

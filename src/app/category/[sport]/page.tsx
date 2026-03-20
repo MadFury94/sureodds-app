@@ -19,7 +19,7 @@ const HEADER_IMAGES: Record<string, string> = {
     epl: "https://r2.thesportsdb.com/images/media/league/fanart/odberp1725731801.jpg",
     "la-liga": "https://r2.thesportsdb.com/images/media/league/fanart/6am8r81707716890.jpg",
     ucl: "https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?w=1800&q=85",
-    afcon: "https://images.unsplash.com/photo-1551958219-acbc595d9e47?w=1800&q=85",
+    afcon: "/afconbg.webp",
     news: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1800&q=85",
     transfer: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=1800&q=85",
     "breaking-news": "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1800&q=85",
@@ -28,19 +28,25 @@ const HEADER_IMAGES: Record<string, string> = {
     blog: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1800&q=85",
 };
 
-// League badge/logo — only for leagues that have one
+// League badge/logo — reliable sources only
 const HEADER_LOGOS: Record<string, string> = {
     epl: "https://r2.thesportsdb.com/images/media/league/badge/gasy9d1737743125.png",
     "la-liga": "https://r2.thesportsdb.com/images/media/league/badge/ja4it51687628717.png",
-    ucl: "https://upload.wikimedia.org/wikipedia/en/b/bf/UEFA_Champions_League_logo_2.svg",
-    afcon: "https://upload.wikimedia.org/wikipedia/en/thumb/5/5e/Africa_Cup_of_Nations_logo.svg/800px-Africa_Cup_of_Nations_logo.svg.png",
+    ucl: "https://crests.football-data.org/CL.png",
+    afcon: "/afconlogo.svg",
 };
 
 const categoryLabels: Record<string, string> = {
-    news: "Football News", transfer: "Transfer News", "breaking-news": "Breaking News",
-    "football-stories": "Football Stories", "la-liga": "La Liga",
-    epl: "English Premier League", ucl: "UEFA Champions League",
-    afcon: "AFCON", "international-football": "International Football", blog: "Blog",
+    news: "Football News",
+    transfer: "Transfer News",
+    "breaking-news": "Breaking News",
+    "football-stories": "Football Stories",
+    "la-liga": "La Liga",
+    epl: "English Premier League",
+    ucl: "UEFA Champions League",
+    afcon: "Africa Cup of Nations",
+    "international-football": "International Football",
+    blog: "Blog",
 };
 
 const categoryDescriptions: Record<string, string> = {
@@ -250,6 +256,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ sport
                                     category: getPostCategory(p),
                                     title: decodeTitle(p.title.rendered),
                                     slug: p.slug,
+                                    logo: HEADER_LOGOS[getPostCategory(p).toLowerCase().replace(/\s+/g, "-")] ?? HEADER_LOGOS[sport],
                                 }))}
                             />
                         </main>

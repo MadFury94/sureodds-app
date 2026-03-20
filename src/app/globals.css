@@ -291,15 +291,6 @@ button {
   .mega-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-
-  /* Scale down hero text on mobile */
-  .hero-section h2 {
-    font-size: 1.8rem !important;
-  }
-
-  .hero-section .clamp2 {
-    font-size: 1.4rem !important;
-  }
 }
 
 /* SportSection responsive */
@@ -716,5 +707,82 @@ button {
     height: 55vw !important;
     min-height: 28rem !important;
     max-height: 44rem !important;
+  }
+}
+
+/* Hide trending/latest bar on mobile */
+@media (max-width: 768px) {
+  .trending-bar {
+    display: none;
+  }
+}
+
+/* ── Article card title sizes — uniform across all card components ── */
+
+/* Featured / hero card title (SportSection featured, HeroSection center) */
+.title-featured {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #1a1a1a;
+}
+
+/* Thumb / grid card title (SportSection grid, HeroSection left, MostRead) */
+.title-card {
+  font-size: 1.875rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #1a1a1a;
+}
+
+/* Latest section card title */
+.title-latest {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #1a1a1a;
+}
+
+/* Top headlines list title */
+.title-headline {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #1a1a1a;
+}
+
+@media (max-width: 640px) {
+  .title-featured {
+    font-size: 1.8rem;
+  }
+
+  .title-card {
+    font-size: 1.5rem;
+  }
+
+  .title-latest {
+    font-size: 1.5rem;
+  }
+
+  .title-headline {
+    font-size: 1.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .title-featured {
+    font-size: 1.6rem;
+  }
+
+  .title-card {
+    font-size: 1.4rem;
+  }
+
+  .title-latest {
+    font-size: 1.4rem;
+  }
+
+  .title-headline {
+    font-size: 1.3rem;
   }
 }

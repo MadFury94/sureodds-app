@@ -14,6 +14,7 @@ interface Headline {
     category: string;
     title: string;
     slug: string;
+    logo?: string;
 }
 
 interface Props {
@@ -33,12 +34,12 @@ const fallbackLeft = [
     { image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600&q=80", category: "Soccer", title: "Every Team's Biggest X-Factor", slug: "#" },
 ];
 const fallbackHeadlines = [
-    { category: "NFL", title: "Peterson Responds to Stephen A. Smith", slug: "#" },
-    { category: "Boxing", title: "Rory Unveils Masters Dinner Menu", slug: "#" },
-    { category: "NBA", title: "WNBA Agrees to New CBA", slug: "#" },
-    { category: "MLB", title: "Judge Pissed About WBC Loss", slug: "#" },
-    { category: "Soccer", title: "Latest Dolphins Trade Report", slug: "#" },
-    { category: "NFL", title: "Fill Out Your Bracket Here", slug: "#" },
+    { category: "NFL", title: "Peterson Responds to Stephen A. Smith", slug: "#", logo: undefined },
+    { category: "Boxing", title: "Rory Unveils Masters Dinner Menu", slug: "#", logo: undefined },
+    { category: "NBA", title: "WNBA Agrees to New CBA", slug: "#", logo: undefined },
+    { category: "MLB", title: "Judge Pissed About WBC Loss", slug: "#", logo: undefined },
+    { category: "Soccer", title: "Latest Dolphins Trade Report", slug: "#", logo: undefined },
+    { category: "NFL", title: "Fill Out Your Bracket Here", slug: "#", logo: undefined },
 ];
 
 export default function HeroSection({ heroPost, leftPosts, topHeadlines }: Props) {
@@ -66,7 +67,7 @@ export default function HeroSection({ heroPost, leftPosts, topHeadlines }: Props
                                     {c.category.slice(0, 2).toUpperCase()}
                                 </span>
                             </span>
-                            <p className="clamp2" style={{ fontFamily: f, fontSize: "1.875rem", fontWeight: 700, lineHeight: 1.25, color: "#1a1a1a" }}>
+                            <p className="clamp2 title-card" style={{ fontFamily: f }}>
                                 {c.title}
                             </p>
                         </div>
@@ -89,7 +90,7 @@ export default function HeroSection({ heroPost, leftPosts, topHeadlines }: Props
                             {hero.category.slice(0, 2).toUpperCase()}
                         </span>
                     </span>
-                    <h2 style={{ fontFamily: f, fontWeight: 700, fontSize: "2.5rem", lineHeight: 1.2, color: "#1a1a1a" }}>
+                    <h2 className="title-featured" style={{ fontFamily: f }}>
                         {hero.title}
                     </h2>
                 </div>
@@ -114,16 +115,27 @@ export default function HeroSection({ heroPost, leftPosts, topHeadlines }: Props
                                 borderBottom: i < headlines.length - 1 ? "1px solid #e8e8e8" : "none",
                                 textDecoration: "none",
                             }}>
-                                <span style={{
-                                    display: "inline-flex", alignItems: "center", justifyContent: "center",
-                                    width: "2.2rem", height: "2.2rem", borderRadius: "0.2rem",
-                                    backgroundColor: bg, flexShrink: 0, marginTop: "0.2rem",
-                                }}>
-                                    <span style={{ fontFamily: f, fontSize: "0.9rem", fontWeight: 700, color: "#fff", lineHeight: 1 }}>
-                                        {h.category.slice(0, 2).toUpperCase()}
+                                {h.logo ? (
+                                    <div style={{
+                                        width: "2.4rem", height: "2.4rem", flexShrink: 0,
+                                        marginTop: "0.2rem", display: "flex",
+                                        alignItems: "center", justifyContent: "center",
+                                    }}>
+                                        <img src={h.logo} alt={h.category}
+                                            style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                                    </div>
+                                ) : (
+                                    <span style={{
+                                        display: "inline-flex", alignItems: "center", justifyContent: "center",
+                                        width: "2.2rem", height: "2.2rem", borderRadius: "0.2rem",
+                                        backgroundColor: bg, flexShrink: 0, marginTop: "0.2rem",
+                                    }}>
+                                        <span style={{ fontFamily: f, fontSize: "0.9rem", fontWeight: 700, color: "#fff", lineHeight: 1 }}>
+                                            {h.category.slice(0, 2).toUpperCase()}
+                                        </span>
                                     </span>
-                                </span>
-                                <span className="clamp2" style={{ fontFamily: f, fontSize: "1.6rem", fontWeight: 700, color: "#1a1a1a", lineHeight: 1.3 }}>
+                                )}
+                                <span className="clamp2 title-headline" style={{ fontFamily: f }}>
                                     {h.title}
                                 </span>
                             </a>
