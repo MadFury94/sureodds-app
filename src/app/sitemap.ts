@@ -5,7 +5,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sureodds.ng";
 
 const CATEGORY_SLUGS = [
     "news", "transfer", "breaking-news", "football-stories",
-    "la-liga", "epl", "ucl", "afcon", "international-football", "blog",
+    "la-liga", "epl", "ucl", "afcon", "serie-a", "international-football",
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

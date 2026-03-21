@@ -14,6 +14,7 @@ import MostRead from "@/components/MostRead";
 import LatestSection from "@/components/LatestSection";
 import SportSection from "@/components/SportSection";
 import CategorySidebar, { CategoryScoresTicker, FixturesRow } from "@/components/CategoryScores";
+import AdUnit from "@/components/AdUnit";
 
 const categoryDescriptions: Record<string, string> = {
     news: "Latest football news, match reports, and analysis from around the world.",
@@ -252,22 +253,8 @@ export default async function CategoryPage({ params }: { params: Promise<{ sport
                                 <div style={{ display: "flex", flexDirection: "column", gap: "2.4rem" }}>
                                     <CategorySidebar sport={sport} color={color} standings={standings} recent={recent} />
 
-                                    {/* AdSense placeholder */}
-                                    <div style={{
-                                        padding: "2rem",
-                                        backgroundColor: "#f9fafb",
-                                        border: "1px dashed #ddd",
-                                        borderRadius: "0.8rem",
-                                        textAlign: "center",
-                                        minHeight: "25rem",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                    }}>
-                                        <span style={{ fontFamily: f, fontSize: "1.2rem", color: "#c9c9c9", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                                            Advertisement
-                                        </span>
-                                    </div>
+                                    {/* AdSense sidebar */}
+                                    <AdUnit slot="0000000000" format="vertical" />
                                 </div>
                             </div>
                         </div>
