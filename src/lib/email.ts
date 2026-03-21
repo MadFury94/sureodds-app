@@ -1,9 +1,15 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = process.env.FROM_EMAIL ?? "noreply@sureodds.ng";
 const ADMIN = process.env.ADMIN_EMAIL ?? "admin@sureodds.ng";
 const SITE = process.env.NEXT_PUBLIC_APP_URL ?? "https://sureodds.ng";
+
+// Lazy init — only instantiate when actually sending so missing key doesn't crash at build time
+function getResend(): Resend {
+    const key = process.env.RESEND_API_KEY;
+    if (!key || key.startsWith("re_xxx")) throw new Error("RESEND_API_KEY is not configured.");
+    return new Resend(key);
+}
 
 // ── Shared styles ─────────────────────────────────────────────────────────
 const base = (content: string) => `
@@ -34,7 +40,7 @@ const badge = (t: string, color = "#ff6b00") => `<span style="display:inline-blo
 
 // ── 1. Welcome email — sent on registration ───────────────────────────────
 export async function sendWelcomeEmail(to: string, name: string) {
-    await resend.emails.send({
+    await getResend().emails.send({
         from: `Sureodds <${FROM}>`,
         to,
         subject: "Welcome to Sureodds — Complete Your Subscription",
@@ -51,7 +57,7 @@ export async function sendWelcomeEmail(to: string, name: string) {
 
 // ── 2. Payment submitted — notify admin ───────────────────────────────────
 export async function sendPaymentSubmittedToAdmin(user: { name: string; email: string }, paymentRef: string, proofUrl?: string) {
-    await resend.emails.send({
+    await getResend().emails.send({
         from: `Sureodds <${FROM}>`,
         to: ADMIN,
         subject: `New Payment Submission — ${user.name}`,
@@ -71,7 +77,7 @@ export async function sendPaymentSubmittedToAdmin(user: { name: string; email: s
 
 // ── 3. Subscription approved — notify user ────────────────────────────────
 export async function sendApprovalEmail(to: string, name: string, expiryDate: string) {
-    await resend.emails.send({
+    await getResend().emails.send({
         from: `Sureodds <${FROM}>`,
         to,
         subject: "✅ Subscription Activated — Welcome to Sureodds!",
@@ -92,7 +98,7 @@ export async function sendApprovalEmail(to: string, name: string, expiryDate: st
 
 // ── 4. Subscription suspended ─────────────────────────────────────────────
 export async function sendSuspensionEmail(to: string, name: string) {
-    await resend.emails.send({
+    await getResend().emails.send({
         from: `Sureodds <${FROM}>`,
         to,
         subject: "Your Sureodds subscription has been suspended",
