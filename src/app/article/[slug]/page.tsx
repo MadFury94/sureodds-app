@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import MostRead from "@/components/MostRead";
 import ArticleHero from "@/components/ArticleHero";
+import AdUnit from "@/components/AdUnit";
 import {
     getPostBySlug, getPosts, getCategoryBySlug, getFeaturedImage, getPostCategory,
     getPostAuthor, formatDate, decodeTitle, stripHtml, WPPost
@@ -173,6 +174,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                             style={{ fontFamily: f, fontSize: "1.8rem", lineHeight: 1.75, color: "#3d3c41" }}
                         />
 
+                        {/* In-article ad — below content */}
+                        <AdUnit slot="0000000000" format="auto" style={{ margin: "3.2rem 0" }} />
+
                         {/* Tags */}
                         <div style={{ display: "flex", gap: "0.8rem", flexWrap: "wrap", marginTop: "4rem", paddingTop: "2.4rem", borderTop: "1px solid #e8ebed" }}>
                             <a href={`/category/${catSlug}`} rel="tag" style={{
@@ -218,17 +222,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                             ))}
                         </div>
 
-                        {/* AdSense placeholder — sidebar */}
-                        <div style={{
-                            marginTop: "3.2rem", padding: "2rem",
-                            backgroundColor: "#f9fafb", border: "1px dashed #ddd",
-                            borderRadius: "0.8rem", textAlign: "center",
-                            minHeight: "25rem", display: "flex", alignItems: "center", justifyContent: "center",
-                        }}>
-                            <span style={{ fontFamily: f, fontSize: "1.2rem", color: "#c9c9c9", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                                Advertisement
-                            </span>
-                        </div>
+                        {/* AdSense — sidebar */}
+                        <AdUnit slot="0000000000" format="vertical" style={{ marginTop: "3.2rem" }} />
                     </aside>
 
                 </div>

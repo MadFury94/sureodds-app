@@ -5,6 +5,7 @@ import SportSection from "@/components/SportSection";
 import HeroSection from "@/components/HeroSection";
 import LatestSection from "@/components/LatestSection";
 import PhoneMarquee from "@/components/PhoneMarquee";
+import AdUnit from "@/components/AdUnit";
 import {
   getPosts, getCategories, getFeaturedImage, getPostCategory,
   formatDate, decodeTitle, WPPost, WPCategory
@@ -113,6 +114,8 @@ export default async function Home() {
 
       {transferSection && <SportSection {...transferSection} />}
 
+      <AdUnit slot="0000000000" format="auto" style={{ maxWidth: "132.48rem", margin: "0 auto", padding: "0 1.2rem" }} />
+
       {latestNewsPosts.length > 0 && (
         <LatestSection posts={latestNewsPosts.map(p => ({
           slug: p.slug,
@@ -124,6 +127,8 @@ export default async function Home() {
       )}
 
       <PhoneMarquee />
+
+      <AdUnit slot="0000000000" format="auto" style={{ maxWidth: "132.48rem", margin: "0 auto", padding: "0 1.2rem" }} />
 
       {breakingSection && <SportSection {...breakingSection} reverse />}
       {laLigaSection && <SportSection {...laLigaSection} />}

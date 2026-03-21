@@ -25,6 +25,15 @@ export const metadata: Metadata = {
   authors: [{ name: "Sureodds Editorial Team", url: SITE_URL }],
   creator: "Sureodds",
   publisher: "Sureodds",
+  icons: {
+    icon: [
+      { url: "/logo.png", type: "image/png" },
+    ],
+    apple: [
+      { url: "/logo.png", type: "image/png" },
+    ],
+    shortcut: "/logo.png",
+  },
   robots: {
     index: true,
     follow: true,
@@ -73,6 +82,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en">
       <head>
+        {/* AdSense auto-ads — replace ca-pub-XXXXXXXXXXXXXXXX with your publisher ID */}
+        {process.env.NEXT_PUBLIC_ADSENSE_PUB_ID && (
+          <script
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_PUB_ID}`}
+            crossOrigin="anonymous"
+          />
+        )}
         {/* JSON-LD: Organization */}
         <script
           type="application/ld+json"
