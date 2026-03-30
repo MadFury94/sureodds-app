@@ -6,10 +6,12 @@ import HeroSection from "@/components/HeroSection";
 import LatestSection from "@/components/LatestSection";
 import PhoneMarquee from "@/components/PhoneMarquee";
 import AdUnit from "@/components/AdUnit";
+import ScoreSection from "@/components/ScoreSection";
 import {
   getPosts, getCategories, getFeaturedImage, getPostCategory,
   formatDate, decodeTitle, WPPost, WPCategory
 } from "@/lib/wordpress";
+import { getRecentMatches, getUpcomingMatches } from "@/lib/footballdata";
 import { SITE_URL, LEAGUE_LOGOS } from "@/lib/config";
 
 export const metadata: Metadata = {
@@ -52,19 +54,46 @@ export default async function Home() {
     ]);
   } catch { /* fallback to empty */ }
 
-  const [transferPosts, breakingPosts, laLigaPosts, eplPosts, serieAPosts, latestNewsPosts] = await Promise.all([
+  const [transferPosts, breakingPosts, laLigaPosts, eplPosts, serieAPosts, latestNewsPosts, featuredMatches] = await Promise.all([
     getPostsBySlug("transfer", cats, 5),
     getPostsBySlug("breaking-news", cats, 5),
     getPostsBySlug("la-liga", cats, 5),
     getPostsBySlug("epl", cats, 5),
     getPostsBySlug("serie-a", cats, 5),
     getPostsBySlug("news", cats, 8),
+    getFeaturedMatches(),
   ]);
 
   const heroPost = latestPosts[0] ?? null;
   const leftPosts = latestPosts.slice(1, 3);
   const topHeadlines = latestPosts.slice(3, 9);
   const mostReadPosts = latestPosts.slice(0, 4);
+
+  // Fetch featured matches for ScoreSection
+  async function getFeaturedMatches() {
+    try {
+      const [eplMatches, laLigaMatches, uclMatches] = await Promise.all([
+        getRecentMatches("PL", 2),
+        getRecentMatches("PD", 2),
+        getRecentMatches("CL", 2),
+      ]);
+      const allMatches = [...eplMatches, ...laLigaMatches, ...uclMatches];
+      // Take up to 4 matches for the ScoreSection
+      return allMatches.slice(0, 4).map(match => ({
+        title: `${match.home} vs ${match.away}`,
+        emoji: "⚽",
+        // Use home team crest as image, or fallback to competition emblem
+        image: match.homeCrest || "/afconbg.webp",
+        homeTeam: match.home,
+        awayTeam: match.away,
+        homeScore: match.homeScore,
+        awayScore: match.awayScore,
+        status: match.status,
+      }));
+    } catch {
+      return [];
+    }
+  }
 
   function toSection(title: string, posts: WPPost[], catSlug: string) {
     if (posts.length < 2) return null;
@@ -111,6 +140,13 @@ export default async function Home() {
         image: getFeaturedImage(p),
         slug: p.slug,
       }))} />
+
+      {featuredMatches.length > 0 && (
+        <ScoreSection
+          title="Latest Scores"
+          cards={featuredMatches}
+        />
+      )}
 
       {transferSection && <SportSection {...transferSection} />}
 

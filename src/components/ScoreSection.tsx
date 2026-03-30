@@ -10,8 +10,8 @@ interface MatchCard {
     image: string;
     homeTeam: string;
     awayTeam: string;
-    homeScore: number;
-    awayScore: number;
+    homeScore: number | null;
+    awayScore: number | null;
     status: string;
 }
 
@@ -79,11 +79,11 @@ export default function ScoreSection({ title, cards }: Props) {
                                         </div>
                                         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
                                             <div style={{ display: "flex", flexDirection: "column", gap: "0.2rem" }}>
-                                                <span style={{ fontFamily: fd, fontWeight: 700, fontSize: "3rem", color: "#fff", lineHeight: 1 }}>{card.homeScore}</span>
+                                                <span style={{ fontFamily: fd, fontWeight: 700, fontSize: "3rem", color: "#fff", lineHeight: 1 }}>{card.homeScore ?? "-"}</span>
                                                 <span style={{ fontFamily: f, fontSize: "1.1rem", fontWeight: 700, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{card.homeTeam}</span>
                                             </div>
                                             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.2rem" }}>
-                                                <span style={{ fontFamily: fd, fontWeight: 700, fontSize: "3rem", color: "#fff", lineHeight: 1 }}>{card.awayScore}</span>
+                                                <span style={{ fontFamily: fd, fontWeight: 700, fontSize: "3rem", color: "#fff", lineHeight: 1 }}>{card.awayScore ?? "-"}</span>
                                                 <span style={{ fontFamily: f, fontSize: "1.1rem", fontWeight: 700, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{card.awayTeam}</span>
                                             </div>
                                         </div>

@@ -13,15 +13,22 @@ export const FD_LEAGUE_CODES: Record<string, string> = {
 export const HAS_STANDINGS = new Set(["PL", "PD", "SA"]);
 
 async function fdFetch<T>(path: string, revalidate = 300): Promise<T | null> {
-    if (!KEY) return null;
+    if (!KEY) {
+        console.warn("Football-Data API key missing");
+        return null;
+    }
     try {
         const res = await fetch(`${BASE}${path}`, {
             headers: { "X-Auth-Token": KEY },
             next: { revalidate },
         });
-        if (!res.ok) return null;
+        if (!res.ok) {
+            console.warn(`Football-Data API error: ${res.status} ${res.statusText} for ${path}`);
+            return null;
+        }
         return res.json() as Promise<T>;
-    } catch {
+    } catch (err) {
+        console.warn("Football-Data fetch failed:", err);
         return null;
     }
 }
