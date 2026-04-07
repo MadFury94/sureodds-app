@@ -9,7 +9,9 @@ interface MatchDetailProps {
 }
 
 export default function MatchDetail({ details }: MatchDetailProps) {
-    const { match, head2head } = details;
+    // Handle both response formats: { match: {...}, head2head: {...} } or direct match object
+    const match = details.match || details;
+    const head2head = details.head2head;
     const hasLineups = match.homeTeam.lineup && match.awayTeam.lineup;
     const hasEvents = match.goals || match.bookings || match.substitutions;
 
