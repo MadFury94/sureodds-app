@@ -2,6 +2,7 @@
 import { useRef, useState } from "react";
 import type { MatchCard, StandingRow } from "@/lib/footballdata";
 import { colors, fonts } from "@/lib/config";
+import HeadToHead from "./HeadToHead";
 
 const f = fonts.body;
 const fd = fonts.display;
@@ -64,12 +65,29 @@ export function CategoryScoresTicker({ recent, upcoming, color }: TickerProps) {
                             const isLive = m.status === "LIVE";
                             const isFT = m.status === "FT";
                             return (
-                                <div key={m.id} style={{
-                                    display: "flex", flexDirection: "column", gap: "0.3rem",
-                                    backgroundColor: "#fff", border: "1px solid #e0e0e0",
-                                    borderRadius: "0.4rem", padding: "0.6rem 1rem",
-                                    minWidth: "15rem",
-                                }}>
+                                <a
+                                    key={m.id}
+                                    href={`/match/${m.id}`}
+                                    style={{
+                                        display: "flex", flexDirection: "column", gap: "0.3rem",
+                                        backgroundColor: "#fff", border: "1px solid #e0e0e0",
+                                        borderRadius: "0.4rem", padding: "0.6rem 1rem",
+                                        minWidth: "15rem",
+                                        textDecoration: "none",
+                                        cursor: "pointer",
+                                        transition: "all 0.2s ease",
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.borderColor = color;
+                                        e.currentTarget.style.transform = "translateY(-2px)";
+                                        e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.borderColor = "#e0e0e0";
+                                        e.currentTarget.style.transform = "translateY(0)";
+                                        e.currentTarget.style.boxShadow = "none";
+                                    }}
+                                >
                                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.2rem" }}>
                                         <span style={{ fontFamily: f, fontSize: "1rem", color: "#99989f", textTransform: "uppercase", letterSpacing: "0.04em", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "9rem" }}>
                                             {m.competition}
@@ -106,7 +124,7 @@ export function CategoryScoresTicker({ recent, upcoming, color }: TickerProps) {
                                             <span style={{ fontFamily: f, fontSize: "1rem", color: "#99989f" }}>{m.date}</span>
                                         </div>
                                     )}
-                                </div>
+                                </a>
                             );
                         })}
                     </div>
@@ -189,12 +207,27 @@ export function FixturesRow({ fixtures, color, label }: FixturesProps) {
             <div ref={scrollRef} onScroll={onScroll} className="scrollbar-hide" style={{ overflowX: "auto" }}>
                 <div style={{ display: "flex", gap: "1.6rem", width: "max-content" }}>
                     {fixtures.map((m) => (
-                        <div key={m.id} style={{
-                            width: "24rem", flexShrink: 0,
-                            backgroundColor: "#fff", borderRadius: "1rem",
-                            border: "1px solid #e8ebed", overflow: "hidden",
-                            boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
-                        }}>
+                        <a
+                            key={m.id}
+                            href={`/match/${m.id}`}
+                            style={{
+                                width: "24rem", flexShrink: 0,
+                                backgroundColor: "#fff", borderRadius: "1rem",
+                                border: "1px solid #e8ebed", overflow: "hidden",
+                                boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+                                textDecoration: "none",
+                                display: "block",
+                                transition: "all 0.2s ease",
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = "translateY(-4px)";
+                                e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.12)";
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = "translateY(0)";
+                                e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.06)";
+                            }}
+                        >
                             <div style={{ height: "0.4rem", backgroundColor: color }} />
                             <div style={{ padding: "1.6rem" }}>
                                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.6rem" }}>
@@ -255,8 +288,18 @@ export function FixturesRow({ fixtures, color, label }: FixturesProps) {
                                         <span style={{ fontFamily: f, fontSize: "1.1rem", color: "#99989f" }}>{m.venue}</span>
                                     </div>
                                 )}
+
+                                {/* Head-to-Head Section */}
+                                {m.id && (
+                                    <HeadToHead
+                                        eventId={String(m.id)}
+                                        homeTeam={m.home}
+                                        awayTeam={m.away}
+                                        color={color}
+                                    />
+                                )}
                             </div>
-                        </div>
+                        </a>
                     ))}
                 </div>
             </div>

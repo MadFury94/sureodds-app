@@ -3,7 +3,7 @@ import {
     getCategoryBySlug, getPosts, getFeaturedImage, getPostCategory,
     formatDate, decodeTitle, WPPost
 } from "@/lib/wordpress";
-import { getLeaguePageData, FD_LEAGUE_CODES, type MatchCard, type StandingRow } from "@/lib/footballdata";
+import { getLeaguePageDataWithScorers, FD_LEAGUE_CODES, type MatchCard, type StandingRow, type TopScorer } from "@/lib/footballdata";
 import {
     SITE_URL, CATEGORY_IMAGES, CATEGORY_LABELS, CATEGORY_COLORS,
     LEAGUE_LOGOS, fonts, colors, MAX_WIDTH,
@@ -14,6 +14,7 @@ import MostRead from "@/components/MostRead";
 import LatestSection from "@/components/LatestSection";
 import SportSection from "@/components/SportSection";
 import CategorySidebar, { CategoryScoresTicker, FixturesRow } from "@/components/CategoryScores";
+import TopScorers from "@/components/TopScorers";
 import AdUnit from "@/components/AdUnit";
 
 const categoryDescriptions: Record<string, string> = {
@@ -98,6 +99,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ sport
     let recent: MatchCard[] = [];
     let upcoming: MatchCard[] = [];
     let standings: StandingRow[] = [];
+    let topScorers: TopScorer[] = [];
 
     const headerImage = CATEGORY_IMAGES[sport] ?? CATEGORY_IMAGES.news;
     const headerLogo = LEAGUE_LOGOS[sport];
@@ -106,7 +108,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ sport
     try {
         const [cat, fdData] = await Promise.all([
             getCategoryBySlug(sport),
-            fdCode ? getLeaguePageData(fdCode) : Promise.resolve({ recent: [], upcoming: [], standings: [] }),
+            fdCode ? getLeaguePageDataWithScorers(fdCode) : Promise.resolve({ recent: [], upcoming: [], standings: [], topScorers: [] }),
         ]);
 
         if (cat) {
@@ -117,6 +119,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ sport
         recent = fdData.recent;
         upcoming = fdData.upcoming;
         standings = fdData.standings;
+        topScorers = fdData.topScorers;
     } catch { /* fallback to defaults */ }
 
     const totalCountLabel = totalCount > 0 ? `${totalCount} articles` : undefined;
@@ -247,9 +250,16 @@ export default async function CategoryPage({ params }: { params: Promise<{ sport
                                         />
                                     )}
                                     <FixturesRow fixtures={upcoming} color={color} label={label} />
+
+                                    {/* Top Scorers - Full Width Below Fixtures */}
+                                    {topScorers.length > 0 && (
+                                        <div style={{ marginTop: "4rem" }}>
+                                            <TopScorers scorers={topScorers} color={color} label={label} />
+                                        </div>
+                                    )}
                                 </div>
 
-                                {/* Sidebar: standings or other leagues + AdSense slot */}
+                                {/* Sidebar: standings + AdSense slot */}
                                 <div style={{ display: "flex", flexDirection: "column", gap: "2.4rem" }}>
                                     <CategorySidebar sport={sport} color={color} standings={standings} recent={recent} />
 

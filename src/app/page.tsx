@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ScoresTicker from "@/components/ScoresTicker";
+import LiveMatchesTicker from "@/components/LiveMatchesTicker";
 import MostRead from "@/components/MostRead";
 import SportSection from "@/components/SportSection";
 import HeroSection from "@/components/HeroSection";
@@ -117,6 +118,7 @@ export default async function Home() {
 
   return (
     <>
+      <LiveMatchesTicker />
       <ScoresTicker />
 
       <div style={{ background: "linear-gradient(to bottom, #e8ebed 0%, #ffffff 100%)" }}>

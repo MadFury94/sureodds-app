@@ -104,6 +104,91 @@ export interface StandingRow {
     form: string | null;
 }
 
+export interface TopScorer {
+    player: { name: string; id: number };
+    team: { name: string; shortName: string; crest: string };
+    goals: number;
+    assists: number | null;
+    penalties: number | null;
+}
+
+export interface MatchDetailPlayer {
+    id: number;
+    name: string;
+    position: string;
+    shirtNumber: number;
+}
+
+export interface MatchGoal {
+    minute: number;
+    extraTime: number | null;
+    type: "REGULAR" | "OWN_GOAL" | "PENALTY";
+    team: { id: number; name: string };
+    scorer: { id: number; name: string };
+    assist: { id: number; name: string } | null;
+}
+
+export interface MatchBooking {
+    minute: number;
+    team: { id: number; name: string };
+    player: { id: number; name: string };
+    card: "YELLOW_CARD" | "RED_CARD";
+}
+
+export interface MatchSubstitution {
+    minute: number;
+    team: { id: number; name: string };
+    playerOut: { id: number; name: string };
+    playerIn: { id: number; name: string };
+}
+
+export interface MatchDetails {
+    match: FDMatch & {
+        homeTeam: FDTeam & {
+            lineup?: MatchDetailPlayer[];
+            bench?: MatchDetailPlayer[];
+            coach?: { name: string };
+        };
+        awayTeam: FDTeam & {
+            lineup?: MatchDetailPlayer[];
+            bench?: MatchDetailPlayer[];
+            coach?: { name: string };
+        };
+        goals?: MatchGoal[];
+        bookings?: MatchBooking[];
+        substitutions?: MatchSubstitution[];
+        referees?: Array<{ name: string }>;
+    };
+    head2head?: {
+        numberOfMatches: number;
+        homeTeam: { wins: number; draws: number; losses: number };
+        awayTeam: { wins: number; draws: number; losses: number };
+    };
+}
+
+export interface TeamSquadPlayer {
+    id: number;
+    name: string;
+    position: string;
+    dateOfBirth: string;
+    nationality: string;
+}
+
+export interface TeamDetails {
+    id: number;
+    name: string;
+    shortName: string;
+    tla: string;
+    crest: string;
+    address: string;
+    website: string;
+    founded: number;
+    clubColors: string;
+    venue: string;
+    squad: TeamSquadPlayer[];
+    coach?: { name: string; nationality: string };
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────
 
 function fmtDate(utc: string): string {
@@ -195,4 +280,47 @@ export async function getLeaguePageData(code: string) {
 export async function getCompetitionEmblem(code: string): Promise<string | null> {
     const data = await fdFetch<{ emblem: string }>(`/competitions/${code}`, 86400);
     return data?.emblem ?? null;
+}
+
+/** Get top scorers for a competition */
+export async function getTopScorers(code: string, limit = 10): Promise<TopScorer[]> {
+    const data = await fdFetch<{ scorers: TopScorer[] }>(
+        `/competitions/${code}/scorers`,
+        600
+    );
+    if (!data?.scorers?.length) return [];
+    return data.scorers.slice(0, limit);
+}
+
+/** Get live matches across all competitions */
+export async function getLiveMatches(): Promise<MatchCard[]> {
+    const data = await fdFetch<{ matches: FDMatch[] }>(
+        `/matches?status=IN_PLAY`,
+        60 // Revalidate every minute for live data
+    );
+    if (!data?.matches?.length) return [];
+    return data.matches.map(normaliseMatch);
+}
+
+/** Get detailed match information including lineups, goals, cards, subs */
+export async function getMatchDetails(matchId: number): Promise<MatchDetails | null> {
+    const data = await fdFetch<MatchDetails>(`/matches/${matchId}`, 300);
+    return data;
+}
+
+/** Get team details including squad */
+export async function getTeamDetails(teamId: number): Promise<TeamDetails | null> {
+    const data = await fdFetch<TeamDetails>(`/teams/${teamId}`, 86400);
+    return data;
+}
+
+/** Fetch all league data including top scorers */
+export async function getLeaguePageDataWithScorers(code: string) {
+    const [recent, upcoming, standings, topScorers] = await Promise.all([
+        getRecentMatches(code),
+        getUpcomingMatches(code),
+        getStandings(code),
+        getTopScorers(code, 10),
+    ]);
+    return { recent, upcoming, standings, topScorers };
 }
