@@ -21,7 +21,14 @@ export default function SubscribePage() {
             fetch("/api/auth/me").then(r => r.json()),
             fetch("/api/settings-public").then(r => r.json()),
         ]).then(([userData, settingsData]) => {
-            if (userData.user) setUser(userData.user);
+            if (userData.user) {
+                // If user is pending and a punter, redirect to pending page
+                if (userData.user.status === "pending" && userData.user.role === "punter") {
+                    window.location.href = "/register/pending";
+                    return;
+                }
+                setUser(userData.user);
+            }
             if (settingsData.settings) setSettings(settingsData.settings);
         });
 

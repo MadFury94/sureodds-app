@@ -75,12 +75,14 @@ export async function createUser(data: {
     if (existing) throw new Error("Email already registered");
 
     const passwordHash = await bcrypt.hash(data.password, 12);
+    const role = data.role ?? "subscriber";
     const user: User = {
         id: generateId(),
         name: data.name.trim(),
         email: data.email.toLowerCase().trim(),
         passwordHash,
-        role: data.role ?? "subscriber",
+        role,
+        // All users start as pending - admin must approve
         status: "pending",
         subscriptionExpiry: null,
         paymentMethod: null,

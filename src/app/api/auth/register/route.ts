@@ -5,12 +5,12 @@ import { sendWelcomeEmail } from "@/lib/email";
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { name, email, password, confirmPassword } = body;
+        const { name, email, password, confirmPassword, userType } = body;
 
         // Only allow role override if caller has an admin session
         const adminRaw = req.cookies.get("so_admin_session")?.value;
         const isAdmin = adminRaw ? !!JSON.parse(adminRaw)?.token : false;
-        const role = isAdmin && body.role ? body.role : undefined;
+        const role = isAdmin && body.role ? body.role : (userType === "punter" ? "punter" : undefined);
 
         if (!name?.trim() || !email?.trim() || !password) {
             return NextResponse.json({ error: "All fields are required." }, { status: 400 });

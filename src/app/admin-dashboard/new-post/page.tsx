@@ -26,6 +26,15 @@ export default function NewPostPage() {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     useEffect(() => {
+        // Check for punter session first
+        fetch("/api/auth/me")
+            .then(r => r.json())
+            .then(d => {
+                if (d.user?.role === "punter") return; // Punters can post
+            })
+            .catch(() => { });
+
+        // Also check WP admin session
         fetch("/api/wordpress-auth")
             .then(r => r.json())
             .then(d => { if (!d.valid) window.location.href = "/admin-login"; })

@@ -6,7 +6,7 @@ const f = fonts.body;
 const fd = fonts.display;
 
 export default function RegisterPage() {
-    const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
+    const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "", userType: "punter" });
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
@@ -26,7 +26,8 @@ export default function RegisterPage() {
             });
             const data = await res.json();
             if (!res.ok) { setError(data.error); return; }
-            window.location.href = "/subscribe";
+            // Both punters and subscribers need admin approval
+            window.location.href = "/register/pending";
         } catch {
             setError("Something went wrong. Please try again.");
         } finally {
@@ -41,7 +42,7 @@ export default function RegisterPage() {
                 <div style={{ backgroundColor: "#0f0f0f", padding: "3.2rem 3.2rem 2.4rem", textAlign: "center" }}>
                     <a href="/"><img src="/logo.png" alt="Sureodds" style={{ height: "3.6rem", margin: "0 auto 1.6rem" }} /></a>
                     <h1 style={{ fontFamily: fd, fontSize: "2rem", fontWeight: 700, color: "#fff", textTransform: "uppercase", letterSpacing: "0.04em", margin: 0 }}>Create Account</h1>
-                    <p style={{ fontFamily: f, fontSize: "1.3rem", color: "#68676d", marginTop: "0.6rem" }}>Sign up to access exclusive betting tips</p>
+                    <p style={{ fontFamily: f, fontSize: "1.3rem", color: "#68676d", marginTop: "0.6rem" }}>Choose your account type below</p>
                 </div>
 
                 {/* Form */}
@@ -51,6 +52,39 @@ export default function RegisterPage() {
                             {error}
                         </div>
                     )}
+
+                    {/* User Type Selection */}
+                    <div style={{ marginBottom: "2.4rem", padding: "1.6rem", backgroundColor: "#f9fafb", borderRadius: "0.8rem", border: "1px solid #e8ebed" }}>
+                        <label style={{ display: "block", fontFamily: f, fontSize: "1.3rem", fontWeight: 700, color: "#1a1a1a", marginBottom: "1.2rem" }}>Account Type:</label>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                            <label style={{ cursor: "pointer", padding: "1.2rem", backgroundColor: form.userType === "punter" ? "#fff" : "transparent", border: `2px solid ${form.userType === "punter" ? "#ff6b00" : "#e8ebed"}`, borderRadius: "0.6rem", transition: "all 0.2s" }}>
+                                <input
+                                    type="radio"
+                                    name="userType"
+                                    value="punter"
+                                    checked={form.userType === "punter"}
+                                    onChange={e => set("userType", e.target.value)}
+                                    style={{ marginRight: "0.8rem" }}
+                                />
+                                <span style={{ fontFamily: f, fontSize: "1.3rem", color: "#1a1a1a" }}>
+                                    <strong>Punter / Tipster</strong> - Post predictions & blog content <span style={{ color: "#16a34a", fontWeight: 700 }}>(FREE)</span>
+                                </span>
+                            </label>
+                            <label style={{ cursor: "pointer", padding: "1.2rem", backgroundColor: form.userType === "subscriber" ? "#fff" : "transparent", border: `2px solid ${form.userType === "subscriber" ? "#ff6b00" : "#e8ebed"}`, borderRadius: "0.6rem", transition: "all 0.2s" }}>
+                                <input
+                                    type="radio"
+                                    name="userType"
+                                    value="subscriber"
+                                    checked={form.userType === "subscriber"}
+                                    onChange={e => set("userType", e.target.value)}
+                                    style={{ marginRight: "0.8rem" }}
+                                />
+                                <span style={{ fontFamily: f, fontSize: "1.3rem", color: "#1a1a1a" }}>
+                                    <strong>Subscriber</strong> - View expert predictions <span style={{ color: "#ff6b00", fontWeight: 700 }}>(PAID)</span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
 
                     {[
                         { label: "Full Name", field: "name", type: "text", placeholder: "Your full name" },

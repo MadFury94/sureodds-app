@@ -24,16 +24,38 @@ export default function LoginPage() {
             if (!res.ok) { setError(data.error); return; }
 
             const user = data.user;
-            // tips-admin goes to admin dashboard
+
+            // Check if account is pending approval
+            if (user.status === "pending") {
+                window.location.href = "/register/pending";
+                return;
+            }
+
+            // Check if account is suspended
+            if (user.status === "suspended") {
+                setError("Your account has been suspended. Please contact support.");
+                return;
+            }
+
+            // Punters go to admin dashboard
+            if (user.role === "punter") {
+                window.location.href = "/admin-dashboard";
+                return;
+            }
+
+            // Tips-admin goes to tips section
             if (user.role === "tips-admin") {
                 window.location.href = "/admin-dashboard/tips";
                 return;
             }
-            // subscriber: check status
-            if (user.status !== "active") {
+
+            // Subscribers: check if they need to pay
+            if (user.role === "subscriber" && user.status !== "active") {
                 window.location.href = "/subscribe";
                 return;
             }
+
+            // Active subscribers go to dashboard
             window.location.href = "/dashboard";
         } catch {
             setError("Something went wrong. Please try again.");
