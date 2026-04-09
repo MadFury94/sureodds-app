@@ -89,6 +89,7 @@ export interface MatchCard {
     competition: string;
     status: "FT" | "LIVE" | "NS" | "PP";
     venue?: string;
+    utcDate: string;    // ISO date string for sorting
 }
 
 export interface StandingRow {
@@ -218,6 +219,7 @@ function normaliseMatch(m: FDMatch): MatchCard {
         competition: m.competition.name,
         status: finished ? "FT" : live ? "LIVE" : postponed ? "PP" : "NS",
         venue: m.venue,
+        utcDate: m.utcDate,
     };
 }
 

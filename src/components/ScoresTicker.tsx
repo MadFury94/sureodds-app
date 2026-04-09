@@ -1,18 +1,42 @@
-import { getRecentMatches, getUpcomingMatches, type MatchCard } from "@/lib/footballdata";
+import { getRecentMatches, getUpcomingMatches, getLiveMatches, type MatchCard } from "@/lib/footballdata";
 import TickerScroll from "./TickerScroll";
 
-// Fetch recent + upcoming for the top 3 leagues in parallel
+// Fetch live matches first, then recent results (sorted by date), then upcoming matches
 async function getTickerData(): Promise<MatchCard[]> {
     try {
-        const [eplRecent, laLigaRecent, uclRecent, eplNext, laLigaNext, uclNext] = await Promise.all([
+        // 1. Get live matches (highest priority)
+        const liveMatches = await getLiveMatches();
+
+        // 2. Get recent finished matches from top leagues
+        const [eplRecent, laLigaRecent, uclRecent] = await Promise.all([
             getRecentMatches("PL", 4),
             getRecentMatches("PD", 4),
             getRecentMatches("CL", 4),
-            getUpcomingMatches("PL", 3),
-            getUpcomingMatches("PD", 3),
-            getUpcomingMatches("CL", 3),
         ]);
-        return [...eplRecent, ...laLigaRecent, ...uclRecent, ...eplNext, ...laLigaNext, ...uclNext];
+
+        // Combine and sort recent matches by date (most recent first)
+        const allRecent = [...eplRecent, ...laLigaRecent, ...uclRecent];
+        allRecent.sort((a, b) => {
+            const dateA = new Date(a.utcDate || 0).getTime();
+            const dateB = new Date(b.utcDate || 0).getTime();
+            return dateB - dateA; // Most recent first
+        });
+
+        // 3. Get upcoming matches (lower priority)
+        const [eplNext, laLigaNext, uclNext] = await Promise.all([
+            getUpcomingMatches("PL", 2),
+            getUpcomingMatches("PD", 2),
+            getUpcomingMatches("CL", 2),
+        ]);
+
+        // Combine: Live matches first, then recent results (sorted), then upcoming
+        return [
+            ...liveMatches,
+            ...allRecent.slice(0, 8), // Take top 8 most recent
+            ...eplNext,
+            ...laLigaNext,
+            ...uclNext
+        ];
     } catch {
         return [];
     }
