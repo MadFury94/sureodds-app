@@ -23,12 +23,36 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const router = useRouter();
     const [user, setUser] = useState<UserData | null>(null);
     const [checked, setChecked] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    // Skip this layout for punter routes - they have their own layout
+    const isPunterRoute = pathname.startsWith("/dashboard/punter");
 
     useEffect(() => {
+        if (isPunterRoute) {
+            // Just render children for punter routes
+            setChecked(true);
+            return;
+        }
+
         fetch("/api/auth/me")
             .then(r => r.json())
             .then(d => {
-                if (!d.user) { router.replace("/login"); return; }
+                console.log("[Dashboard] Auth response:", d);
+                if (!d.user) {
+                    console.log("[Dashboard] No user, redirecting to login");
+                    router.replace("/login");
+                    return;
+                }
+
+                // Redirect punters to their dashboard
+                if (d.user.role === "punter") {
+                    console.log("[Dashboard] Punter detected, redirecting to /dashboard/punter");
+                    router.replace("/dashboard/punter");
+                    return;
+                }
+
+                console.log("[Dashboard] Checking status:", d.user.status);
                 if (d.user.status !== "active") { router.replace("/subscribe"); return; }
                 const expiry = d.user.subscriptionExpiry ? new Date(d.user.subscriptionExpiry) : null;
                 if (expiry && expiry < new Date()) { router.replace("/subscribe?expired=1"); return; }
@@ -36,11 +60,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 setChecked(true);
             })
             .catch(() => router.replace("/login"));
-    }, [router]);
+    }, [router, isPunterRoute]);
 
     async function handleLogout() {
         await fetch("/api/auth/logout", { method: "POST" });
         router.push("/login");
+    }
+
+    // For punter routes, just render children (they have their own layout)
+    if (isPunterRoute) {
+        return <>{children}</>;
     }
 
     if (!checked) {
@@ -59,8 +88,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     return (
         <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "#f2f5f6", fontFamily: f }}>
+            {/* Mobile Overlay */}
+            <div
+                className={`mobile-overlay ${mobileMenuOpen ? 'show' : ''}`}
+                onClick={() => setMobileMenuOpen(false)}
+            />
+
             {/* Sidebar */}
-            <aside style={{ width: "24rem", backgroundColor: "#0f0f0f", display: "flex", flexDirection: "column", flexShrink: 0, position: "sticky", top: 0, height: "100vh" }}>
+            <aside style={{ width: "24rem", backgroundColor: "#0f0f0f", display: "flex", flexDirection: "column", flexShrink: 0, position: "sticky", top: 0, height: "100vh" }} className={`dashboard-sidebar ${mobileMenuOpen ? 'open' : ''}`}>
                 <div style={{ padding: "2.4rem 1.6rem 2rem", borderBottom: "1px solid #1e1e1e" }}>
                     <a href="/"><img src="/logo.png" alt="Sureodds" style={{ height: "3rem", width: "auto" }} /></a>
                 </div>
@@ -107,9 +142,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {/* Main */}
             <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
                 <header style={{ backgroundColor: "#fff", borderBottom: "1px solid #e8ebed", padding: "0 2.4rem", height: "6.4rem", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 10 }}>
-                    <span style={{ fontFamily: fd, fontSize: "1.6rem", fontWeight: 700, color: "#1a1a1a", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-                        Members Area
-                    </span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "1.2rem" }}>
+                        <button
+                            className="mobile-menu-btn"
+                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                            aria-label="Toggle menu"
+                        >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <line x1="3" y1="6" x2="21" y2="6" />
+                                <line x1="3" y1="12" x2="21" y2="12" />
+                                <line x1="3" y1="18" x2="21" y2="18" />
+                            </svg>
+                        </button>
+                        <span style={{ fontFamily: fd, fontSize: "1.6rem", fontWeight: 700, color: "#1a1a1a", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                            Members Area
+                        </span>
+                    </div>
                     <a href="/" style={{ fontFamily: f, fontSize: "1.3rem", color: "#68676d", textDecoration: "none" }}>↗ Back to Site</a>
                 </header>
                 <main style={{ flex: 1, padding: "2.4rem", overflowY: "auto" }}>

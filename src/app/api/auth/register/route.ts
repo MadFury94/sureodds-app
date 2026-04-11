@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createUser, signUserToken, toSafeUser } from "@/lib/auth";
-import { sendWelcomeEmail } from "@/lib/email";
+import { sendWelcomeEmail, sendNewUserNotificationToAdmin } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
     try {
@@ -27,10 +27,17 @@ export async function POST(req: NextRequest) {
 
         const user = await createUser({ name, email, password, role });
 
-        // Only send welcome email for subscribers, not punters
+        // Send welcome email only to subscribers
         if (!role || role === "subscriber") {
             sendWelcomeEmail(user.email, user.name);
         }
+
+        // Notify admin about new registration (both punters and subscribers)
+        sendNewUserNotificationToAdmin({
+            name: user.name,
+            email: user.email,
+            role: user.role,
+        });
 
         const token = await signUserToken({
             id: user.id,

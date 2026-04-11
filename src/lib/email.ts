@@ -55,7 +55,34 @@ export async function sendWelcomeEmail(to: string, name: string) {
     }).catch(console.error);
 }
 
-// ── 2. Payment submitted — notify admin ───────────────────────────────────
+// ── 2. New user registration — notify admin ──────────────────────────────
+export async function sendNewUserNotificationToAdmin(user: { name: string; email: string; role: string }) {
+    const isPunter = user.role === "punter";
+
+    await getResend().emails.send({
+        from: `Sureodds <${FROM}>`,
+        to: ADMIN,
+        subject: isPunter ? `New Punter Registration — ${user.name}` : `New Subscriber Registration — ${user.name}`,
+        html: base(`
+            ${badge(isPunter ? "Punter Registration" : "Subscriber Registration", isPunter ? "#1a1f71" : "#ff6b00")}
+            <br><br>
+            ${h1("New User Awaiting Approval")}
+            ${p(`<strong>${user.name}</strong> (${user.email}) has registered as a ${isPunter ? "punter" : "subscriber"} and is awaiting approval.`)}
+            <table style="width:100%;border-collapse:collapse;margin:16px 0 24px">
+                <tr><td style="padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:14px;color:#68676d;width:140px">Name</td><td style="padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:14px;font-weight:700;color:#1a1a1a">${user.name}</td></tr>
+                <tr><td style="padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:14px;color:#68676d">Email</td><td style="padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:14px;font-weight:700;color:#1a1a1a">${user.email}</td></tr>
+                <tr><td style="padding:10px 0;font-size:14px;color:#68676d">Account Type</td><td style="padding:10px 0;font-size:14px;font-weight:700;color:#1a1a1a">${isPunter ? "Punter / Tipster" : "Subscriber"}</td></tr>
+            </table>
+            ${p(isPunter
+            ? "Once approved, this punter will be able to post predictions and blog articles."
+            : "Once approved, this subscriber will need to complete payment to access predictions."
+        )}
+            ${btn("Review & Approve →", `${SITE}/admin-dashboard/users`)}
+        `),
+    }).catch(console.error);
+}
+
+// ── 3. Payment submitted — notify admin ───────────────────────────────────
 export async function sendPaymentSubmittedToAdmin(user: { name: string; email: string }, paymentRef: string, proofUrl?: string) {
     await getResend().emails.send({
         from: `Sureodds <${FROM}>`,
@@ -75,23 +102,37 @@ export async function sendPaymentSubmittedToAdmin(user: { name: string; email: s
     }).catch(console.error);
 }
 
-// ── 3. Subscription approved — notify user ────────────────────────────────
-export async function sendApprovalEmail(to: string, name: string, expiryDate: string) {
+// ── 3. Account approved — notify user (Punters & Subscribers) ───────────
+export async function sendApprovalEmail(to: string, name: string, role: "punter" | "subscriber", expiryDate?: string) {
+    const isPunter = role === "punter";
+
     await getResend().emails.send({
         from: `Sureodds <${FROM}>`,
         to,
-        subject: "✅ Subscription Activated — Welcome to Sureodds!",
+        subject: isPunter
+            ? "✅ Punter Account Activated — Start Posting!"
+            : "✅ Subscription Activated — Welcome to Sureodds!",
         html: base(`
-            ${badge("Subscription Active", "#16a34a")}
+            ${badge("Account Active", "#16a34a")}
             <br><br>
             ${h1(`You're in, ${name.split(" ")[0]}!`)}
-            ${p("Your payment has been confirmed and your subscription is now active.")}
-            <table style="width:100%;border-collapse:collapse;margin:16px 0 24px">
-                <tr><td style="padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:14px;color:#68676d;width:140px">Status</td><td style="padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:14px;font-weight:700;color:#16a34a">Active ✓</td></tr>
-                <tr><td style="padding:10px 0;font-size:14px;color:#68676d">Expires</td><td style="padding:10px 0;font-size:14px;font-weight:700;color:#1a1a1a">${expiryDate}</td></tr>
-            </table>
-            ${p("You now have full access to daily expert tips, analysis, and your members dashboard.")}
-            ${btn("Go to Dashboard →", `${SITE}/dashboard`)}
+            ${p(isPunter
+            ? "Your punter account has been approved and is now active. You can now start posting predictions and blog articles."
+            : "Your payment has been confirmed and your subscription is now active."
+        )}
+            ${isPunter ? "" : `
+                <table style="width:100%;border-collapse:collapse;margin:16px 0 24px">
+                    <tr><td style="padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:14px;color:#68676d;width:140px">Status</td><td style="padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:14px;font-weight:700;color:#16a34a">Active ✓</td></tr>
+                    <tr><td style="padding:10px 0;font-size:14px;color:#68676d">Expires</td><td style="padding:10px 0;font-size:14px;font-weight:700;color:#1a1a1a">${expiryDate}</td></tr>
+                </table>
+            `}
+            ${p(isPunter
+            ? "You now have full access to post betting tips and write articles for our subscribers."
+            : "You now have full access to daily expert tips, analysis, and your members dashboard."
+        )}
+            ${btn(isPunter ? "Go to Dashboard →" : "Go to Dashboard →", `${SITE}${isPunter ? "/dashboard/punter" : "/dashboard"}`)}
+            <hr style="border:none;border-top:1px solid #e8ebed;margin:28px 0">
+            ${p(`<span style="font-size:13px;color:#68676d">Login anytime at: <a href="${SITE}/login" style="color:#ff6b00;text-decoration:none;font-weight:700">${SITE}/login</a></span>`)}
         `),
     }).catch(console.error);
 }

@@ -50,7 +50,7 @@ export default function DashboardHome() {
             </div>
 
             {/* Stats row */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1.6rem", marginBottom: "2.4rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1.6rem", marginBottom: "2.4rem" }} className="stats-grid">
                 {card(
                     <>
                         <p style={{ fontFamily: f, fontSize: "1.2rem", fontWeight: 700, color: "#99989f", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 0.6rem" }}>Subscription</p>
@@ -76,7 +76,7 @@ export default function DashboardHome() {
                 )}
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem" }} className="two-col-grid">
                 {/* Tips preview */}
                 {card(
                     <>

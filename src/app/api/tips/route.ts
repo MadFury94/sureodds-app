@@ -42,7 +42,18 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const tips = readTips();
     const maxId = tips.reduce((m: number, t: { id: number }) => Math.max(m, t.id), 0);
-    const newTip = { ...body, id: maxId + 1 };
+
+    // Get the logged-in user info
+    let createdBy = { id: "", name: "Unknown", email: "" };
+    const userToken = req.cookies.get("so_user_session")?.value;
+    if (userToken) {
+        const payload = await verifyUserToken(userToken);
+        if (payload) {
+            createdBy = { id: payload.id, name: payload.name, email: payload.email };
+        }
+    }
+
+    const newTip = { ...body, id: maxId + 1, createdBy };
     tips.push(newTip);
     writeTips(tips);
     return NextResponse.json(newTip, { status: 201 });

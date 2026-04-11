@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./globals-responsive.css";
 import Navbar from "@/components/Navbar";
 import TrendingBar from "@/components/TrendingBar";
 import Footer from "@/components/Footer";
@@ -77,7 +78,7 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const headersList = await headers();
   const pathname = headersList.get("x-pathname") ?? headersList.get("x-invoke-path") ?? "";
-  const isAdmin = pathname.startsWith("/admin-dashboard") || pathname.startsWith("/admin-login");
+  const isAdmin = pathname.startsWith("/admin-dashboard") || pathname.startsWith("/admin-login") || pathname.startsWith("/dashboard");
 
   return (
     <html lang="en">

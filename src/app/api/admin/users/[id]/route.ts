@@ -21,20 +21,29 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     if (action === "approve") {
         const settings = await readSettings();
-        const expiry = new Date();
-        expiry.setDate(expiry.getDate() + settings.subscriptionDurationDays);
+
+        // Punters don't need subscription expiry, subscribers do
+        const isPunter = user.role === "punter";
+        const expiry = isPunter ? null : new Date();
+        if (expiry) {
+            expiry.setDate(expiry.getDate() + settings.subscriptionDurationDays);
+        }
+
         const updated = await updateUser(id, {
             status: "active",
-            subscriptionExpiry: expiry.toISOString(),
+            subscriptionExpiry: expiry ? expiry.toISOString() : null,
             approvedAt: new Date().toISOString(),
             approvedBy: "admin",
         });
-        // Notify user
+
+        // Notify user with role-specific email
         sendApprovalEmail(
             user.email,
             user.name,
-            expiry.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
+            user.role as "punter" | "subscriber",
+            expiry ? expiry.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : undefined
         );
+
         return NextResponse.json({ user: toSafeUser(updated!) });
     }
 

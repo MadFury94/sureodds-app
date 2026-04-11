@@ -35,6 +35,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const pathname = usePathname();
     const router = useRouter();
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [user, setUser] = useState<{ name: string; email: string; avatar?: string; role?: string } | null>(null);
 
     useEffect(() => {
@@ -87,6 +88,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return (
         <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "#f2f5f6", fontFamily: f }}>
 
+            {/* Mobile Overlay */}
+            <div
+                className={`mobile-overlay ${mobileMenuOpen ? 'show' : ''}`}
+                onClick={() => setMobileMenuOpen(false)}
+            />
+
             {/* ── Sidebar ── */}
             <aside style={{
                 width: sidebarOpen ? "24rem" : "6.4rem",
@@ -95,7 +102,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 transition: "width 0.25s cubic-bezier(0.4,0,0.2,1)",
                 flexShrink: 0, position: "sticky", top: 0, height: "100vh",
                 overflow: "hidden",
-            }}>
+            }} className={`admin-sidebar ${mobileMenuOpen ? 'open' : ''}`}>
                 {/* Logo + toggle */}
                 <div style={{
                     display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -192,6 +199,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     position: "sticky", top: 0, zIndex: 10,
                 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "1.2rem" }}>
+                        <button
+                            className="mobile-menu-btn"
+                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                            aria-label="Toggle menu"
+                        >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <line x1="3" y1="6" x2="21" y2="6" />
+                                <line x1="3" y1="12" x2="21" y2="12" />
+                                <line x1="3" y1="18" x2="21" y2="18" />
+                            </svg>
+                        </button>
                         <span style={{ fontFamily: fd, fontWeight: 700, fontSize: "1.6rem", color: "#1a1a1a", textTransform: "uppercase", letterSpacing: "0.04em" }}>
                             Admin
                         </span>

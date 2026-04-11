@@ -101,7 +101,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Stats */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1.6rem", marginBottom: "2.4rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1.6rem", marginBottom: "2.4rem" }} className="admin-stats-grid">
                 {stats.map(s => (
                     <div key={s.label} style={{
                         backgroundColor: "#fff", borderRadius: "1rem",
@@ -123,7 +123,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Two-col: recent posts + quick actions */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 32rem", gap: "2rem", marginBottom: "2.4rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 32rem", gap: "2rem", marginBottom: "2.4rem" }} className="admin-two-col">
 
                 {/* Recent posts */}
                 <div style={{ backgroundColor: "#fff", borderRadius: "1rem", border: "1.5px solid #e8ebed", overflow: "hidden" }}>

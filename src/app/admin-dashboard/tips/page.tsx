@@ -15,6 +15,7 @@ const SPECIALISTS = [
 ];
 
 interface Specialist { handle: string; name: string; avatar: string; }
+interface CreatedBy { id: string; name: string; email: string; }
 interface Tip {
     id: number;
     specialist: Specialist;
@@ -28,6 +29,7 @@ interface Tip {
     time: string;
     matchDate: string;
     result: string;
+    createdBy?: CreatedBy;
 }
 
 const EMPTY_TIP: Omit<Tip, "id"> = {
@@ -69,6 +71,18 @@ export default function TipsAdminPage() {
     const [saving, setSaving] = useState(false);
     const [deleteId, setDeleteId] = useState<number | null>(null);
     const [status, setStatus] = useState<string | null>(null);
+    const [filterResult, setFilterResult] = useState<string>("all");
+    const [filterPunter, setFilterPunter] = useState<string>("all");
+
+    const filteredTips = tips.filter(tip => {
+        if (filterResult !== "all" && tip.result !== filterResult) return false;
+        if (filterPunter !== "all" && tip.createdBy?.id !== filterPunter) return false;
+        return true;
+    });
+
+    const uniquePunters = Array.from(new Set(tips.map(t => t.createdBy?.id).filter(Boolean)))
+        .map(id => tips.find(t => t.createdBy?.id === id)?.createdBy)
+        .filter((p): p is CreatedBy => p !== undefined);
 
     async function loadTips() {
         setLoading(true);
@@ -149,7 +163,7 @@ export default function TipsAdminPage() {
                         Betting Tips
                     </h1>
                     <p style={{ fontFamily: f, fontSize: "1.3rem", color: "#68676d", margin: "0.4rem 0 0" }}>
-                        {loading ? "Loading…" : `${tips.length} tips`}
+                        {loading ? "Loading…" : `${filteredTips.length} of ${tips.length} tips`}
                     </p>
                 </div>
                 <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
@@ -168,42 +182,96 @@ export default function TipsAdminPage() {
                 </div>
             </div>
 
+            {/* Filters */}
+            <div style={{ display: "flex", gap: "1.2rem", marginBottom: "2rem", flexWrap: "wrap" }}>
+                <div>
+                    <label style={{ display: "block", fontFamily: f, fontSize: "1.2rem", color: "#68676d", marginBottom: "0.4rem", fontWeight: 700 }}>
+                        Filter by Result
+                    </label>
+                    <select
+                        value={filterResult}
+                        onChange={(e) => setFilterResult(e.target.value)}
+                        style={{
+                            padding: "0.8rem 1.2rem",
+                            border: "1.5px solid #e8ebed",
+                            borderRadius: "0.6rem",
+                            fontFamily: f,
+                            fontSize: "1.3rem",
+                            color: "#1a1a1a",
+                            backgroundColor: "#fff",
+                            cursor: "pointer",
+                        }}
+                    >
+                        <option value="all">All Results</option>
+                        <option value="pending">Pending</option>
+                        <option value="won">Won</option>
+                        <option value="lost">Lost</option>
+                    </select>
+                </div>
+                <div>
+                    <label style={{ display: "block", fontFamily: f, fontSize: "1.2rem", color: "#68676d", marginBottom: "0.4rem", fontWeight: 700 }}>
+                        Filter by Punter
+                    </label>
+                    <select
+                        value={filterPunter}
+                        onChange={(e) => setFilterPunter(e.target.value)}
+                        style={{
+                            padding: "0.8rem 1.2rem",
+                            border: "1.5px solid #e8ebed",
+                            borderRadius: "0.6rem",
+                            fontFamily: f,
+                            fontSize: "1.3rem",
+                            color: "#1a1a1a",
+                            backgroundColor: "#fff",
+                            cursor: "pointer",
+                        }}
+                    >
+                        <option value="all">All Punters</option>
+                        {uniquePunters.map((punter) => (
+                            <option key={punter.id} value={punter.id}>
+                                {punter.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            </div>
+
             {/* Tips table */}
             <div style={{ backgroundColor: "#fff", borderRadius: "1rem", border: "1.5px solid #e8ebed", overflow: "hidden" }}>
                 <div style={{
-                    display: "grid", gridTemplateColumns: "1fr 14rem 10rem 8rem 8rem 8rem",
+                    display: "grid", gridTemplateColumns: "1fr 14rem 10rem 8rem 8rem 10rem 8rem",
                     padding: "1.2rem 2rem", backgroundColor: "#f9f9f9", borderBottom: "1px solid #e8ebed",
                 }}>
-                    {["Match", "League", "Outcome", "Odds", "Confidence", ""].map((h, i) => (
+                    {["Match", "League", "Outcome", "Odds", "Confidence", "Punter", ""].map((h, i) => (
                         <span key={i} style={{ fontFamily: f, fontSize: "1.2rem", fontWeight: 700, color: "#68676d", textTransform: "uppercase", letterSpacing: "0.06em" }}>{h}</span>
                     ))}
                 </div>
 
                 {loading ? (
                     Array.from({ length: 5 }).map((_, i) => (
-                        <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 14rem 10rem 8rem 8rem 8rem", padding: "1.4rem 2rem", borderBottom: "1px solid #f0f0f0" }}>
-                            {Array.from({ length: 5 }).map((_, j) => (
+                        <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 14rem 10rem 8rem 8rem 10rem 8rem", padding: "1.4rem 2rem", borderBottom: "1px solid #f0f0f0" }}>
+                            {Array.from({ length: 6 }).map((_, j) => (
                                 <div key={j} style={{ height: "1.4rem", backgroundColor: "#f0f0f0", borderRadius: "0.3rem", width: "70%" }} />
                             ))}
                             <div />
                         </div>
                     ))
-                ) : tips.length === 0 ? (
+                ) : filteredTips.length === 0 ? (
                     <div style={{ padding: "6rem", textAlign: "center" }}>
-                        <p style={{ fontFamily: f, fontSize: "1.6rem", color: "#68676d" }}>No tips yet. <button onClick={openNew} style={{ background: "none", border: "none", color: "#ff6b00", fontFamily: f, fontSize: "1.6rem", fontWeight: 700, cursor: "pointer" }}>Add your first tip →</button></p>
+                        <p style={{ fontFamily: f, fontSize: "1.6rem", color: "#68676d" }}>No tips match your filters.</p>
                     </div>
-                ) : tips.map((tip, i) => (
+                ) : filteredTips.map((tip, i) => (
                     <div key={tip.id} style={{
-                        display: "grid", gridTemplateColumns: "1fr 14rem 10rem 8rem 8rem 8rem",
+                        display: "grid", gridTemplateColumns: "1fr 14rem 10rem 8rem 8rem 10rem 8rem",
                         padding: "1.4rem 2rem", alignItems: "center",
-                        borderBottom: i < tips.length - 1 ? "1px solid #f0f0f0" : "none",
+                        borderBottom: i < filteredTips.length - 1 ? "1px solid #f0f0f0" : "none",
                     }}>
                         <div>
                             <p style={{ fontFamily: f, fontWeight: 700, fontSize: "1.4rem", color: "#1a1a1a", margin: 0 }}>
                                 {tip.home} vs {tip.away}
                             </p>
                             <p style={{ fontFamily: f, fontSize: "1.2rem", color: "#99989f", margin: "0.2rem 0 0" }}>
-                                {tip.matchDate} · {tip.specialist.name}
+                                {tip.matchDate}
                             </p>
                         </div>
                         <span style={{ fontFamily: f, fontSize: "1.3rem", color: "#3d3c41" }}>{tip.league}</span>
@@ -216,6 +284,14 @@ export default function TipsAdminPage() {
                             backgroundColor: (CONFIDENCE_COLOR[tip.confidence] ?? "#68676d") + "18",
                             border: `1px solid ${CONFIDENCE_COLOR[tip.confidence] ?? "#68676d"}`,
                         }}>{tip.confidence}</span>
+                        <div>
+                            <p style={{ fontFamily: f, fontSize: "1.2rem", fontWeight: 600, color: "#1a1a1a", margin: 0 }}>
+                                {tip.createdBy?.name || "Unknown"}
+                            </p>
+                            <p style={{ fontFamily: f, fontSize: "1.1rem", color: "#99989f", margin: "0.2rem 0 0" }}>
+                                {tip.result === "won" ? "✓ Won" : tip.result === "lost" ? "✗ Lost" : "⏳ Pending"}
+                            </p>
+                        </div>
                         <div style={{ display: "flex", gap: "0.8rem" }}>
                             <button onClick={() => openEdit(tip)} style={{
                                 padding: "0.5rem 1rem", border: "1.5px solid #e8ebed",

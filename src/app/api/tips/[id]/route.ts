@@ -6,8 +6,13 @@ import { verifyUserToken } from "@/lib/auth";
 const TIPS_FILE = path.join(process.cwd(), "src/data/tips.json");
 
 function readTips() {
-    try { return JSON.parse(readFileSync(TIPS_FILE, "utf-8")); } catch { return []; }
+    try {
+        return JSON.parse(readFileSync(TIPS_FILE, "utf-8"));
+    } catch {
+        return [];
+    }
 }
+
 function writeTips(tips: unknown[]) {
     writeFileSync(TIPS_FILE, JSON.stringify(tips, null, 2));
 }
@@ -25,28 +30,61 @@ async function isAuthorized(req: NextRequest): Promise<boolean> {
     return false;
 }
 
-export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-    if (!(await isAuthorized(req))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export async function GET(
+    req: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    const { id } = await params;
+    const tips = readTips();
+    const tip = tips.find((t: { id: number }) => t.id === parseInt(id));
+
+    if (!tip) {
+        return NextResponse.json({ error: "Prediction not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(tip);
+}
+
+export async function PUT(
+    req: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    if (!(await isAuthorized(req))) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const { id } = await params;
     const body = await req.json();
     const tips = readTips();
-    const idx = tips.findIndex((t: { id: number }) => t.id === Number(id));
-    if (idx === -1) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const index = tips.findIndex((t: { id: number }) => t.id === parseInt(id));
 
-    tips[idx] = { ...tips[idx], ...body, id: Number(id) };
+    if (index === -1) {
+        return NextResponse.json({ error: "Prediction not found" }, { status: 404 });
+    }
+
+    tips[index] = { ...tips[index], ...body, id: parseInt(id) };
     writeTips(tips);
-    return NextResponse.json(tips[idx]);
+
+    return NextResponse.json(tips[index]);
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-    if (!(await isAuthorized(req))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export async function DELETE(
+    req: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    if (!(await isAuthorized(req))) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const { id } = await params;
     const tips = readTips();
-    const filtered = tips.filter((t: { id: number }) => t.id !== Number(id));
-    if (filtered.length === tips.length) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const filtered = tips.filter((t: { id: number }) => t.id !== parseInt(id));
+
+    if (filtered.length === tips.length) {
+        return NextResponse.json({ error: "Prediction not found" }, { status: 404 });
+    }
 
     writeTips(filtered);
+
     return NextResponse.json({ success: true });
 }

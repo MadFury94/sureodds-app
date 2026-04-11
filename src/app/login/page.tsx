@@ -37,9 +37,9 @@ export default function LoginPage() {
                 return;
             }
 
-            // Punters go to admin dashboard
+            // Punters go to punter dashboard
             if (user.role === "punter") {
-                window.location.href = "/admin-dashboard";
+                window.location.href = "/dashboard/punter";
                 return;
             }
 

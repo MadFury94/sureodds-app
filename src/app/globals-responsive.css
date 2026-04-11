@@ -1,0 +1,150 @@
+/* Responsive Dashboard Styles */
+
+/* Mobile: Hide sidebar by default, show hamburger */
+@media (max-width: 768px) {
+    .dashboard-sidebar {
+        position: fixed !important;
+        left: -24rem;
+        top: 0;
+        bottom: 0;
+        z-index: 1000;
+        transition: left 0.3s ease;
+    }
+
+    .dashboard-sidebar.open {
+        left: 0;
+    }
+
+    .mobile-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+    }
+
+    .mobile-overlay.show {
+        display: block;
+    }
+
+    .mobile-menu-btn {
+        display: flex !important;
+    }
+
+    /* Stats grid - 1 column on mobile */
+    .stats-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Two column layouts become single column */
+    .two-col-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Admin dashboard stats - 2 columns on mobile */
+    .admin-stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    /* Admin two-col layout */
+    .admin-two-col {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Hide sidebar on admin dashboard mobile */
+    .admin-sidebar {
+        position: fixed !important;
+        left: -24rem;
+        z-index: 1000;
+        transition: left 0.3s ease;
+    }
+
+    .admin-sidebar.open {
+        left: 0;
+    }
+
+    /* Table responsive - stack on mobile */
+    .tips-table-grid {
+        display: block !important;
+    }
+
+    .tips-table-grid>div {
+        display: flex !important;
+        flex-direction: column !important;
+        padding: 1.6rem !important;
+        border-bottom: 1px solid #f0f0f0 !important;
+    }
+
+    .tips-table-grid>div>* {
+        margin-bottom: 0.8rem;
+    }
+
+    /* Betslip sidebar - fixed bottom on mobile */
+    .betslip-sidebar {
+        position: fixed !important;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100% !important;
+        max-height: 50vh !important;
+        border-radius: 1.6rem 1.6rem 0 0 !important;
+        z-index: 100;
+    }
+
+    /* Predictions page - single column */
+    .predictions-layout {
+        flex-direction: column !important;
+        gap: 0 !important;
+    }
+
+    .predictions-main {
+        padding-right: 0 !important;
+    }
+}
+
+/* Tablet: 769px - 1024px */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .dashboard-sidebar {
+        width: 6.4rem !important;
+    }
+
+    .dashboard-sidebar .sidebar-text {
+        display: none;
+    }
+
+    .admin-sidebar {
+        width: 6.4rem !important;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .admin-stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* Desktop: Always show sidebar */
+@media (min-width: 769px) {
+    .mobile-menu-btn {
+        display: none !important;
+    }
+
+    .mobile-overlay {
+        display: none !important;
+    }
+}
+
+/* Utility classes */
+.mobile-menu-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 4rem;
+    height: 4rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #1a1a1a;
+}
