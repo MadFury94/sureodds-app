@@ -14,6 +14,7 @@ const FULL_NAV = [
     { label: "Categories", href: "/admin-dashboard/categories", icon: "◈", indent: true },
     { label: "Media", href: "/admin-dashboard/media", icon: "⊞", indent: false },
     { label: "Betting Tips", href: "/admin-dashboard/tips", icon: "🎯", indent: false },
+    { label: "Bet Codes & Stats", href: "/admin-dashboard/bet-codes-view", icon: "🎫", indent: false },
     { label: "Users", href: "/admin-dashboard/users", icon: "👥", indent: false },
     { label: "Settings", href: "/admin-dashboard/settings", icon: "⚙", indent: false },
 ];

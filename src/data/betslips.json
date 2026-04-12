@@ -1,0 +1,54 @@
+[
+  {
+    "id": 2,
+    "selections": [
+      {
+        "id": "2-0",
+        "league": "Championship",
+        "home": "Birmingham",
+        "away": "Wrexham",
+        "outcome": "Home Win",
+        "odds": "...",
+        "matchDate": "12 Apr, 12:00",
+        "homeScore": null,
+        "awayScore": null,
+        "status": "pending"
+      },
+      {
+        "id": "2-1",
+        "league": "Championship",
+        "home": "Southampton",
+        "away": "Blackburn",
+        "outcome": "Away Win",
+        "odds": "3.20",
+        "matchDate": "14 Apr, 20:00",
+        "homeScore": null,
+        "awayScore": null,
+        "status": "pending"
+      },
+      {
+        "id": "2-2",
+        "league": "Championship",
+        "home": "Portsmouth",
+        "away": "Ipswich Town",
+        "outcome": "Draw",
+        "odds": "3.40",
+        "matchDate": "14 Apr, 20:00",
+        "homeScore": null,
+        "awayScore": null,
+        "status": "pending"
+      }
+    ],
+    "totalOdds": "10.88",
+    "confidence": "High",
+    "isAccumulator": true,
+    "status": "pending",
+    "createdBy": {
+      "id": "00e9bb2d-a989-4450-86ff-64dc0a8f0992",
+      "name": "Mike Tips",
+      "email": "thecybertechhq@gmail.com"
+    },
+    "createdAt": "2026-04-12T08:52:27.168Z",
+    "time": "Just now"
+  }
+]

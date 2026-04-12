@@ -14,15 +14,31 @@ interface Stats {
     pendingPredictions: number;
 }
 
-interface Tip {
+interface Betslip {
     id: number;
-    league: string;
-    home: string;
-    away: string;
-    outcome: string;
+    selections: Array<{
+        id: string;
+        league: string;
+        home: string;
+        away: string;
+        outcome: string;
+        odds: string;
+        matchDate: string;
+        homeScore: number | null;
+        awayScore: number | null;
+        status: string;
+    }>;
+    totalOdds: string;
     confidence: string;
-    result: string;
-    matchDate: string;
+    isAccumulator: boolean;
+    status: string;
+    createdBy?: {
+        id: string;
+        name: string;
+        email: string;
+    };
+    createdAt: string;
+    time: string;
 }
 
 export default function PunterDashboard() {
@@ -30,14 +46,14 @@ export default function PunterDashboard() {
     const searchParams = useSearchParams();
     const [user, setUser] = useState<{ name: string; email: string } | null>(null);
     const [stats, setStats] = useState<Stats>({ totalPredictions: 0, totalPosts: 0, wonPredictions: 0, lostPredictions: 0, pendingPredictions: 0 });
-    const [recentTips, setRecentTips] = useState<Tip[]>([]);
+    const [recentTips, setRecentTips] = useState<Betslip[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         Promise.all([
             fetch("/api/auth/me").then(r => r.json()),
-            fetch("/api/tips").then(r => r.json()),
-        ]).then(([userData, tipsData]) => {
+            fetch("/api/betslips").then(r => r.json()),
+        ]).then(([userData, betslipsData]) => {
             if (userData.user) {
                 if (userData.user.role !== "punter") {
                     router.push("/dashboard");
@@ -46,17 +62,18 @@ export default function PunterDashboard() {
                 setUser(userData.user);
             }
 
-            const tips = tipsData || [];
+            const betslips = betslipsData || [];
+
             setStats({
-                totalPredictions: tips.length,
+                totalPredictions: betslips.length,
                 totalPosts: 0,
-                wonPredictions: tips.filter((t: { result: string }) => t.result === "won").length,
-                lostPredictions: tips.filter((t: { result: string }) => t.result === "lost").length,
-                pendingPredictions: tips.filter((t: { result: string }) => t.result === "pending").length,
+                wonPredictions: betslips.filter((b: any) => b.status === "won").length,
+                lostPredictions: betslips.filter((b: any) => b.status === "lost").length,
+                pendingPredictions: betslips.filter((b: any) => b.status === "pending").length,
             });
 
-            // Get the 5 most recent predictions
-            setRecentTips(tips.slice(-5).reverse());
+            // Get the 5 most recent betslips
+            setRecentTips(betslips.slice(-5).reverse());
             setLoading(false);
         });
     }, [router, searchParams]);
@@ -249,84 +266,104 @@ export default function PunterDashboard() {
                     </div>
                 ) : (
                     <div style={{ display: "flex", flexDirection: "column", gap: "1.2rem" }}>
-                        {recentTips.map((tip) => (
-                            <div
-                                key={tip.id}
-                                style={{
-                                    padding: "1.6rem",
-                                    backgroundColor: "#f9fafb",
-                                    borderRadius: "0.8rem",
-                                    border: "1px solid #e8ebed",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "space-between",
-                                    gap: "1.6rem",
-                                }}
-                            >
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ display: "flex", alignItems: "center", gap: "1.2rem", marginBottom: "0.8rem" }}>
-                                        <span style={{ fontFamily: fd, fontSize: "1.4rem", fontWeight: 700, color: "#1a1a1a" }}>
-                                            {tip.home} vs {tip.away}
-                                        </span>
-                                        <span style={{
-                                            padding: "0.4rem 0.8rem",
-                                            backgroundColor: tip.result === "won" ? "#dcfce7" : tip.result === "lost" ? "#fee2e2" : "#fef3c7",
-                                            color: tip.result === "won" ? "#16a34a" : tip.result === "lost" ? "#dc2626" : "#ca8a04",
-                                            borderRadius: "0.4rem",
-                                            fontFamily: f,
-                                            fontSize: "1.1rem",
-                                            fontWeight: 700,
-                                            textTransform: "uppercase",
-                                        }}>
-                                            {tip.result}
-                                        </span>
+                        {recentTips.map((betslip) => {
+                            const isAccumulator = betslip.isAccumulator;
+                            const firstSelection = betslip.selections[0];
+
+                            return (
+                                <div
+                                    key={betslip.id}
+                                    style={{
+                                        padding: "1.6rem",
+                                        backgroundColor: "#f9fafb",
+                                        borderRadius: "0.8rem",
+                                        border: isAccumulator ? "2px solid #ff6b00" : "1px solid #e8ebed",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "space-between",
+                                        gap: "1.6rem",
+                                    }}
+                                >
+                                    <div style={{ flex: 1 }}>
+                                        {isAccumulator ? (
+                                            <>
+                                                <div style={{ display: "flex", alignItems: "center", gap: "1.2rem", marginBottom: "0.8rem" }}>
+                                                    <span style={{ fontSize: "1.8rem" }}>🎯</span>
+                                                    <span style={{ fontFamily: fd, fontSize: "1.4rem", fontWeight: 700, color: "#ff6b00" }}>
+                                                        {betslip.selections.length}x ACCUMULATOR
+                                                    </span>
+                                                    <span style={{
+                                                        padding: "0.4rem 0.8rem",
+                                                        backgroundColor: betslip.status === "won" ? "#dcfce7" : betslip.status === "lost" ? "#fee2e2" : "#fef3c7",
+                                                        color: betslip.status === "won" ? "#16a34a" : betslip.status === "lost" ? "#dc2626" : "#ca8a04",
+                                                        borderRadius: "0.4rem",
+                                                        fontFamily: f,
+                                                        fontSize: "1.1rem",
+                                                        fontWeight: 700,
+                                                        textTransform: "uppercase",
+                                                    }}>
+                                                        {betslip.status}
+                                                    </span>
+                                                </div>
+                                                <p style={{ fontFamily: f, fontSize: "1.2rem", color: "#68676d", margin: "0 0 0.4rem" }}>
+                                                    {betslip.selections.map((s) => `${s.home} vs ${s.away}`).join(" • ")}
+                                                </p>
+                                                <p style={{ fontFamily: f, fontSize: "1.1rem", color: "#99989f", margin: 0 }}>
+                                                    Confidence: {betslip.confidence} • Total Odds: {betslip.totalOdds}
+                                                </p>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div style={{ display: "flex", alignItems: "center", gap: "1.2rem", marginBottom: "0.8rem" }}>
+                                                    <span style={{ fontFamily: fd, fontSize: "1.4rem", fontWeight: 700, color: "#1a1a1a" }}>
+                                                        {firstSelection.home} vs {firstSelection.away}
+                                                    </span>
+                                                    <span style={{
+                                                        padding: "0.4rem 0.8rem",
+                                                        backgroundColor: betslip.status === "won" ? "#dcfce7" : betslip.status === "lost" ? "#fee2e2" : "#fef3c7",
+                                                        color: betslip.status === "won" ? "#16a34a" : betslip.status === "lost" ? "#dc2626" : "#ca8a04",
+                                                        borderRadius: "0.4rem",
+                                                        fontFamily: f,
+                                                        fontSize: "1.1rem",
+                                                        fontWeight: 700,
+                                                        textTransform: "uppercase",
+                                                    }}>
+                                                        {betslip.status}
+                                                    </span>
+                                                </div>
+                                                <p style={{ fontFamily: f, fontSize: "1.2rem", color: "#68676d", margin: "0 0 0.4rem" }}>
+                                                    {firstSelection.league} • {firstSelection.outcome}
+                                                </p>
+                                                <p style={{ fontFamily: f, fontSize: "1.1rem", color: "#99989f", margin: 0 }}>
+                                                    Confidence: {betslip.confidence}
+                                                </p>
+                                            </>
+                                        )}
                                     </div>
-                                    <p style={{ fontFamily: f, fontSize: "1.2rem", color: "#68676d", margin: "0 0 0.4rem" }}>
-                                        {tip.league} • {tip.outcome}
-                                    </p>
-                                    <p style={{ fontFamily: f, fontSize: "1.1rem", color: "#99989f", margin: 0 }}>
-                                        Confidence: {tip.confidence}
-                                    </p>
+                                    <div style={{ display: "flex", gap: "0.8rem" }}>
+                                        <a
+                                            href={`/betslip/${betslip.id}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            style={{
+                                                padding: "0.8rem 1.6rem",
+                                                backgroundColor: "#ff6b00",
+                                                border: "none",
+                                                borderRadius: "0.6rem",
+                                                fontFamily: f,
+                                                fontSize: "1.2rem",
+                                                fontWeight: 600,
+                                                color: "#fff",
+                                                textDecoration: "none",
+                                                display: "inline-block",
+                                            }}
+                                        >
+                                            View
+                                        </a>
+                                    </div>
                                 </div>
-                                <div style={{ display: "flex", gap: "0.8rem" }}>
-                                    <button
-                                        onClick={() => router.push(`/dashboard/punter/predictions/edit/${tip.id}`)}
-                                        style={{
-                                            padding: "0.8rem 1.6rem",
-                                            backgroundColor: "#fff",
-                                            border: "1px solid #e8ebed",
-                                            borderRadius: "0.6rem",
-                                            fontFamily: f,
-                                            fontSize: "1.2rem",
-                                            fontWeight: 600,
-                                            color: "#68676d",
-                                            cursor: "pointer",
-                                        }}
-                                    >
-                                        Edit
-                                    </button>
-                                    <a
-                                        href={`/predictions/${tip.id}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        style={{
-                                            padding: "0.8rem 1.6rem",
-                                            backgroundColor: "#ff6b00",
-                                            border: "none",
-                                            borderRadius: "0.6rem",
-                                            fontFamily: f,
-                                            fontSize: "1.2rem",
-                                            fontWeight: 600,
-                                            color: "#fff",
-                                            textDecoration: "none",
-                                            display: "inline-block",
-                                        }}
-                                    >
-                                        View
-                                    </a>
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </div>

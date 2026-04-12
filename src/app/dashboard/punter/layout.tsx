@@ -16,11 +16,12 @@ interface MenuItem {
 const NAV: MenuItem[] = [
     { label: "Dashboard", href: "/dashboard/punter", icon: "▦" },
     {
-        label: "Predictions",
+        label: "Betslips",
         icon: "🎯",
         submenu: [
-            { label: "All Predictions", href: "/dashboard/punter/predictions" },
-            { label: "Add New", href: "/dashboard/punter/new-prediction" },
+            { label: "All Betslips", href: "/dashboard/punter/predictions" },
+            { label: "Add New (Football-Data)", href: "/dashboard/punter/new-prediction" },
+            { label: "Add New (Odds API)", href: "/dashboard/punter/new-prediction-v2" },
         ],
     },
     {
@@ -49,7 +50,7 @@ export default function PunterLayout({ children }: { children: React.ReactNode }
     const [user, setUser] = useState<UserData | null>(null);
     const [checked, setChecked] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [expandedMenus, setExpandedMenus] = useState<string[]>(["Predictions", "Bet Codes"]);
+    const [expandedMenus, setExpandedMenus] = useState<string[]>(["Betslips", "Bet Codes"]);
 
     useEffect(() => {
         fetch("/api/auth/me")

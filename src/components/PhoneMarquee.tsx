@@ -1,4 +1,5 @@
 "use client";
+import { useState, useEffect } from "react";
 import { fonts, colors, LEAGUE_LOGOS } from "@/lib/config";
 
 const f = fonts.body;
@@ -42,6 +43,18 @@ const CONFIDENCE_COLOR: Record<string, string> = {
     Low: "#99989f", Medium: "#f59e0b", High: "#22c55e", Banker: "#ff6b00",
 };
 
+interface UpcomingMatch {
+    league: string;
+    home: string;
+    away: string;
+    outcome: string;
+    odds: string;
+    confidence: string;
+    punter: string;
+    note: string;
+    matchDate?: string;
+}
+
 const TIPS = [
     { league: "Champions League", home: "Real Madrid", away: "Man City", outcome: "Home Win", odds: "2.10", confidence: "High", punter: "PaulBets", note: "Madrid always deliver at the Bernabeu" },
     { league: "Premier League", home: "Arsenal", away: "Chelsea", outcome: "Home Win", odds: "1.85", confidence: "Banker", punter: "OddsKing", note: "Arsenal's home record is unreal" },
@@ -80,7 +93,7 @@ function TeamCrest({ name, size = 28 }: { name: string; size?: number }) {
     );
 }
 
-function PhoneCard({ tip }: { tip: typeof TIPS[0] }) {
+function PhoneCard({ tip }: { tip: UpcomingMatch }) {
     const bg = LEAGUE_BG[tip.league] ?? "#0a0a1a";
     const accent = LEAGUE_ACCENT[tip.league] ?? colors.primary;
     const confColor = CONFIDENCE_COLOR[tip.confidence] ?? "#fff";
@@ -219,6 +232,83 @@ function PhoneCard({ tip }: { tip: typeof TIPS[0] }) {
 }
 
 export default function PhoneMarquee({ showHeading = true }: { showHeading?: boolean }) {
+    const [upcomingMatches, setUpcomingMatches] = useState<UpcomingMatch[]>(TIPS);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        // Fetch upcoming matches from API
+        fetch("/api/sports/scheduled?days=7")
+            .then(r => r.json())
+            .then(async data => {
+                if (data.matches && data.matches.length > 0) {
+                    // Get first 10 matches
+                    const matchesToShow = data.matches.slice(0, 10);
+
+                    // Fetch odds for each match
+                    const matchesWithOdds = await Promise.all(
+                        matchesToShow.map(async (match: any) => {
+                            try {
+                                const oddsRes = await fetch(
+                                    `/api/sports/odds?homeTeam=${encodeURIComponent(match.homeTeam?.shortName || match.homeTeam?.name || "")}&awayTeam=${encodeURIComponent(match.awayTeam?.shortName || match.awayTeam?.name || "")}&league=${encodeURIComponent(match.competition?.name || "")}`
+                                );
+
+                                if (oddsRes.ok) {
+                                    const odds = await oddsRes.json();
+                                    return {
+                                        league: match.competition?.name || "Football",
+                                        home: match.homeTeam?.shortName || match.homeTeam?.name || "Home",
+                                        away: match.awayTeam?.shortName || match.awayTeam?.name || "Away",
+                                        outcome: `${odds.homeWin} / ${odds.draw} / ${odds.awayWin}`,
+                                        odds: odds.homeWin,
+                                        confidence: "High",
+                                        punter: "Sureodds",
+                                        note: `${new Date(match.utcDate).toLocaleDateString("en-GB", {
+                                            day: "numeric",
+                                            month: "short",
+                                            hour: "2-digit",
+                                            minute: "2-digit"
+                                        })} • Home: ${odds.homeWin} | Draw: ${odds.draw} | Away: ${odds.awayWin}`,
+                                        matchDate: match.utcDate,
+                                    };
+                                }
+                            } catch (error) {
+                                console.error("Error fetching odds:", error);
+                            }
+
+                            // Fallback without odds
+                            return {
+                                league: match.competition?.name || "Football",
+                                home: match.homeTeam?.shortName || match.homeTeam?.name || "Home",
+                                away: match.awayTeam?.shortName || match.awayTeam?.name || "Away",
+                                outcome: "View Tips",
+                                odds: "TBD",
+                                confidence: "High",
+                                punter: "Sureodds",
+                                note: `${new Date(match.utcDate).toLocaleDateString("en-GB", {
+                                    day: "numeric",
+                                    month: "short",
+                                    hour: "2-digit",
+                                    minute: "2-digit"
+                                })}`,
+                                matchDate: match.utcDate,
+                            };
+                        })
+                    );
+
+                    if (matchesWithOdds.length > 0) {
+                        setUpcomingMatches(matchesWithOdds);
+                    }
+                }
+                setLoading(false);
+            })
+            .catch(() => {
+                // Fallback to default tips if API fails
+                setLoading(false);
+            });
+    }, []);
+
+    const displayTips = upcomingMatches.length > 0 ? upcomingMatches : TIPS;
+
     return (
         <section style={{ backgroundColor: "#0a0a0a", overflow: "hidden", padding: showHeading ? "5rem 0 6rem" : "3.2rem 0" }}>
 
@@ -269,7 +359,7 @@ export default function PhoneMarquee({ showHeading = true }: { showHeading?: boo
             {/* ── Row 2: phone cards RIGHT ── */}
             <div style={{ overflow: "hidden" }}>
                 <div className="pm-track-right">
-                    {[...TIPS, ...TIPS].map((tip, i) => (
+                    {[...displayTips, ...displayTips].map((tip, i) => (
                         <PhoneCard key={i} tip={tip} />
                     ))}
                 </div>

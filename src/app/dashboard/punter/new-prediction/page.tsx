@@ -29,6 +29,22 @@ interface Match {
     competition: { name: string };
 }
 
+interface MatchOdds {
+    homeWin?: string;
+    draw?: string;
+    awayWin?: string;
+    over15?: string;
+    under15?: string;
+    over25?: string;
+    under25?: string;
+    over35?: string;
+    under35?: string;
+    bttsYes?: string;
+    bttsNo?: string;
+    estimated: boolean;
+    availableMarkets: string[];
+}
+
 interface BetSelection {
     id: string;
     matchId: number;
@@ -42,6 +58,7 @@ interface BetSelection {
     outcome: string;
     confidence: string;
     analysis: string;
+    odds?: string;
 }
 
 interface Toast {
@@ -92,6 +109,8 @@ export default function NewPrediction() {
     const [toasts, setToasts] = useState<Toast[]>([]);
     const [showLeagueSelector, setShowLeagueSelector] = useState(true);
     const [shareModal, setShareModal] = useState<ShareModal>({ show: false, link: "", count: 0 });
+    const [matchOdds, setMatchOdds] = useState<Record<number, MatchOdds>>({});
+    const [loadingOdds, setLoadingOdds] = useState<Record<number, boolean>>({});
 
     const showToast = (message: string, type: Toast["type"] = "success") => {
         const id = Date.now().toString();
@@ -101,8 +120,73 @@ export default function NewPrediction() {
         }, 4000);
     };
 
+    // Fetch odds for a match
+    const fetchOddsForMatch = async (match: Match) => {
+        if (matchOdds[match.id] || loadingOdds[match.id]) return;
+
+        setLoadingOdds((prev) => ({ ...prev, [match.id]: true }));
+
+        try {
+            const response = await fetch(
+                `/api/sports/odds?homeTeam=${encodeURIComponent(match.homeTeam.shortName || match.homeTeam.name)}&awayTeam=${encodeURIComponent(match.awayTeam.shortName || match.awayTeam.name)}&league=${encodeURIComponent(selectedLeague?.name || "")}`
+            );
+
+            if (response.ok) {
+                const odds = await response.json();
+                setMatchOdds((prev) => ({ ...prev, [match.id]: odds }));
+            }
+        } catch (error) {
+            console.error("Error fetching odds:", error);
+        } finally {
+            setLoadingOdds((prev) => ({ ...prev, [match.id]: false }));
+        }
+    };
+
+    // Get odds for a specific outcome
+    const getOddsForOutcome = (matchId: number, outcome: string): string | null => {
+        const odds = matchOdds[matchId];
+        if (!odds) return null;
+
+        switch (outcome) {
+            case "Home Win":
+                return odds.homeWin || null;
+            case "Draw":
+                return odds.draw || null;
+            case "Away Win":
+                return odds.awayWin || null;
+            case "Over 1.5 Goals":
+                return odds.over15 || null;
+            case "Under 1.5 Goals":
+                return odds.under15 || null;
+            case "Over 2.5 Goals":
+                return odds.over25 || null;
+            case "Under 2.5 Goals":
+                return odds.under25 || null;
+            case "Over 3.5 Goals":
+                return odds.over35 || null;
+            case "Under 3.5 Goals":
+                return odds.under35 || null;
+            case "Both Teams To Score":
+                return odds.bttsYes || null;
+            case "Both Teams Not To Score":
+                return odds.bttsNo || null;
+            default:
+                return null;
+        }
+    };
+
+    // Check if a betting option is available for a match
+    const isBetOptionAvailable = (matchId: number, outcome: string): boolean => {
+        const odds = matchOdds[matchId];
+        if (!odds || !odds.availableMarkets) return false;
+        return odds.availableMarkets.includes(outcome);
+    };
+
     const addToBetslip = (match: Match, outcome: string) => {
         if (!selectedLeague) return;
+
+        // Get the odds for this outcome
+        const odds = getOddsForOutcome(match.id, outcome);
 
         const existingIndex = betslip.findIndex(b => b.matchId === match.id);
 
@@ -133,6 +217,7 @@ export default function NewPrediction() {
                 outcome,
                 confidence: "High",
                 analysis: "",
+                odds: odds,
             };
             setBetslip((prev) => [...prev, selection]);
             showToast("Added to betslip!", "success");
@@ -154,59 +239,63 @@ export default function NewPrediction() {
         if (betslip.length === 0) return;
 
         setSaving(true);
-        let successCount = 0;
-        let failCount = 0;
-        const postedIds: number[] = [];
 
-        for (const prediction of betslip) {
-            try {
-                const res = await fetch("/api/tips", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
+        try {
+            // Get current user info
+            const userRes = await fetch("/api/auth/me");
+            const userData = await userRes.json();
+
+            if (!userData.user) {
+                showToast("You must be logged in to post predictions", "error");
+                setSaving(false);
+                return;
+            }
+
+            // Create ONE betslip with all selections
+            const res = await fetch("/api/betslips", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    selections: betslip.map(prediction => ({
                         league: prediction.league,
+                        leagueEmblem: prediction.leagueEmblem,
                         home: prediction.homeTeam,
                         away: prediction.awayTeam,
+                        homeCrest: prediction.homeCrest,
+                        awayCrest: prediction.awayCrest,
                         outcome: prediction.outcome,
-                        odds: "TBD",
-                        confidence: prediction.confidence,
-                        analysis: prediction.analysis,
-                        specialist: { handle: "Analyst_SO", name: "SO Analyst", avatar: "AN" },
+                        odds: prediction.odds || "TBD",
                         matchDate: prediction.matchDate,
-                        time: "Just now",
-                        result: "pending",
-                    }),
-                });
+                        analysis: prediction.analysis,
+                    })),
+                    confidence: betslip[0]?.confidence || "High",
+                    createdBy: {
+                        id: userData.user.id,
+                        name: userData.user.name,
+                        email: userData.user.email,
+                    },
+                }),
+            });
 
-                if (res.ok) {
-                    const data = await res.json();
-                    postedIds.push(data.id);
-                    successCount++;
-                } else {
-                    failCount++;
-                }
-            } catch (error) {
-                console.error(error);
-                failCount++;
+            if (res.ok) {
+                const data = await res.json();
+                showToast(`Betslip posted successfully!`, "success");
+
+                // Generate shareable betslip link
+                const betslipLink = `${window.location.origin}/betslip/${data.betslip.id}`;
+
+                // Show share modal
+                setShareModal({ show: true, link: betslipLink, count: betslip.length });
+
+                setBetslip([]);
+            } else {
+                showToast("Failed to post betslip", "error");
             }
-        }
-
-        setSaving(false);
-
-        if (successCount > 0) {
-            showToast(`${successCount} prediction(s) posted successfully!`, "success");
-
-            // Generate shareable betslip link with all prediction IDs
-            const betslipLink = `${window.location.origin}/betslip/${postedIds.join("-")}`;
-
-            // Show share modal
-            setShareModal({ show: true, link: betslipLink, count: successCount });
-
-            setBetslip([]);
-        }
-
-        if (failCount > 0) {
-            showToast(`${failCount} prediction(s) failed to post`, "error");
+        } catch (error) {
+            console.error(error);
+            showToast("Error posting betslip", "error");
+        } finally {
+            setSaving(false);
         }
     }
 
@@ -220,6 +309,16 @@ export default function NewPrediction() {
             .catch(console.error)
             .finally(() => setLoadingCompetitions(false));
     }, []);
+
+    // Fetch odds when matches are loaded
+    useEffect(() => {
+        if (matches.length > 0 && selectedLeague) {
+            // Fetch odds for first 5 matches to avoid rate limiting
+            matches.slice(0, 5).forEach(match => {
+                fetchOddsForMatch(match);
+            });
+        }
+    }, [matches, selectedLeague]);
 
     useEffect(() => {
         let filtered = competitions;
@@ -648,97 +747,119 @@ export default function NewPrediction() {
 
                                         {/* Betting Options */}
                                         <div style={{ padding: "1.6rem" }}>
-                                            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.8rem", marginBottom: "1.2rem" }}>
-                                                <button
-                                                    onClick={() => addToBetslip(match, "Home Win")}
-                                                    style={{
-                                                        padding: "1.2rem",
-                                                        border: "1px solid",
-                                                        borderColor: betslip.some(b => b.matchId === match.id && b.outcome === "Home Win") ? "#ff6b00" : "#e8ebed",
-                                                        backgroundColor: betslip.some(b => b.matchId === match.id && b.outcome === "Home Win") ? "#fff5f0" : "#fff",
-                                                        borderRadius: "0.6rem",
-                                                        cursor: "pointer",
-                                                        transition: "all 0.2s",
-                                                    }}
-                                                    onMouseEnter={(e) => {
-                                                        if (!betslip.some(b => b.matchId === match.id && b.outcome === "Home Win")) {
-                                                            e.currentTarget.style.backgroundColor = "#f9fafb";
-                                                        }
-                                                    }}
-                                                    onMouseLeave={(e) => {
-                                                        if (!betslip.some(b => b.matchId === match.id && b.outcome === "Home Win")) {
-                                                            e.currentTarget.style.backgroundColor = "#fff";
-                                                        }
-                                                    }}
-                                                >
-                                                    <div style={{ fontFamily: f, fontSize: "1.1rem", color: "#68676d", marginBottom: "0.4rem" }}>Home</div>
-                                                    <div style={{ fontFamily: fd, fontSize: "1.5rem", fontWeight: 700, color: betslip.some(b => b.matchId === match.id && b.outcome === "Home Win") ? "#ff6b00" : "#1a1a1a" }}>
-                                                        1
-                                                    </div>
-                                                </button>
+                                            {/* Main markets: Home/Draw/Away */}
+                                            {(isBetOptionAvailable(match.id, "Home Win") || isBetOptionAvailable(match.id, "Draw") || isBetOptionAvailable(match.id, "Away Win")) && (
+                                                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.8rem", marginBottom: "1.2rem" }}>
+                                                    {isBetOptionAvailable(match.id, "Home Win") && (
+                                                        <button
+                                                            onClick={() => {
+                                                                addToBetslip(match, "Home Win");
+                                                                if (!matchOdds[match.id]) fetchOddsForMatch(match);
+                                                            }}
+                                                            style={{
+                                                                padding: "1.2rem",
+                                                                border: "1px solid",
+                                                                borderColor: betslip.some(b => b.matchId === match.id && b.outcome === "Home Win") ? "#ff6b00" : "#e8ebed",
+                                                                backgroundColor: betslip.some(b => b.matchId === match.id && b.outcome === "Home Win") ? "#fff5f0" : "#fff",
+                                                                borderRadius: "0.6rem",
+                                                                cursor: "pointer",
+                                                                transition: "all 0.2s",
+                                                            }}
+                                                            onMouseEnter={(e) => {
+                                                                if (!betslip.some(b => b.matchId === match.id && b.outcome === "Home Win")) {
+                                                                    e.currentTarget.style.backgroundColor = "#f9fafb";
+                                                                }
+                                                            }}
+                                                            onMouseLeave={(e) => {
+                                                                if (!betslip.some(b => b.matchId === match.id && b.outcome === "Home Win")) {
+                                                                    e.currentTarget.style.backgroundColor = "#fff";
+                                                                }
+                                                            }}
+                                                        >
+                                                            <div style={{ fontFamily: f, fontSize: "1.1rem", color: "#68676d", marginBottom: "0.4rem" }}>Home</div>
+                                                            <div style={{ fontFamily: fd, fontSize: "1.5rem", fontWeight: 700, color: betslip.some(b => b.matchId === match.id && b.outcome === "Home Win") ? "#ff6b00" : "#1a1a1a" }}>
+                                                                {getOddsForOutcome(match.id, "Home Win")}
+                                                            </div>
+                                                        </button>
+                                                    )}
 
-                                                <button
-                                                    onClick={() => addToBetslip(match, "Draw")}
-                                                    style={{
-                                                        padding: "1.2rem",
-                                                        border: "1px solid",
-                                                        borderColor: betslip.some(b => b.matchId === match.id && b.outcome === "Draw") ? "#ff6b00" : "#e8ebed",
-                                                        backgroundColor: betslip.some(b => b.matchId === match.id && b.outcome === "Draw") ? "#fff5f0" : "#fff",
-                                                        borderRadius: "0.6rem",
-                                                        cursor: "pointer",
-                                                        transition: "all 0.2s",
-                                                    }}
-                                                    onMouseEnter={(e) => {
-                                                        if (!betslip.some(b => b.matchId === match.id && b.outcome === "Draw")) {
-                                                            e.currentTarget.style.backgroundColor = "#f9fafb";
-                                                        }
-                                                    }}
-                                                    onMouseLeave={(e) => {
-                                                        if (!betslip.some(b => b.matchId === match.id && b.outcome === "Draw")) {
-                                                            e.currentTarget.style.backgroundColor = "#fff";
-                                                        }
-                                                    }}
-                                                >
-                                                    <div style={{ fontFamily: f, fontSize: "1.1rem", color: "#68676d", marginBottom: "0.4rem" }}>Draw</div>
-                                                    <div style={{ fontFamily: fd, fontSize: "1.5rem", fontWeight: 700, color: betslip.some(b => b.matchId === match.id && b.outcome === "Draw") ? "#ff6b00" : "#1a1a1a" }}>
-                                                        X
-                                                    </div>
-                                                </button>
+                                                    {isBetOptionAvailable(match.id, "Draw") && (
+                                                        <button
+                                                            onClick={() => {
+                                                                addToBetslip(match, "Draw");
+                                                                if (!matchOdds[match.id]) fetchOddsForMatch(match);
+                                                            }}
+                                                            style={{
+                                                                padding: "1.2rem",
+                                                                border: "1px solid",
+                                                                borderColor: betslip.some(b => b.matchId === match.id && b.outcome === "Draw") ? "#ff6b00" : "#e8ebed",
+                                                                backgroundColor: betslip.some(b => b.matchId === match.id && b.outcome === "Draw") ? "#fff5f0" : "#fff",
+                                                                borderRadius: "0.6rem",
+                                                                cursor: "pointer",
+                                                                transition: "all 0.2s",
+                                                            }}
+                                                            onMouseEnter={(e) => {
+                                                                if (!betslip.some(b => b.matchId === match.id && b.outcome === "Draw")) {
+                                                                    e.currentTarget.style.backgroundColor = "#f9fafb";
+                                                                }
+                                                            }}
+                                                            onMouseLeave={(e) => {
+                                                                if (!betslip.some(b => b.matchId === match.id && b.outcome === "Draw")) {
+                                                                    e.currentTarget.style.backgroundColor = "#fff";
+                                                                }
+                                                            }}
+                                                        >
+                                                            <div style={{ fontFamily: f, fontSize: "1.1rem", color: "#68676d", marginBottom: "0.4rem" }}>Draw</div>
+                                                            <div style={{ fontFamily: fd, fontSize: "1.5rem", fontWeight: 700, color: betslip.some(b => b.matchId === match.id && b.outcome === "Draw") ? "#ff6b00" : "#1a1a1a" }}>
+                                                                {getOddsForOutcome(match.id, "Draw")}
+                                                            </div>
+                                                        </button>
+                                                    )}
 
-                                                <button
-                                                    onClick={() => addToBetslip(match, "Away Win")}
-                                                    style={{
-                                                        padding: "1.2rem",
-                                                        border: "1px solid",
-                                                        borderColor: betslip.some(b => b.matchId === match.id && b.outcome === "Away Win") ? "#ff6b00" : "#e8ebed",
-                                                        backgroundColor: betslip.some(b => b.matchId === match.id && b.outcome === "Away Win") ? "#fff5f0" : "#fff",
-                                                        borderRadius: "0.6rem",
-                                                        cursor: "pointer",
-                                                        transition: "all 0.2s",
-                                                    }}
-                                                    onMouseEnter={(e) => {
-                                                        if (!betslip.some(b => b.matchId === match.id && b.outcome === "Away Win")) {
-                                                            e.currentTarget.style.backgroundColor = "#f9fafb";
-                                                        }
-                                                    }}
-                                                    onMouseLeave={(e) => {
-                                                        if (!betslip.some(b => b.matchId === match.id && b.outcome === "Away Win")) {
-                                                            e.currentTarget.style.backgroundColor = "#fff";
-                                                        }
-                                                    }}
-                                                >
-                                                    <div style={{ fontFamily: f, fontSize: "1.1rem", color: "#68676d", marginBottom: "0.4rem" }}>Away</div>
-                                                    <div style={{ fontFamily: fd, fontSize: "1.5rem", fontWeight: 700, color: betslip.some(b => b.matchId === match.id && b.outcome === "Away Win") ? "#ff6b00" : "#1a1a1a" }}>
-                                                        2
-                                                    </div>
-                                                </button>
-                                            </div>
+                                                    {isBetOptionAvailable(match.id, "Away Win") && (
+                                                        <button
+                                                            onClick={() => {
+                                                                addToBetslip(match, "Away Win");
+                                                                if (!matchOdds[match.id]) fetchOddsForMatch(match);
+                                                            }}
+                                                            style={{
+                                                                padding: "1.2rem",
+                                                                border: "1px solid",
+                                                                borderColor: betslip.some(b => b.matchId === match.id && b.outcome === "Away Win") ? "#ff6b00" : "#e8ebed",
+                                                                backgroundColor: betslip.some(b => b.matchId === match.id && b.outcome === "Away Win") ? "#fff5f0" : "#fff",
+                                                                borderRadius: "0.6rem",
+                                                                cursor: "pointer",
+                                                                transition: "all 0.2s",
+                                                            }}
+                                                            onMouseEnter={(e) => {
+                                                                if (!betslip.some(b => b.matchId === match.id && b.outcome === "Away Win")) {
+                                                                    e.currentTarget.style.backgroundColor = "#f9fafb";
+                                                                }
+                                                            }}
+                                                            onMouseLeave={(e) => {
+                                                                if (!betslip.some(b => b.matchId === match.id && b.outcome === "Away Win")) {
+                                                                    e.currentTarget.style.backgroundColor = "#fff";
+                                                                }
+                                                            }}
+                                                        >
+                                                            <div style={{ fontFamily: f, fontSize: "1.1rem", color: "#68676d", marginBottom: "0.4rem" }}>Away</div>
+                                                            <div style={{ fontFamily: fd, fontSize: "1.5rem", fontWeight: 700, color: betslip.some(b => b.matchId === match.id && b.outcome === "Away Win") ? "#ff6b00" : "#1a1a1a" }}>
+                                                                {getOddsForOutcome(match.id, "Away Win")}
+                                                            </div>
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            )}
 
+                                            {/* Other markets: Over/Under/BTTS - only show if available */}
                                             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "0.8rem" }}>
-                                                {BET_OPTIONS.slice(3).map((option) => (
+                                                {BET_OPTIONS.slice(3).filter(option => isBetOptionAvailable(match.id, option.value)).map((option) => (
                                                     <button
                                                         key={option.value}
-                                                        onClick={() => addToBetslip(match, option.value)}
+                                                        onClick={() => {
+                                                            addToBetslip(match, option.value);
+                                                            if (!matchOdds[match.id]) fetchOddsForMatch(match);
+                                                        }}
                                                         style={{
                                                             padding: "1rem",
                                                             border: "1px solid",
@@ -746,11 +867,11 @@ export default function NewPrediction() {
                                                             backgroundColor: betslip.some(b => b.matchId === match.id && b.outcome === option.value) ? "#fff5f0" : "#fff",
                                                             borderRadius: "0.6rem",
                                                             cursor: "pointer",
-                                                            fontFamily: f,
-                                                            fontSize: "1.2rem",
-                                                            fontWeight: 600,
-                                                            color: betslip.some(b => b.matchId === match.id && b.outcome === option.value) ? "#ff6b00" : "#1a1a1a",
                                                             transition: "all 0.2s",
+                                                            display: "flex",
+                                                            flexDirection: "column",
+                                                            alignItems: "center",
+                                                            gap: "0.4rem",
                                                         }}
                                                         onMouseEnter={(e) => {
                                                             if (!betslip.some(b => b.matchId === match.id && b.outcome === option.value)) {
@@ -763,10 +884,33 @@ export default function NewPrediction() {
                                                             }
                                                         }}
                                                     >
-                                                        {option.label}
+                                                        <div style={{ fontFamily: f, fontSize: "1.1rem", color: "#68676d" }}>
+                                                            {option.label}
+                                                        </div>
+                                                        <div style={{ fontFamily: fd, fontSize: "1.4rem", fontWeight: 700, color: betslip.some(b => b.matchId === match.id && b.outcome === option.value) ? "#ff6b00" : "#1a1a1a" }}>
+                                                            {getOddsForOutcome(match.id, option.value)}
+                                                        </div>
                                                     </button>
                                                 ))}
                                             </div>
+
+                                            {/* Loading state */}
+                                            {loadingOdds[match.id] && (
+                                                <div style={{ padding: "1rem", textAlign: "center" }}>
+                                                    <p style={{ fontFamily: f, fontSize: "1.2rem", color: "#68676d", margin: 0 }}>
+                                                        Loading odds...
+                                                    </p>
+                                                </div>
+                                            )}
+
+                                            {/* No odds available */}
+                                            {!loadingOdds[match.id] && matchOdds[match.id] && matchOdds[match.id].availableMarkets.length === 0 && (
+                                                <div style={{ padding: "1rem", textAlign: "center" }}>
+                                                    <p style={{ fontFamily: f, fontSize: "1.2rem", color: "#68676d", margin: 0 }}>
+                                                        No odds available for this match
+                                                    </p>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 ))}

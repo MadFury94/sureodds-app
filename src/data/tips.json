@@ -1,188 +1,31 @@
 [
   {
-    "id": 1,
-    "specialist": {
-      "handle": "Analyst_SO",
-      "name": "SO Analyst",
-      "avatar": "AN"
-    },
-    "league": "Champions League",
-    "home": "Real Madrid",
-    "away": "Man City",
-    "outcome": "Home Win",
-    "odds": "2.10",
-    "confidence": "High",
-    "analysis": "Madrid always deliver at the Bernabeu. Vinicius is in electric form and City's defence has been shaky in away fixtures this season.",
-    "time": "2h ago",
-    "matchDate": "Today, 20:00",
-    "result": "pending"
-  },
-  {
-    "id": 2,
-    "specialist": {
-      "handle": "TipMaster",
-      "name": "Tip Master",
-      "avatar": "TM"
-    },
     "league": "Premier League",
-    "home": "Arsenal",
-    "away": "Chelsea",
-    "outcome": "Home Win",
-    "odds": "1.85",
-    "confidence": "Banker",
-    "analysis": "Arsenal's home record this season is unreal — 9W 1D 0L. Chelsea have conceded in every away game this month.",
-    "time": "3h ago",
-    "matchDate": "Today, 17:30",
-    "result": "won"
-  },
-  {
-    "id": 3,
-    "specialist": {
-      "handle": "OddsEdge",
-      "name": "Odds Edge",
-      "avatar": "OE"
-    },
-    "league": "La Liga",
-    "home": "Barcelona",
-    "away": "Atletico",
-    "outcome": "Draw",
-    "odds": "3.40",
-    "confidence": "Medium",
-    "analysis": "Atletico always make it tight at the Camp Nou. Value in the draw here — both teams are evenly matched on current form.",
-    "time": "5h ago",
-    "matchDate": "Tomorrow, 21:00",
-    "result": "pending"
-  },
-  {
-    "id": 4,
-    "specialist": {
-      "handle": "ProPunter",
-      "name": "Pro Punter",
-      "avatar": "PP"
-    },
-    "league": "Serie A",
-    "home": "Inter Milan",
-    "away": "Juventus",
-    "outcome": "Home Win",
-    "odds": "2.25",
-    "confidence": "High",
-    "analysis": "Inter are the best team in Italy right now. Juventus have been inconsistent away from home all season.",
-    "time": "6h ago",
-    "matchDate": "Tomorrow, 18:00",
-    "result": "pending"
-  },
-  {
-    "id": 5,
-    "specialist": {
-      "handle": "Analyst_SO",
-      "name": "SO Analyst",
-      "avatar": "AN"
-    },
-    "league": "Premier League",
-    "home": "Liverpool",
+    "home": "Sunderland",
     "away": "Tottenham",
     "outcome": "Home Win",
-    "odds": "1.65",
-    "confidence": "Banker",
-    "analysis": "Liverpool at Anfield is a fortress. Tottenham have lost 4 of their last 5 away games against top-6 sides.",
-    "time": "8h ago",
-    "matchDate": "Saturday, 12:30",
-    "result": "won"
-  },
-  {
-    "id": 6,
-    "specialist": {
-      "handle": "TipMaster",
-      "name": "Tip Master",
-      "avatar": "TM"
-    },
-    "league": "Bundesliga",
-    "home": "Bayern Munich",
-    "away": "Dortmund",
-    "outcome": "Home Win",
-    "odds": "1.75",
-    "confidence": "High",
-    "analysis": "Der Klassiker at the Allianz. Bayern have won 7 of the last 10 home meetings. Dortmund's away form is poor.",
-    "time": "10h ago",
-    "matchDate": "Saturday, 17:30",
-    "result": "lost"
-  },
-  {
-    "id": 7,
-    "specialist": {
-      "handle": "OddsEdge",
-      "name": "Odds Edge",
-      "avatar": "OE"
-    },
-    "league": "Champions League",
-    "home": "PSG",
-    "away": "Dortmund",
-    "outcome": "Home Win",
-    "odds": "2.00",
-    "confidence": "Medium",
-    "analysis": "PSG need a win to advance. Home crowd will be electric. Dortmund's away record in UCL knockouts is poor.",
-    "time": "12h ago",
-    "matchDate": "Sunday, 21:00",
-    "result": "pending"
-  },
-  {
-    "id": 8,
-    "specialist": {
-      "handle": "ProPunter",
-      "name": "Pro Punter",
-      "avatar": "PP"
-    },
-    "league": "Serie A",
-    "home": "AC Milan",
-    "away": "Napoli",
-    "outcome": "Draw",
-    "odds": "3.10",
-    "confidence": "Medium",
-    "analysis": "Both teams are mid-table and have drawn 3 of their last 5 head-to-heads. Value in the draw market.",
-    "time": "1d ago",
-    "matchDate": "Sunday, 15:00",
-    "result": "pending"
-  },
-  {
-    "league": "Premier League",
-    "home": "Arsenal",
-    "away": "Bournemouth",
-    "outcome": "Home win",
     "odds": "TBD",
     "confidence": "High",
-    "analysis": "Arsenal on top form. Can't see Bournemouth doing anything",
-    "specialist": {
-      "handle": "ProPunter",
-      "name": "Pro Punter",
-      "avatar": "PP"
-    },
-    "matchDate": "11 Apr, 12:30",
-    "time": "Just now",
-    "result": "pending",
-    "id": 9
-  },
-  {
-    "league": "Primera Division",
-    "home": "Real Sociedad",
-    "away": "Alavés",
-    "outcome": "Home win",
-    "odds": "TBD",
-    "confidence": "High",
-    "analysis": "Strong form",
+    "analysis": "",
     "specialist": {
       "handle": "Analyst_SO",
       "name": "SO Analyst",
       "avatar": "AN"
     },
-    "matchDate": "11 Apr, 13:00",
+    "matchDate": "12 Apr, 14:00",
     "time": "Just now",
     "result": "pending",
-    "id": 10
+    "id": 1,
+    "createdBy": {
+      "id": "00e9bb2d-a989-4450-86ff-64dc0a8f0992",
+      "name": "Mike Tips",
+      "email": "thecybertechhq@gmail.com"
+    }
   },
   {
     "league": "Premier League",
-    "home": "Arsenal",
-    "away": "Bournemouth",
+    "home": "Crystal Palace",
+    "away": "Newcastle",
     "outcome": "Home Win",
     "odds": "TBD",
     "confidence": "High",
@@ -192,69 +35,89 @@
       "name": "SO Analyst",
       "avatar": "AN"
     },
-    "matchDate": "11 Apr, 12:30",
+    "matchDate": "12 Apr, 14:00",
     "time": "Just now",
     "result": "pending",
-    "id": 11
+    "id": 2,
+    "createdBy": {
+      "id": "00e9bb2d-a989-4450-86ff-64dc0a8f0992",
+      "name": "Mike Tips",
+      "email": "thecybertechhq@gmail.com"
+    }
+  },
+  {
+    "league": "Premier League",
+    "home": "Nottingham",
+    "away": "Aston Villa",
+    "outcome": "Home Win",
+    "odds": "TBD",
+    "confidence": "High",
+    "analysis": "",
+    "specialist": {
+      "handle": "Analyst_SO",
+      "name": "SO Analyst",
+      "avatar": "AN"
+    },
+    "matchDate": "12 Apr, 14:00",
+    "time": "Just now",
+    "result": "pending",
+    "id": 3,
+    "createdBy": {
+      "id": "00e9bb2d-a989-4450-86ff-64dc0a8f0992",
+      "name": "Mike Tips",
+      "email": "thecybertechhq@gmail.com"
+    }
+  },
+  {
+    "league": "Premier League",
+    "home": "Chelsea",
+    "away": "Man City",
+    "outcome": "Home Win",
+    "odds": "TBD",
+    "confidence": "High",
+    "analysis": "",
+    "specialist": {
+      "handle": "Analyst_SO",
+      "name": "SO Analyst",
+      "avatar": "AN"
+    },
+    "matchDate": "12 Apr, 16:30",
+    "time": "Just now",
+    "result": "pending",
+    "id": 4,
+    "createdBy": {
+      "id": "00e9bb2d-a989-4450-86ff-64dc0a8f0992",
+      "name": "Mike Tips",
+      "email": "thecybertechhq@gmail.com"
+    }
+  },
+  {
+    "league": "Premier League",
+    "home": "Man United",
+    "away": "Leeds United",
+    "outcome": "Home Win",
+    "odds": "TBD",
+    "confidence": "High",
+    "analysis": "",
+    "specialist": {
+      "handle": "Analyst_SO",
+      "name": "SO Analyst",
+      "avatar": "AN"
+    },
+    "matchDate": "13 Apr, 20:00",
+    "time": "Just now",
+    "result": "pending",
+    "id": 5,
+    "createdBy": {
+      "id": "00e9bb2d-a989-4450-86ff-64dc0a8f0992",
+      "name": "Mike Tips",
+      "email": "thecybertechhq@gmail.com"
+    }
   },
   {
     "league": "Premier League",
     "home": "Brentford",
-    "away": "Everton",
-    "outcome": "Home Win",
-    "odds": "TBD",
-    "confidence": "High",
-    "analysis": "",
-    "specialist": {
-      "handle": "Analyst_SO",
-      "name": "SO Analyst",
-      "avatar": "AN"
-    },
-    "matchDate": "11 Apr, 15:00",
-    "time": "Just now",
-    "result": "pending",
-    "id": 12
-  },
-  {
-    "league": "Premier League",
-    "home": "Burnley",
-    "away": "Brighton Hove",
-    "outcome": "Over 2.5 Goals",
-    "odds": "TBD",
-    "confidence": "High",
-    "analysis": "",
-    "specialist": {
-      "handle": "Analyst_SO",
-      "name": "SO Analyst",
-      "avatar": "AN"
-    },
-    "matchDate": "11 Apr, 15:00",
-    "time": "Just now",
-    "result": "pending",
-    "id": 13
-  },
-  {
-    "league": "Premier League",
-    "home": "Liverpool",
     "away": "Fulham",
-    "outcome": "Over 1.5 Goals",
-    "odds": "TBD",
-    "confidence": "High",
-    "analysis": "",
-    "specialist": {
-      "handle": "Analyst_SO",
-      "name": "SO Analyst",
-      "avatar": "AN"
-    },
-    "matchDate": "11 Apr, 17:30",
-    "time": "Just now",
-    "result": "pending",
-    "id": 14
-  },
-  {
-    "league": "Premier League",
-    "home": "Arsenal",
-    "away": "Bournemouth",
     "outcome": "Home Win",
     "odds": "TBD",
     "confidence": "High",
@@ -264,135 +127,14 @@
       "name": "SO Analyst",
       "avatar": "AN"
     },
-    "matchDate": "11 Apr, 12:30",
+    "matchDate": "18 Apr, 12:30",
     "time": "Just now",
     "result": "pending",
-    "id": 15
-  },
-  {
-    "league": "Premier League",
-    "home": "Arsenal",
-    "away": "Bournemouth",
-    "outcome": "Home Win",
-    "odds": "TBD",
-    "confidence": "High",
-    "analysis": "",
-    "specialist": {
-      "handle": "Analyst_SO",
-      "name": "SO Analyst",
-      "avatar": "AN"
-    },
-    "matchDate": "11 Apr, 12:30",
-    "time": "Just now",
-    "result": "pending",
-    "id": 16
-  },
-  {
-    "league": "Premier League",
-    "home": "Brentford",
-    "away": "Everton",
-    "outcome": "Away Win",
-    "odds": "TBD",
-    "confidence": "High",
-    "analysis": "",
-    "specialist": {
-      "handle": "Analyst_SO",
-      "name": "SO Analyst",
-      "avatar": "AN"
-    },
-    "matchDate": "11 Apr, 15:00",
-    "time": "Just now",
-    "result": "pending",
-    "id": 17
-  },
-  {
-    "league": "Premier League",
-    "home": "Burnley",
-    "away": "Brighton Hove",
-    "outcome": "Home Win",
-    "odds": "TBD",
-    "confidence": "High",
-    "analysis": "",
-    "specialist": {
-      "handle": "Analyst_SO",
-      "name": "SO Analyst",
-      "avatar": "AN"
-    },
-    "matchDate": "11 Apr, 15:00",
-    "time": "Just now",
-    "result": "pending",
-    "id": 18
-  },
-  {
-    "league": "Premier League",
-    "home": "Arsenal",
-    "away": "Bournemouth",
-    "outcome": "Over 1.5 Goals",
-    "odds": "TBD",
-    "confidence": "High",
-    "analysis": "",
-    "specialist": {
-      "handle": "Analyst_SO",
-      "name": "SO Analyst",
-      "avatar": "AN"
-    },
-    "matchDate": "11 Apr, 12:30",
-    "time": "Just now",
-    "result": "pending",
-    "id": 19
-  },
-  {
-    "league": "Premier League",
-    "home": "Arsenal",
-    "away": "Bournemouth",
-    "outcome": "Over 1.5 Goals",
-    "odds": "TBD",
-    "confidence": "High",
-    "analysis": "",
-    "specialist": {
-      "handle": "Analyst_SO",
-      "name": "SO Analyst",
-      "avatar": "AN"
-    },
-    "matchDate": "11 Apr, 12:30",
-    "time": "Just now",
-    "result": "pending",
-    "id": 20
-  },
-  {
-    "league": "Premier League",
-    "home": "Brentford",
-    "away": "Everton",
-    "outcome": "Under 2.5 Goals",
-    "odds": "TBD",
-    "confidence": "High",
-    "analysis": "",
-    "specialist": {
-      "handle": "Analyst_SO",
-      "name": "SO Analyst",
-      "avatar": "AN"
-    },
-    "matchDate": "11 Apr, 15:00",
-    "time": "Just now",
-    "result": "pending",
-    "id": 21
-  },
-  {
-    "league": "Premier League",
-    "home": "Burnley",
-    "away": "Brighton Hove",
-    "outcome": "Both Teams To Score",
-    "odds": "TBD",
-    "confidence": "High",
-    "analysis": "",
-    "specialist": {
-      "handle": "Analyst_SO",
-      "name": "SO Analyst",
-      "avatar": "AN"
-    },
-    "matchDate": "11 Apr, 15:00",
-    "time": "Just now",
-    "result": "pending",
-    "id": 22
+    "id": 6,
+    "createdBy": {
+      "id": "00e9bb2d-a989-4450-86ff-64dc0a8f0992",
+      "name": "Mike Tips",
+      "email": "thecybertechhq@gmail.com"
+    }
   }
 ]
