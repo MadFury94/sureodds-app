@@ -206,11 +206,19 @@ function AccumulatorCard({ betslip }: { betslip: Tip }) {
 
 // ── Tip card (visible) ────────────────────────────────────────────────────
 function TipCard({ tip }: { tip: Tip }) {
-    const accent = LEAGUE_ACCENT[tip.league ?? ""] ?? "#1a1a1a";
+    // For accumulators, use first selection's league, for singles use the only selection
+    const firstSelection = tip.selections[0];
+    const league = firstSelection?.league ?? "Football";
+    const accent = LEAGUE_ACCENT[league] ?? "#1a1a1a";
     const confColor = CONFIDENCE_COLOR[tip.confidence ?? ""] ?? "#68676d";
-    const resultStyle = RESULT_STYLE[tip.result ?? "pending"];
-    const matchLabel = tip.match ?? `${tip.home ?? ""} vs ${tip.away ?? ""}`;
-    const predLabel = tip.tip ?? tip.outcome ?? "";
+    const resultStyle = RESULT_STYLE[tip.status ?? "pending"];
+
+    // For single tips, show match details
+    const isSingle = tip.selections.length === 1;
+    const matchLabel = isSingle
+        ? `${firstSelection.home} vs ${firstSelection.away}`
+        : `${tip.selections.length} Selections`;
+    const predLabel = isSingle ? firstSelection.outcome : "Accumulator";
 
     return (
         <div style={{ border: "1.5px solid #e8ebed", borderRadius: "1.2rem", overflow: "hidden", backgroundColor: "#fff", boxShadow: "0 2px 12px rgba(0,0,0,0.05)", transition: "box-shadow 0.2s, transform 0.2s" }}
@@ -218,34 +226,35 @@ function TipCard({ tip }: { tip: Tip }) {
             onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = "0 2px 12px rgba(0,0,0,0.05)"; (e.currentTarget as HTMLDivElement).style.transform = "none"; }}
         >
             <div style={{ backgroundColor: accent, padding: "1rem 1.6rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ fontFamily: f, fontSize: "1.2rem", fontWeight: 700, color: "#fff", textTransform: "uppercase", letterSpacing: "0.06em" }}>{tip.league ?? "Football"}</span>
+                <span style={{ fontFamily: f, fontSize: "1.2rem", fontWeight: 700, color: "#fff", textTransform: "uppercase", letterSpacing: "0.06em" }}>{league}</span>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
                     {tip.confidence && (
                         <span style={{ fontFamily: f, fontSize: "1.1rem", fontWeight: 700, color: confColor, backgroundColor: confColor + "22", border: `1px solid ${confColor}`, padding: "0.2rem 0.8rem", borderRadius: "10rem" }}>{tip.confidence}</span>
                     )}
-                    <span style={{ fontFamily: f, fontSize: "1.1rem", fontWeight: 700, padding: "0.2rem 0.8rem", borderRadius: "10rem", ...resultStyle }}>{RESULT_LABEL[tip.result ?? "pending"]}</span>
+                    <span style={{ fontFamily: f, fontSize: "1.1rem", fontWeight: 700, padding: "0.2rem 0.8rem", borderRadius: "10rem", ...resultStyle }}>{RESULT_LABEL[tip.status ?? "pending"]}</span>
                 </div>
             </div>
             <div style={{ padding: "2rem" }}>
                 <p style={{ fontFamily: fd, fontSize: "1.6rem", fontWeight: 700, color: "#1a1a1a", margin: "0 0 1.4rem" }}>{matchLabel}</p>
                 <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.4rem", flexWrap: "wrap" }}>
                     <span style={{ padding: "0.6rem 1.6rem", borderRadius: "10rem", backgroundColor: colors.primary, fontFamily: f, fontSize: "1.4rem", fontWeight: 700, color: "#fff" }}>⚽ {predLabel}</span>
-                    <span style={{ padding: "0.6rem 1.4rem", borderRadius: "10rem", border: "2px solid #1a1a1a", fontFamily: fd, fontSize: "1.6rem", fontWeight: 700, color: "#1a1a1a" }}>@ {tip.odds}</span>
+                    <span style={{ padding: "0.6rem 1.4rem", borderRadius: "10rem", border: "2px solid #1a1a1a", fontFamily: fd, fontSize: "1.6rem", fontWeight: 700, color: "#1a1a1a" }}>@ {tip.totalOdds}</span>
                 </div>
-                {tip.analysis && (
-                    <p style={{ fontFamily: f, fontSize: "1.4rem", color: "#3d3c41", lineHeight: 1.6, fontStyle: "italic", borderLeft: `3px solid ${accent}`, paddingLeft: "1.2rem", margin: "0 0 1.4rem" }}>"{tip.analysis}"</p>
+                {!isSingle && (
+                    <div style={{ marginBottom: "1.4rem", padding: "1.2rem", backgroundColor: "#f9fafb", borderRadius: "0.8rem" }}>
+                        {tip.selections.map((sel, idx) => (
+                            <div key={sel.id} style={{ fontFamily: f, fontSize: "1.3rem", color: "#3d3c41", marginBottom: idx < tip.selections.length - 1 ? "0.6rem" : 0 }}>
+                                {sel.home} vs {sel.away} - {sel.outcome} @ {sel.odds}
+                            </div>
+                        ))}
+                    </div>
                 )}
                 <div style={{ paddingTop: "1.2rem", borderTop: "1px solid #f0f0f0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <div style={{ display: "flex", flexDirection: "column", gap: "0.2rem" }}>
-                        <span style={{ fontFamily: f, fontSize: "1.2rem", color: "#99989f" }}>{tip.date ?? tip.matchDate ?? ""}</span>
+                        <span style={{ fontFamily: f, fontSize: "1.2rem", color: "#99989f" }}>{firstSelection?.matchDate ?? tip.time ?? ""}</span>
                         {tip.createdBy && (
                             <span style={{ fontFamily: f, fontSize: "1.1rem", color: "#68676d", fontWeight: 600 }}>
                                 By {tip.createdBy.name}
-                            </span>
-                        )}
-                        {!tip.createdBy && tip.specialist && (
-                            <span style={{ fontFamily: f, fontSize: "1.1rem", color: "#68676d", fontWeight: 600 }}>
-                                By {tip.specialist.name}
                             </span>
                         )}
                     </div>
@@ -355,21 +364,17 @@ export default function BettingPage() {
                             if (betslip.isAccumulator) {
                                 return <AccumulatorCard key={betslip.id} betslip={betslip} />;
                             } else {
-                                // Single selection betslip
-                                const selection = betslip.selections[0];
+                                // Single selection betslip - convert to Tip format
                                 return <TipCard key={betslip.id} tip={{
                                     id: betslip.id,
-                                    league: selection.league,
-                                    match: `${selection.home} vs ${selection.away}`,
-                                    home: selection.home,
-                                    away: selection.away,
-                                    tip: selection.outcome,
-                                    outcome: selection.outcome,
-                                    odds: selection.odds,
+                                    selections: betslip.selections,
+                                    totalOdds: betslip.totalOdds,
                                     confidence: betslip.confidence,
-                                    date: selection.matchDate,
-                                    result: betslip.status,
+                                    isAccumulator: betslip.isAccumulator,
+                                    status: betslip.status,
                                     createdBy: betslip.createdBy,
+                                    createdAt: betslip.createdAt,
+                                    time: betslip.selections[0]?.matchDate ?? "",
                                 }} />;
                             }
                         })}

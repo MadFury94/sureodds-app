@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 
-const FROM = process.env.FROM_EMAIL ?? "noreply@sureodds.ng";
+const FROM = process.env.FROM_EMAIL ?? "onboarding@resend.dev";
 const ADMIN = process.env.ADMIN_EMAIL ?? "admin@sureodds.ng";
 const SITE = process.env.NEXT_PUBLIC_APP_URL ?? "https://sureodds.ng";
 
@@ -40,7 +40,7 @@ const badge = (t: string, color = "#ff6b00") => `<span style="display:inline-blo
 
 // ── 1. Welcome email — sent on registration ───────────────────────────────
 export async function sendWelcomeEmail(to: string, name: string) {
-    await getResend().emails.send({
+    const { data, error } = await getResend().emails.send({
         from: `Sureodds <${FROM}>`,
         to,
         subject: "Welcome to Sureodds — Complete Your Subscription",
@@ -52,14 +52,21 @@ export async function sendWelcomeEmail(to: string, name: string) {
             <hr style="border:none;border-top:1px solid #e8ebed;margin:28px 0">
             ${p('<span style="font-size:13px;color:#68676d">Once your payment is confirmed, you\'ll receive another email with access to your dashboard.</span>')}
         `),
-    }).catch(console.error);
+    });
+
+    if (error) {
+        console.error("❌ Failed to send welcome email:", error);
+        return;
+    }
+
+    console.log("✅ Welcome email sent:", data?.id);
 }
 
 // ── 2. New user registration — notify admin ──────────────────────────────
 export async function sendNewUserNotificationToAdmin(user: { name: string; email: string; role: string }) {
     const isPunter = user.role === "punter";
 
-    await getResend().emails.send({
+    const { data, error } = await getResend().emails.send({
         from: `Sureodds <${FROM}>`,
         to: ADMIN,
         subject: isPunter ? `New Punter Registration — ${user.name}` : `New Subscriber Registration — ${user.name}`,
@@ -79,12 +86,19 @@ export async function sendNewUserNotificationToAdmin(user: { name: string; email
         )}
             ${btn("Review & Approve →", `${SITE}/admin-dashboard/users`)}
         `),
-    }).catch(console.error);
+    });
+
+    if (error) {
+        console.error("❌ Failed to send admin notification:", error);
+        return;
+    }
+
+    console.log("✅ Admin notification sent:", data?.id);
 }
 
 // ── 3. Payment submitted — notify admin ───────────────────────────────────
 export async function sendPaymentSubmittedToAdmin(user: { name: string; email: string }, paymentRef: string, proofUrl?: string) {
-    await getResend().emails.send({
+    const { data, error } = await getResend().emails.send({
         from: `Sureodds <${FROM}>`,
         to: ADMIN,
         subject: `New Payment Submission — ${user.name}`,
@@ -99,14 +113,21 @@ export async function sendPaymentSubmittedToAdmin(user: { name: string; email: s
             </table>
             ${btn("Review & Approve →", `${SITE}/admin-dashboard/users`)}
         `),
-    }).catch(console.error);
+    });
+
+    if (error) {
+        console.error("❌ Failed to send payment notification:", error);
+        return;
+    }
+
+    console.log("✅ Payment notification sent:", data?.id);
 }
 
-// ── 3. Account approved — notify user (Punters & Subscribers) ───────────
+// ── 4. Account approved — notify user (Punters & Subscribers) ───────────
 export async function sendApprovalEmail(to: string, name: string, role: "punter" | "subscriber", expiryDate?: string) {
     const isPunter = role === "punter";
 
-    await getResend().emails.send({
+    const { data, error } = await getResend().emails.send({
         from: `Sureodds <${FROM}>`,
         to,
         subject: isPunter
@@ -134,12 +155,19 @@ export async function sendApprovalEmail(to: string, name: string, role: "punter"
             <hr style="border:none;border-top:1px solid #e8ebed;margin:28px 0">
             ${p(`<span style="font-size:13px;color:#68676d">Login anytime at: <a href="${SITE}/login" style="color:#ff6b00;text-decoration:none;font-weight:700">${SITE}/login</a></span>`)}
         `),
-    }).catch(console.error);
+    });
+
+    if (error) {
+        console.error("❌ Failed to send approval email:", error);
+        return;
+    }
+
+    console.log("✅ Approval email sent:", data?.id);
 }
 
-// ── 4. Subscription suspended ─────────────────────────────────────────────
+// ── 5. Subscription suspended ─────────────────────────────────────────────
 export async function sendSuspensionEmail(to: string, name: string) {
-    await getResend().emails.send({
+    const { data, error } = await getResend().emails.send({
         from: `Sureodds <${FROM}>`,
         to,
         subject: "Your Sureodds subscription has been suspended",
@@ -149,5 +177,46 @@ export async function sendSuspensionEmail(to: string, name: string) {
             ${p("If you believe this is an error or would like to reactivate, please contact us.")}
             ${btn("Contact Support →", `${SITE}/contact`)}
         `),
-    }).catch(console.error);
+    });
+
+    if (error) {
+        console.error("❌ Failed to send suspension email:", error);
+        return;
+    }
+
+    console.log("✅ Suspension email sent:", data?.id);
+}
+
+// ── 6. OTP Email ──────────────────────────────────────────────────────────
+export async function sendOTPEmail(to: string, code: string, purpose: "login" | "register") {
+    const isLogin = purpose === "login";
+
+    const { data, error } = await getResend().emails.send({
+        from: `Sureodds <${FROM}>`,
+        to,
+        subject: isLogin ? "Your Login Code" : "Your Registration Code",
+        html: base(`
+            ${badge(isLogin ? "Login Code" : "Registration Code")}
+            <br><br>
+            ${h1(isLogin ? "Sign In to Sureodds" : "Complete Your Registration")}
+            ${p(isLogin
+            ? "Use the code below to sign in to your account:"
+            : "Use the code below to complete your registration:"
+        )}
+            <div style="background:#f9fafb;border:2px solid #e8ebed;border-radius:12px;padding:24px;text-align:center;margin:24px 0">
+                <p style="margin:0 0 8px;font-size:13px;color:#68676d;text-transform:uppercase;letter-spacing:0.06em;font-weight:700">Your Code</p>
+                <p style="margin:0;font-size:36px;font-weight:700;color:#ff6b00;letter-spacing:0.1em;font-family:monospace">${code}</p>
+            </div>
+            ${p("This code will expire in 5 minutes.")}
+            ${p('<span style="font-size:13px;color:#68676d">If you didn\'t request this code, you can safely ignore this email.</span>')}
+        `),
+    });
+
+    if (error) {
+        console.error("❌ Resend API error:", error);
+        throw error;
+    }
+
+    console.log("✅ OTP email sent:", data?.id);
+    return data;
 }

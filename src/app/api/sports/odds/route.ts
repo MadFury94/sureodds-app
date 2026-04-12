@@ -225,7 +225,7 @@ export async function GET(req: NextRequest) {
                 if (odds) {
                     const parts = key.split("_");
                     const team = parts[0];
-                    const handicap = parts[1];
+                    const handicap = parseFloat(parts[1]);
                     const marketName = `${team} ${handicap > 0 ? '+' : ''}${handicap}`;
                     result.markets[`spread_${key}`] = odds;
                     result.availableMarkets.push(marketName);

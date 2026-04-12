@@ -217,7 +217,7 @@ export default function NewPrediction() {
                 outcome,
                 confidence: "High",
                 analysis: "",
-                odds: odds,
+                odds: odds ?? "2.00",
             };
             setBetslip((prev) => [...prev, selection]);
             showToast("Added to betslip!", "success");
