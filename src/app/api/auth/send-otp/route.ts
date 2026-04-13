@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateOTP, storeOTP, hasRecentOTP } from "@/lib/otp";
-import { sendOTPEmail } from "@/lib/email";
+import { sendOTPEmail } from "@/lib/email-nodemailer"; // Using Nodemailer instead of Resend
 import { findUserByEmail } from "@/lib/auth";
 
 // Rate limiting
@@ -92,6 +92,12 @@ export async function POST(req: NextRequest) {
 
         // Send OTP email
         try {
+            console.log("📧 Attempting to send OTP email...");
+            console.log("📧 To:", email);
+            console.log("📧 Code:", code);
+            console.log("📧 Gmail User:", process.env.GMAIL_USER ? "✓ Set" : "✗ Not set");
+            console.log("📧 Gmail Password:", process.env.GMAIL_APP_PASSWORD ? "✓ Set" : "✗ Not set");
+
             await sendOTPEmail(email, code, purpose);
             console.log(`✅ OTP sent successfully to ${email}: ${code}`);
         } catch (emailError) {
