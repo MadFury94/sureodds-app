@@ -1,60 +1,55 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Resend } from "resend";
+import { sendOTPEmail } from "@/lib/email-nodemailer";
 
-// Test endpoint to verify Resend configuration
+// Test endpoint to verify Gmail/Nodemailer configuration
 export async function GET(req: NextRequest) {
     try {
-        const apiKey = process.env.RESEND_API_KEY;
-        const fromEmail = process.env.FROM_EMAIL ?? "onboarding@resend.dev";
+        const gmailUser = process.env.GMAIL_USER;
+        const gmailPassword = process.env.GMAIL_APP_PASSWORD;
+        const fromEmail = process.env.FROM_EMAIL ?? "noreply@sureodds.ng";
 
-        // Check if API key exists
-        if (!apiKey || apiKey.startsWith("re_xxx")) {
+        // Check if Gmail credentials exist
+        if (!gmailUser || !gmailPassword) {
             return NextResponse.json({
                 success: false,
-                error: "RESEND_API_KEY not configured",
+                error: "Gmail credentials not configured. Set GMAIL_USER and GMAIL_APP_PASSWORD in .env.local",
                 config: {
-                    hasApiKey: false,
+                    hasGmailUser: !!gmailUser,
+                    hasGmailPassword: !!gmailPassword,
                     fromEmail,
                 }
             });
         }
 
-        // Try to send a test email
-        const resend = new Resend(apiKey);
-        const { data, error } = await resend.emails.send({
-            from: `Sureodds Test <${fromEmail}>`,
-            to: "delivered@resend.dev", // Resend test address
-            subject: "Test Email - Sureodds",
-            html: "<p>This is a test email to verify Resend configuration.</p>",
-        });
+        // Get test email from query params or use Gmail user
+        const testEmail = req.nextUrl.searchParams.get("email") ?? gmailUser;
 
-        if (error) {
-            return NextResponse.json({
-                success: false,
-                error: error.message,
-                config: {
-                    hasApiKey: true,
-                    apiKeyPrefix: apiKey.substring(0, 8) + "...",
-                    fromEmail,
-                }
-            });
-        }
+        console.log("🧪 Testing email configuration...");
+        console.log("📧 Gmail User:", gmailUser);
+        console.log("📧 From Email:", fromEmail);
+        console.log("📧 Test Email To:", testEmail);
+
+        // Try to send a test OTP email
+        await sendOTPEmail(testEmail, "123456", "login");
 
         return NextResponse.json({
             success: true,
-            message: "Email sent successfully!",
-            emailId: data?.id,
+            message: `Test email sent successfully to ${testEmail}!`,
             config: {
-                hasApiKey: true,
-                apiKeyPrefix: apiKey.substring(0, 8) + "...",
+                hasGmailUser: true,
+                hasGmailPassword: true,
+                gmailUser,
                 fromEmail,
+                testEmailSentTo: testEmail,
             }
         });
 
     } catch (error) {
+        console.error("❌ Test email failed:", error);
         return NextResponse.json({
             success: false,
             error: error instanceof Error ? error.message : "Unknown error",
+            details: error instanceof Error ? error.stack : undefined,
         }, { status: 500 });
     }
 }

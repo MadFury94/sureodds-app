@@ -38,19 +38,19 @@ const p = (t: string) => `<p style="margin:0 0 16px;font-size:15px;color:#3d3c41
 const btn = (label: string, href: string) => `<a href="${href}" style="display:inline-block;padding:14px 32px;background:#ff6b00;color:#fff;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none;text-transform:uppercase;letter-spacing:0.04em;margin-top:8px">${label}</a>`;
 const badge = (t: string, color = "#ff6b00") => `<span style="display:inline-block;padding:4px 12px;background:${color}22;border:1px solid ${color};border-radius:100px;font-size:12px;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:0.06em">${t}</span>`;
 
-// ── 1. Welcome email — sent on registration ───────────────────────────────
+// ── 1. Welcome email — sent on registration (subscribers only) ───────────────────────────────
 export async function sendWelcomeEmail(to: string, name: string) {
     const { data, error } = await getResend().emails.send({
         from: `Sureodds <${FROM}>`,
         to,
-        subject: "Welcome to Sureodds — Complete Your Subscription",
+        subject: "Welcome to Sureodds — Complete Your Payment",
         html: base(`
             ${h1(`Welcome, ${name.split(" ")[0]}!`)}
-            ${p("Your account has been created. You're one step away from accessing expert daily betting tips.")}
-            ${p("Complete your payment to activate your subscription and unlock the members dashboard.")}
+            ${p("Your account has been created. Complete your payment to activate your subscription and unlock the members dashboard.")}
+            ${p("Once your payment is confirmed by our admin, you'll receive an email with instant access to your dashboard.")}
             ${btn("Complete Payment →", `${SITE}/subscribe`)}
             <hr style="border:none;border-top:1px solid #e8ebed;margin:28px 0">
-            ${p('<span style="font-size:13px;color:#68676d">Once your payment is confirmed, you\'ll receive another email with access to your dashboard.</span>')}
+            ${p('<span style="font-size:13px;color:#68676d">After payment approval, you\'ll receive a magic link to access your dashboard instantly.</span>')}
         `),
     });
 
@@ -123,8 +123,59 @@ export async function sendPaymentSubmittedToAdmin(user: { name: string; email: s
     console.log("✅ Payment notification sent:", data?.id);
 }
 
-// ── 4. Account approved — notify user (Punters & Subscribers) ───────────
+// ── 4. Account approved — notify user with magic link (Punters & Subscribers) ───────────
+export async function sendApprovalEmailWithMagicLink(to: string, name: string, role: "punter" | "subscriber", magicToken: string, expiryDate?: string) {
+    const isPunter = role === "punter";
+    const dashboardUrl = `${SITE}/auth/magic?token=${magicToken}`;
+
+    const { data, error } = await getResend().emails.send({
+        from: `Sureodds <${FROM}>`,
+        to,
+        subject: isPunter
+            ? "✅ Punter Account Activated — Start Posting!"
+            : "✅ Subscription Activated — Welcome to Sureodds!",
+        html: base(`
+            ${badge("Account Active", "#16a34a")}
+            <br><br>
+            ${h1(`You're in, ${name.split(" ")[0]}!`)}
+            ${p(isPunter
+            ? "Your punter account has been approved and is now active. You can now start posting predictions and blog articles."
+            : "Your payment has been confirmed and your subscription is now active."
+        )}
+            ${isPunter ? "" : `
+                <table style="width:100%;border-collapse:collapse;margin:16px 0 24px">
+                    <tr><td style="padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:14px;color:#68676d;width:140px">Status</td><td style="padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:14px;font-weight:700;color:#16a34a">Active ✓</td></tr>
+                    <tr><td style="padding:10px 0;font-size:14px;color:#68676d">Expires</td><td style="padding:10px 0;font-size:14px;font-weight:700;color:#1a1a1a">${expiryDate}</td></tr>
+                </table>
+            `}
+            ${p(isPunter
+            ? "You now have full access to post betting tips and write articles for our subscribers."
+            : "You now have full access to daily expert tips, analysis, and your members dashboard."
+        )}
+            ${btn("Access Your Dashboard →", dashboardUrl)}
+            <div style="background:#fff7f0;border:1px solid #fed7aa;border-radius:8px;padding:16px;margin:24px 0">
+                <p style="margin:0;font-size:13px;color:#68676d;line-height:1.6">
+                    <strong style="color:#ff6b00">🔐 One-Time Access Link</strong><br>
+                    This link will log you in automatically and expires in 24 hours. For future logins, use the regular login page with OTP verification.
+                </p>
+            </div>
+            <hr style="border:none;border-top:1px solid #e8ebed;margin:28px 0">
+            ${p(`<span style="font-size:13px;color:#68676d">For future logins, visit: <a href="${SITE}/login" style="color:#ff6b00;text-decoration:none;font-weight:700">${SITE}/login</a> and we'll send you a code.</span>`)}
+        `),
+    });
+
+    if (error) {
+        console.error("❌ Failed to send approval email:", error);
+        return;
+    }
+
+    console.log("✅ Approval email with magic link sent:", data?.id);
+}
+
+// Legacy function for backward compatibility
 export async function sendApprovalEmail(to: string, name: string, role: "punter" | "subscriber", expiryDate?: string) {
+    console.warn("⚠️ sendApprovalEmail is deprecated. Use sendApprovalEmailWithMagicLink instead.");
+    // For now, just send without magic link
     const isPunter = role === "punter";
 
     const { data, error } = await getResend().emails.send({
@@ -151,7 +202,7 @@ export async function sendApprovalEmail(to: string, name: string, role: "punter"
             ? "You now have full access to post betting tips and write articles for our subscribers."
             : "You now have full access to daily expert tips, analysis, and your members dashboard."
         )}
-            ${btn(isPunter ? "Go to Dashboard →" : "Go to Dashboard →", `${SITE}${isPunter ? "/dashboard/punter" : "/dashboard"}`)}
+            ${btn("Sign In →", `${SITE}/login`)}
             <hr style="border:none;border-top:1px solid #e8ebed;margin:28px 0">
             ${p(`<span style="font-size:13px;color:#68676d">Login anytime at: <a href="${SITE}/login" style="color:#ff6b00;text-decoration:none;font-weight:700">${SITE}/login</a></span>`)}
         `),

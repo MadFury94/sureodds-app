@@ -79,6 +79,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const headersList = await headers();
   const pathname = headersList.get("x-pathname") ?? headersList.get("x-invoke-path") ?? "";
   const isAdmin = pathname.startsWith("/admin-dashboard") || pathname.startsWith("/admin-login") || pathname.startsWith("/dashboard");
+  const isAuth = pathname.startsWith("/login") || pathname.startsWith("/register") || pathname.startsWith("/auth/magic") || pathname.startsWith("/subscribe");
 
   return (
     <html lang="en">
@@ -143,10 +144,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
       </head>
       <body style={{ minHeight: "100vh", backgroundColor: "#f2f5f6" }}>
-        {!isAdmin && <Navbar />}
-        {!isAdmin && <TrendingBar />}
+        {!isAdmin && !isAuth && <Navbar />}
+        {!isAdmin && !isAuth && <TrendingBar />}
         {children}
-        {!isAdmin && <Footer />}
+        {!isAdmin && !isAuth && <Footer />}
       </body>
     </html>
   );

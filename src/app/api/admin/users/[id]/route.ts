@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readUsers, writeUsers, updateUser, toSafeUser, findUserById } from "@/lib/auth";
+import { updateUser, toSafeUser, findUserByEmail } from "@/lib/auth-wordpress";
 import { readSettings } from "@/lib/settings";
-import { sendApprovalEmail, sendSuspensionEmail } from "@/lib/email";
+import { sendApprovalEmailWithMagicLink, sendSuspensionEmail } from "@/lib/email-nodemailer";
+import { createMagicLink } from "@/lib/magic-link";
 
 function isAdminAuthed(req: NextRequest): boolean {
     const session = req.cookies.get("so_admin_session")?.value;
@@ -14,9 +15,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (!isAdminAuthed(req)) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
 
     const { id } = await params;
-    const { action } = await req.json(); // "approve" | "suspend"
+    const { action, email } = await req.json(); // "approve" | "suspend", need email to find user
 
-    const user = await findUserById(id);
+    // WordPress uses numeric IDs, but we need to find user by email or ID
+    // For now, we'll need the email passed from frontend
+    const user = await findUserByEmail(email);
     if (!user) return NextResponse.json({ error: "User not found." }, { status: 404 });
 
     if (action === "approve") {
@@ -36,11 +39,15 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
             approvedBy: "admin",
         });
 
-        // Notify user with role-specific email
-        sendApprovalEmail(
+        // Generate magic link for one-time dashboard access
+        const magicToken = createMagicLink(user.email, user.role);
+
+        // Notify user with role-specific email and magic link
+        sendApprovalEmailWithMagicLink(
             user.email,
             user.name,
             user.role as "punter" | "subscriber",
+            magicToken,
             expiry ? expiry.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : undefined
         );
 
@@ -57,14 +64,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "Invalid action." }, { status: 400 });
 }
 
-// Delete user
+// Delete user - WordPress API will handle this
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     if (!isAdminAuthed(req)) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
 
     const { id } = await params;
-    const users = await readUsers();
-    const filtered = users.filter(u => u.id !== id);
-    if (filtered.length === users.length) return NextResponse.json({ error: "User not found." }, { status: 404 });
-    await writeUsers(filtered);
-    return NextResponse.json({ ok: true });
+
+    // TODO: Implement WordPress user deletion via API
+    // For now, return not implemented
+    return NextResponse.json({ error: "User deletion must be done through WordPress admin panel." }, { status: 501 });
 }

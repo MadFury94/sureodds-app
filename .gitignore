@@ -52,3 +52,9 @@ public/uploads/
 # Cookies / session exports
 cookies.txt
 *.whtt
+
+# OTP store (development only)
+.otp-store.json
+
+# Magic links store (development only)
+.magic-links.json

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateOTP, storeOTP, hasRecentOTP } from "@/lib/otp";
 import { sendOTPEmail } from "@/lib/email-nodemailer"; // Using Nodemailer instead of Resend
-import { findUserByEmail } from "@/lib/auth";
+import { findUserByEmail } from "@/lib/auth-wordpress";
 
 // Rate limiting
 const attempts = new Map<string, { count: number; resetAt: number }>();

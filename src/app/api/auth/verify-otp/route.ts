@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyOTP } from "@/lib/otp";
-import { findUserByEmail, createUser, signUserToken, toSafeUser } from "@/lib/auth";
-import { sendWelcomeEmail, sendNewUserNotificationToAdmin } from "@/lib/email";
+import { findUserByEmail, createUser, signUserToken, toSafeUser } from "@/lib/auth-wordpress";
+import { sendWelcomeEmail, sendNewUserNotificationToAdmin } from "@/lib/email-nodemailer";
 
 export async function POST(req: NextRequest) {
     try {
@@ -56,6 +56,7 @@ export async function POST(req: NextRequest) {
 
             // Create user without password (OTP-based auth)
             const role = verification.userData.userType === "punter" ? "punter" : undefined;
+            const isPunter = role === "punter";
 
             user = await createUser({
                 name: verification.userData.name,
@@ -64,17 +65,19 @@ export async function POST(req: NextRequest) {
                 role,
             });
 
-            // Send welcome email only to subscribers (not punters)
-            if (user.role === "subscriber") {
+            // Auto-approve subscribers, punters need manual approval
+            if (!isPunter) {
+                // Subscribers stay pending until they pay
+                // Send welcome email directing them to payment page
                 sendWelcomeEmail(user.email, user.name);
+            } else {
+                // Notify admin only about punter registrations (need manual approval)
+                sendNewUserNotificationToAdmin({
+                    name: user.name,
+                    email: user.email,
+                    role: user.role,
+                });
             }
-
-            // Notify admin about new registration
-            sendNewUserNotificationToAdmin({
-                name: user.name,
-                email: user.email,
-                role: user.role,
-            });
         }
 
         if (!user) {

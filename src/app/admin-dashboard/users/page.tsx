@@ -25,6 +25,7 @@ export default function UsersPage() {
     const [acting, setActing] = useState<string | null>(null);
     const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
     const [filter, setFilter] = useState<"all" | "pending" | "active" | "suspended">("all");
+    const [roleFilter, setRoleFilter] = useState<"all" | "tips-admin" | "punter" | "subscriber">("all");
     const [showAddAdmin, setShowAddAdmin] = useState(false);
     const [newAdmin, setNewAdmin] = useState({ name: "", email: "", password: "" });
     const [addingAdmin, setAddingAdmin] = useState(false);
@@ -33,18 +34,26 @@ export default function UsersPage() {
 
     async function loadUsers() {
         setLoading(true);
-        const res = await fetch("/api/admin/users");
+        // Add timestamp to prevent caching
+        const timestamp = Date.now();
+        const res = await fetch(`/api/admin/users?t=${timestamp}`, {
+            cache: 'no-store',
+            headers: {
+                'Cache-Control': 'no-cache',
+            },
+        });
         const data = await res.json();
+        console.log("📋 [loadUsers] Received users:", data.users?.length);
         setUsers(data.users ?? []);
         setLoading(false);
     }
 
-    async function action(id: string, act: "approve" | "suspend") {
+    async function action(id: string, email: string, act: "approve" | "suspend") {
         setActing(id); setMsg(null);
         const res = await fetch(`/api/admin/users/${id}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: act }),
+            body: JSON.stringify({ action: act, email }),
         });
         const data = await res.json();
         if (res.ok) {
@@ -85,8 +94,14 @@ export default function UsersPage() {
         }
     }
 
-    const filtered = filter === "all" ? users : users.filter(u => u.status === filter);
+    const filtered = users.filter(u => {
+        const statusMatch = filter === "all" || u.status === filter;
+        const roleMatch = roleFilter === "all" || u.role === roleFilter;
+        return statusMatch && roleMatch;
+    });
     const pendingCount = users.filter(u => u.status === "pending").length;
+    const puntersPendingCount = users.filter(u => u.status === "pending" && u.role === "punter").length;
+    const subscribersPendingCount = users.filter(u => u.status === "pending" && u.role === "subscriber").length;
 
     return (
         <div style={{ maxWidth: "120rem" }}>
@@ -132,7 +147,29 @@ export default function UsersPage() {
                 </div>
             )}
 
-            {/* Filter tabs */}
+            {/* Role filter tabs */}
+            <div style={{ display: "flex", gap: "0.8rem", marginBottom: "1.6rem", borderBottom: "2px solid #e8ebed", paddingBottom: "0.4rem" }}>
+                {[
+                    { key: "all", label: "All Users", count: users.length },
+                    { key: "tips-admin", label: "Admin", count: users.filter(u => u.role === "tips-admin").length },
+                    { key: "punter", label: "Punters", count: users.filter(u => u.role === "punter").length, pending: puntersPendingCount },
+                    { key: "subscriber", label: "Subscribers", count: users.filter(u => u.role === "subscriber").length, pending: subscribersPendingCount },
+                ].map(({ key, label, count, pending }) => (
+                    <button key={key} onClick={() => setRoleFilter(key as any)} style={{ padding: "0.8rem 1.6rem", borderRadius: "0.6rem 0.6rem 0 0", border: "none", fontFamily: fd, fontSize: "1.3rem", fontWeight: roleFilter === key ? 700 : 500, backgroundColor: roleFilter === key ? "#1a1a1a" : "transparent", color: roleFilter === key ? "#fff" : "#68676d", cursor: "pointer", position: "relative" }}>
+                        {label}
+                        <span style={{ marginLeft: "0.6rem", backgroundColor: roleFilter === key ? "#ff6b00" : "#e8ebed", color: roleFilter === key ? "#fff" : "#68676d", borderRadius: "10rem", padding: "0.2rem 0.6rem", fontSize: "1.1rem", fontWeight: 700 }}>
+                            {count}
+                        </span>
+                        {pending && pending > 0 && (
+                            <span style={{ position: "absolute", top: "0.4rem", right: "0.4rem", backgroundColor: "#ff6b00", color: "#fff", borderRadius: "10rem", padding: "0.1rem 0.4rem", fontSize: "0.9rem", fontWeight: 700 }}>
+                                {pending}
+                            </span>
+                        )}
+                    </button>
+                ))}
+            </div>
+
+            {/* Status filter tabs */}
             <div style={{ display: "flex", gap: "0.4rem", marginBottom: "1.6rem" }}>
                 {(["all", "pending", "active", "suspended"] as const).map(s => (
                     <button key={s} onClick={() => setFilter(s)} style={{ padding: "0.6rem 1.4rem", borderRadius: "10rem", border: "1px solid #e8ebed", fontFamily: f, fontSize: "1.2rem", fontWeight: filter === s ? 700 : 500, backgroundColor: filter === s ? "#1a1a1a" : "#fff", color: filter === s ? "#fff" : "#68676d", cursor: "pointer" }}>
@@ -190,17 +227,17 @@ export default function UsersPage() {
                                         <td style={{ padding: "1.2rem 1.6rem" }}>
                                             <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
                                                 {user.status === "pending" && (
-                                                    <button onClick={() => action(user.id, "approve")} disabled={acting === user.id} style={{ padding: "0.5rem 1.1rem", backgroundColor: "#f0fdf4", border: "1px solid #86efac", borderRadius: "0.4rem", fontFamily: f, fontSize: "1.2rem", fontWeight: 700, color: "#16a34a", cursor: "pointer" }}>
+                                                    <button onClick={() => action(user.id, user.email, "approve")} disabled={acting === user.id} style={{ padding: "0.5rem 1.1rem", backgroundColor: "#f0fdf4", border: "1px solid #86efac", borderRadius: "0.4rem", fontFamily: f, fontSize: "1.2rem", fontWeight: 700, color: "#16a34a", cursor: "pointer" }}>
                                                         Approve
                                                     </button>
                                                 )}
                                                 {user.status === "active" && (
-                                                    <button onClick={() => action(user.id, "suspend")} disabled={acting === user.id} style={{ padding: "0.5rem 1.1rem", backgroundColor: "#fff7f0", border: "1px solid #fed7aa", borderRadius: "0.4rem", fontFamily: f, fontSize: "1.2rem", fontWeight: 700, color: "#ff6b00", cursor: "pointer" }}>
+                                                    <button onClick={() => action(user.id, user.email, "suspend")} disabled={acting === user.id} style={{ padding: "0.5rem 1.1rem", backgroundColor: "#fff7f0", border: "1px solid #fed7aa", borderRadius: "0.4rem", fontFamily: f, fontSize: "1.2rem", fontWeight: 700, color: "#ff6b00", cursor: "pointer" }}>
                                                         Suspend
                                                     </button>
                                                 )}
                                                 {user.status === "suspended" && (
-                                                    <button onClick={() => action(user.id, "approve")} disabled={acting === user.id} style={{ padding: "0.5rem 1.1rem", backgroundColor: "#f0fdf4", border: "1px solid #86efac", borderRadius: "0.4rem", fontFamily: f, fontSize: "1.2rem", fontWeight: 700, color: "#16a34a", cursor: "pointer" }}>
+                                                    <button onClick={() => action(user.id, user.email, "approve")} disabled={acting === user.id} style={{ padding: "0.5rem 1.1rem", backgroundColor: "#f0fdf4", border: "1px solid #86efac", borderRadius: "0.4rem", fontFamily: f, fontSize: "1.2rem", fontWeight: 700, color: "#16a34a", cursor: "pointer" }}>
                                                         Reactivate
                                                     </button>
                                                 )}
