@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyUserToken, findUserById, updateUser } from "@/lib/auth";
+import { verifyUserToken, findUserByEmail, updateUser } from "@/lib/auth-wordpress";
 import { sendPaymentSubmittedToAdmin } from "@/lib/email";
 import { promises as fs } from "fs";
 import path from "path";
@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     const payload = await verifyUserToken(token);
     if (!payload) return NextResponse.json({ error: "Invalid session." }, { status: 401 });
 
-    const user = await findUserById(payload.id);
+    const user = await findUserByEmail(payload.email);
     if (!user) return NextResponse.json({ error: "User not found." }, { status: 404 });
 
     const contentType = req.headers.get("content-type") ?? "";

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createUser, signUserToken, toSafeUser } from "@/lib/auth";
+import { createUser, signUserToken, toSafeUser } from "@/lib/auth-wordpress";
 import { sendWelcomeEmail, sendNewUserNotificationToAdmin } from "@/lib/email";
 
 export async function POST(req: NextRequest) {

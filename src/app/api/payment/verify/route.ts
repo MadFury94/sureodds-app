@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { findUserById, updateUser, signUserToken } from "@/lib/auth";
+import { findUserByEmail, updateUser, signUserToken } from "@/lib/auth-wordpress";
 import { readSettings } from "@/lib/settings";
 
 export async function GET(req: NextRequest) {
@@ -19,17 +19,18 @@ export async function GET(req: NextRequest) {
         return NextResponse.redirect(new URL("/subscribe?error=payment_failed", req.url));
     }
 
-    const userId = psData.data?.metadata?.userId;
-    if (!userId) return NextResponse.redirect(new URL("/subscribe?error=no_user", req.url));
+    // Get user email from metadata (added in initiate)
+    const userEmail = psData.data?.metadata?.userEmail;
+    if (!userEmail) return NextResponse.redirect(new URL("/subscribe?error=no_user", req.url));
 
-    const user = await findUserById(userId);
+    const user = await findUserByEmail(userEmail);
     if (!user) return NextResponse.redirect(new URL("/subscribe?error=no_user", req.url));
 
     const settings = await readSettings();
     const expiry = new Date();
     expiry.setDate(expiry.getDate() + settings.subscriptionDurationDays);
 
-    const updated = await updateUser(userId, {
+    const updated = await updateUser(user.id, {
         status: "active",
         subscriptionExpiry: expiry.toISOString(),
         paymentMethod: "online",

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyUserToken, findUserById } from "@/lib/auth";
+import { verifyUserToken, findUserByEmail } from "@/lib/auth-wordpress";
 import { readSettings } from "@/lib/settings";
 
 export async function POST(req: NextRequest) {
@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     const payload = await verifyUserToken(token);
     if (!payload) return NextResponse.json({ error: "Invalid session." }, { status: 401 });
 
-    const user = await findUserById(payload.id);
+    const user = await findUserByEmail(payload.email);
     if (!user) return NextResponse.json({ error: "User not found." }, { status: 404 });
 
     const settings = await readSettings();
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
             currency: settings.subscriptionCurrency,
             reference: `so_${user.id}_${Date.now()}`,
             callback_url: `${appUrl}/api/payment/verify`,
-            metadata: { userId: user.id, userName: user.name },
+            metadata: { userId: user.id, userName: user.name, userEmail: user.email },
         }),
     });
 
