@@ -1,151 +1,69 @@
-// Magic link authentication for one-time dashboard access
-// Links expire after 24 hours and can only be used once
-// For development: also stores in file to survive server restarts
+// Magic Link Management - Stateless version for Vercel
+// Encodes user data directly in the token (no file storage needed)
 
-import { promises as fs } from "fs";
-import path from "path";
+import { findUserByEmail } from "./auth-wordpress";
 
-interface MagicLinkData {
-    email: string;
-    role: string;
-    createdAt: number;
-    used: boolean;
-}
-
-// In-memory storage (in production, use Redis or database)
-const magicLinks = new Map<string, MagicLinkData>();
-
-// File path for development persistence
-const MAGIC_LINK_FILE = path.join(process.cwd(), ".magic-links.json");
-
-// Load magic links from file on startup (development only)
-async function loadMagicLinksFromFile() {
-    if (process.env.NODE_ENV !== "development") return;
-
-    try {
-        const data = await fs.readFile(MAGIC_LINK_FILE, "utf-8");
-        const entries: [string, MagicLinkData][] = JSON.parse(data);
-
-        // Only load non-expired entries
-        const now = Date.now();
-        const maxAge = 24 * 60 * 60 * 1000;
-        for (const [token, data] of entries) {
-            if (now - data.createdAt < maxAge && !data.used) {
-                magicLinks.set(token, data);
-            }
-        }
-        console.log("📂 Loaded", magicLinks.size, "magic links from file");
-    } catch (error) {
-        // File doesn't exist or is invalid - that's okay
-    }
-}
-
-// Save magic links to file (development only)
-async function saveMagicLinksToFile() {
-    if (process.env.NODE_ENV !== "development") return;
-
-    try {
-        const entries = Array.from(magicLinks.entries());
-        await fs.writeFile(MAGIC_LINK_FILE, JSON.stringify(entries, null, 2));
-    } catch (error) {
-        console.error("Failed to save magic links to file:", error);
-    }
-}
-
-// Load on startup
-loadMagicLinksFromFile();
-
-// Generate a secure random token
-function generateToken(): string {
-    return Array.from(crypto.getRandomValues(new Uint8Array(32)))
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('');
-}
-
-// Create a magic link
+// Create a magic link token with embedded data
 export function createMagicLink(email: string, role: string): string {
-    const token = generateToken();
+    const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
 
-    magicLinks.set(token, {
-        email,
+    // Encode data in the token itself
+    const data = JSON.stringify({
+        email: email.toLowerCase().trim(),
         role,
-        createdAt: Date.now(),
-        used: false,
+        expiresAt,
+        nonce: Math.random().toString(36).slice(2),
     });
 
-    console.log("🔗 Created magic link for:", email, "Token:", token.substring(0, 10) + "...");
+    const token = Buffer.from(data).toString('base64url');
 
-    // Save to file in development
-    saveMagicLinksToFile();
+    console.log("🔗 [createMagicLink] Created magic link:", {
+        email,
+        role,
+        tokenPreview: token.substring(0, 20) + "...",
+    });
 
     return token;
 }
 
-// Verify and consume a magic link
-export function verifyMagicLink(token: string): { valid: boolean; email?: string; role?: string; error?: string } {
-    console.log("🔍 Magic Link Verification Debug:");
-    console.log("  Token:", token.substring(0, 10) + "...");
-    console.log("  Total links in store:", magicLinks.size);
+// Verify magic link token
+export async function verifyMagicLink(token: string): Promise<{
+    valid: boolean;
+    email?: string;
+    role?: string;
+    error?: string;
+}> {
+    try {
+        console.log("🔍 [verifyMagicLink] Verifying token:", token.substring(0, 20) + "...");
 
-    const data = magicLinks.get(token);
+        // Decode the token
+        const data = JSON.parse(Buffer.from(token, 'base64url').toString());
+        const { email, role, expiresAt } = data;
 
-    console.log("  Data found:", data ? "Yes" : "No");
-    if (data) {
-        console.log("  Email:", data.email);
-        console.log("  Role:", data.role);
-        console.log("  Used:", data.used);
-        console.log("  Age:", Math.floor((Date.now() - data.createdAt) / 1000), "seconds");
-    }
+        console.log("🔍 [verifyMagicLink] Decoded data:", { email, role, expiresAt });
 
-    if (!data) {
-        return { valid: false, error: "Invalid or expired link." };
-    }
-
-    // Check if already used
-    if (data.used) {
-        return { valid: false, error: "This link has already been used. Please request a new one." };
-    }
-
-    // Check if expired (24 hours)
-    const age = Date.now() - data.createdAt;
-    const maxAge = 24 * 60 * 60 * 1000; // 24 hours
-
-    if (age > maxAge) {
-        magicLinks.delete(token);
-        return { valid: false, error: "This link has expired. Please request a new one." };
-    }
-
-    // Mark as used
-    data.used = true;
-    magicLinks.set(token, data);
-
-    // Save to file in development
-    saveMagicLinksToFile();
-
-    // Clean up after 1 hour
-    setTimeout(() => {
-        magicLinks.delete(token);
-        saveMagicLinksToFile();
-    }, 60 * 60 * 1000);
-
-    return {
-        valid: true,
-        email: data.email,
-        role: data.role,
-    };
-}
-
-// Clean up expired links (run periodically)
-export function cleanupExpiredLinks() {
-    const now = Date.now();
-    const maxAge = 24 * 60 * 60 * 1000;
-
-    for (const [token, data] of magicLinks.entries()) {
-        if (now - data.createdAt > maxAge) {
-            magicLinks.delete(token);
+        // Check expiry
+        if (Date.now() > expiresAt) {
+            console.log("❌ [verifyMagicLink] Token expired");
+            return { valid: false, error: "Magic link has expired. Please contact admin." };
         }
+
+        // Verify user exists in WordPress
+        const user = await findUserByEmail(email);
+        if (!user) {
+            console.log("❌ [verifyMagicLink] User not found");
+            return { valid: false, error: "User not found." };
+        }
+
+        console.log("✅ [verifyMagicLink] Token valid for user:", email);
+
+        return {
+            valid: true,
+            email,
+            role,
+        };
+    } catch (error) {
+        console.error("❌ [verifyMagicLink] Error:", error);
+        return { valid: false, error: "Invalid magic link." };
     }
 }
-
-// Run cleanup every hour
-setInterval(cleanupExpiredLinks, 60 * 60 * 1000);
