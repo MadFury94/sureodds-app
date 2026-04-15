@@ -65,12 +65,21 @@ export default function UsersPage() {
         setActing(null);
     }
 
-    async function deleteUser(id: string) {
-        if (!confirm("Delete this user permanently?")) return;
-        setActing(id);
-        const res = await fetch(`/api/admin/users/${id}`, { method: "DELETE" });
-        if (res.ok) setUsers(prev => prev.filter(u => u.id !== id));
-        else setMsg({ type: "err", text: "Delete failed." });
+    async function deleteUser(id: string, email: string) {
+        if (!confirm(`Delete user ${email} permanently? This action cannot be undone.`)) return;
+        setActing(id); setMsg(null);
+        const res = await fetch(`/api/admin/users/${id}`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+            setUsers(prev => prev.filter(u => u.id !== id));
+            setMsg({ type: "ok", text: "User and all their content deleted successfully." });
+        } else {
+            setMsg({ type: "err", text: data.error || "Delete failed." });
+        }
         setActing(null);
     }
 
@@ -179,80 +188,177 @@ export default function UsersPage() {
                 ))}
             </div>
 
-            {/* Table */}
+            {/* User List - Responsive */}
             <div style={{ backgroundColor: "#fff", borderRadius: "1rem", border: "1px solid #e8ebed", overflow: "hidden" }}>
                 {loading ? (
                     <div style={{ padding: "3.2rem", textAlign: "center", fontFamily: f, fontSize: "1.4rem", color: "#99989f" }}>Loading…</div>
                 ) : filtered.length === 0 ? (
                     <div style={{ padding: "3.2rem", textAlign: "center", fontFamily: f, fontSize: "1.4rem", color: "#99989f" }}>No users found.</div>
                 ) : (
-                    <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                        <thead>
-                            <tr style={{ backgroundColor: "#f9fafb", borderBottom: "1px solid #e8ebed" }}>
-                                {["Name", "Email", "Role", "Status", "Payment", "Proof", "Expires", "Actions"].map(h => (
-                                    <th key={h} style={{ padding: "1.2rem 1.6rem", fontFamily: f, fontSize: "1.2rem", fontWeight: 700, color: "#99989f", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "left" }}>{h}</th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filtered.map((user, i) => {
+                    <>
+                        {/* Desktop Table View */}
+                        <div className="desktop-only">
+                            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                                <thead>
+                                    <tr style={{ backgroundColor: "#f9fafb", borderBottom: "1px solid #e8ebed" }}>
+                                        {["Name", "Email", "Role", "Status", "Payment", "Proof", "Expires", "Actions"].map(h => (
+                                            <th key={h} style={{ padding: "1.2rem 1.6rem", fontFamily: f, fontSize: "1.2rem", fontWeight: 700, color: "#99989f", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "left" }}>{h}</th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filtered.map((user, i) => {
+                                        const st = STATUS_STYLE[user.status] ?? { bg: "#f9fafb", color: "#68676d" };
+                                        const expiry = user.subscriptionExpiry ? new Date(user.subscriptionExpiry).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—";
+                                        return (
+                                            <tr key={user.id} style={{ borderBottom: i < filtered.length - 1 ? "1px solid #f5f5f5" : "none" }}>
+                                                <td style={{ padding: "1.2rem 1.6rem", fontFamily: f, fontSize: "1.3rem", fontWeight: 700, color: "#1a1a1a" }}>{user.name}</td>
+                                                <td style={{ padding: "1.2rem 1.6rem", fontFamily: f, fontSize: "1.3rem", color: "#68676d" }}>{user.email}</td>
+                                                <td style={{ padding: "1.2rem 1.6rem" }}>
+                                                    <span style={{ padding: "0.3rem 0.8rem", borderRadius: "0.3rem", backgroundColor: user.role === "tips-admin" || user.role === "punter" ? "#f0f0ff" : "#f9fafb", fontFamily: f, fontSize: "1.1rem", fontWeight: 700, color: user.role === "tips-admin" || user.role === "punter" ? "#4f46e5" : "#68676d" }}>
+                                                        {user.role}
+                                                    </span>
+                                                </td>
+                                                <td style={{ padding: "1.2rem 1.6rem" }}>
+                                                    <span style={{ padding: "0.3rem 0.8rem", borderRadius: "0.3rem", backgroundColor: st.bg, fontFamily: f, fontSize: "1.1rem", fontWeight: 700, color: st.color }}>
+                                                        {user.status}
+                                                    </span>
+                                                </td>
+                                                <td style={{ padding: "1.2rem 1.6rem", fontFamily: f, fontSize: "1.2rem", color: "#68676d" }}>
+                                                    {user.paymentMethod ?? "—"}
+                                                    {user.paymentRef && <span style={{ display: "block", fontSize: "1.1rem", color: "#99989f" }}>{user.paymentRef}</span>}
+                                                </td>
+                                                <td style={{ padding: "1.2rem 1.6rem" }}>
+                                                    {user.proofUrl ? (
+                                                        <a href={user.proofUrl} target="_blank" rel="noopener noreferrer">
+                                                            <img src={user.proofUrl} alt="proof" style={{ height: "4rem", width: "5.6rem", objectFit: "cover", borderRadius: "0.4rem", border: "1px solid #e8ebed", display: "block" }} />
+                                                        </a>
+                                                    ) : <span style={{ fontFamily: f, fontSize: "1.2rem", color: "#99989f" }}>—</span>}
+                                                </td>
+                                                <td style={{ padding: "1.2rem 1.6rem", fontFamily: f, fontSize: "1.2rem", color: "#68676d" }}>{expiry}</td>
+                                                <td style={{ padding: "1.2rem 1.6rem" }}>
+                                                    <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
+                                                        {user.status === "pending" && (
+                                                            <button onClick={() => action(user.id, user.email, "approve")} disabled={acting === user.id} style={{ padding: "0.5rem 1.1rem", backgroundColor: "#f0fdf4", border: "1px solid #86efac", borderRadius: "0.4rem", fontFamily: f, fontSize: "1.2rem", fontWeight: 700, color: "#16a34a", cursor: "pointer" }}>
+                                                                Approve
+                                                            </button>
+                                                        )}
+                                                        {user.status === "active" && (
+                                                            <button onClick={() => action(user.id, user.email, "suspend")} disabled={acting === user.id} style={{ padding: "0.5rem 1.1rem", backgroundColor: "#fff7f0", border: "1px solid #fed7aa", borderRadius: "0.4rem", fontFamily: f, fontSize: "1.2rem", fontWeight: 700, color: "#ff6b00", cursor: "pointer" }}>
+                                                                Suspend
+                                                            </button>
+                                                        )}
+                                                        {user.status === "suspended" && (
+                                                            <button onClick={() => action(user.id, user.email, "approve")} disabled={acting === user.id} style={{ padding: "0.5rem 1.1rem", backgroundColor: "#f0fdf4", border: "1px solid #86efac", borderRadius: "0.4rem", fontFamily: f, fontSize: "1.2rem", fontWeight: 700, color: "#16a34a", cursor: "pointer" }}>
+                                                                Reactivate
+                                                            </button>
+                                                        )}
+                                                        <button onClick={() => deleteUser(user.id, user.email)} disabled={acting === user.id} style={{ padding: "0.5rem 1.1rem", backgroundColor: "#fff0f0", border: "1px solid #fca5a5", borderRadius: "0.4rem", fontFamily: f, fontSize: "1.2rem", fontWeight: 700, color: "#dc2626", cursor: "pointer" }}>
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Mobile Card View */}
+                        <div className="mobile-only">
+                            {filtered.map((user) => {
                                 const st = STATUS_STYLE[user.status] ?? { bg: "#f9fafb", color: "#68676d" };
                                 const expiry = user.subscriptionExpiry ? new Date(user.subscriptionExpiry).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—";
                                 return (
-                                    <tr key={user.id} style={{ borderBottom: i < filtered.length - 1 ? "1px solid #f5f5f5" : "none" }}>
-                                        <td style={{ padding: "1.2rem 1.6rem", fontFamily: f, fontSize: "1.3rem", fontWeight: 700, color: "#1a1a1a" }}>{user.name}</td>
-                                        <td style={{ padding: "1.2rem 1.6rem", fontFamily: f, fontSize: "1.3rem", color: "#68676d" }}>{user.email}</td>
-                                        <td style={{ padding: "1.2rem 1.6rem" }}>
-                                            <span style={{ padding: "0.3rem 0.8rem", borderRadius: "0.3rem", backgroundColor: user.role === "tips-admin" || user.role === "punter" ? "#f0f0ff" : "#f9fafb", fontFamily: f, fontSize: "1.1rem", fontWeight: 700, color: user.role === "tips-admin" || user.role === "punter" ? "#4f46e5" : "#68676d" }}>
-                                                {user.role}
-                                            </span>
-                                        </td>
-                                        <td style={{ padding: "1.2rem 1.6rem" }}>
+                                    <div key={user.id} style={{ padding: "1.6rem", borderBottom: "1px solid #f5f5f5" }}>
+                                        {/* Header */}
+                                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "1.2rem" }}>
+                                            <div style={{ flex: 1 }}>
+                                                <h3 style={{ fontFamily: fd, fontSize: "1.5rem", fontWeight: 700, color: "#1a1a1a", margin: "0 0 0.4rem" }}>{user.name}</h3>
+                                                <p style={{ fontFamily: f, fontSize: "1.2rem", color: "#68676d", margin: 0 }}>{user.email}</p>
+                                            </div>
                                             <span style={{ padding: "0.3rem 0.8rem", borderRadius: "0.3rem", backgroundColor: st.bg, fontFamily: f, fontSize: "1.1rem", fontWeight: 700, color: st.color }}>
                                                 {user.status}
                                             </span>
-                                        </td>
-                                        <td style={{ padding: "1.2rem 1.6rem", fontFamily: f, fontSize: "1.2rem", color: "#68676d" }}>
-                                            {user.paymentMethod ?? "—"}
-                                            {user.paymentRef && <span style={{ display: "block", fontSize: "1.1rem", color: "#99989f" }}>{user.paymentRef}</span>}
-                                        </td>
-                                        <td style={{ padding: "1.2rem 1.6rem" }}>
-                                            {user.proofUrl ? (
-                                                <a href={user.proofUrl} target="_blank" rel="noopener noreferrer">
-                                                    <img src={user.proofUrl} alt="proof" style={{ height: "4rem", width: "5.6rem", objectFit: "cover", borderRadius: "0.4rem", border: "1px solid #e8ebed", display: "block" }} />
-                                                </a>
-                                            ) : <span style={{ fontFamily: f, fontSize: "1.2rem", color: "#99989f" }}>—</span>}
-                                        </td>
-                                        <td style={{ padding: "1.2rem 1.6rem", fontFamily: f, fontSize: "1.2rem", color: "#68676d" }}>{expiry}</td>
-                                        <td style={{ padding: "1.2rem 1.6rem" }}>
-                                            <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
-                                                {user.status === "pending" && (
-                                                    <button onClick={() => action(user.id, user.email, "approve")} disabled={acting === user.id} style={{ padding: "0.5rem 1.1rem", backgroundColor: "#f0fdf4", border: "1px solid #86efac", borderRadius: "0.4rem", fontFamily: f, fontSize: "1.2rem", fontWeight: 700, color: "#16a34a", cursor: "pointer" }}>
-                                                        Approve
-                                                    </button>
-                                                )}
-                                                {user.status === "active" && (
-                                                    <button onClick={() => action(user.id, user.email, "suspend")} disabled={acting === user.id} style={{ padding: "0.5rem 1.1rem", backgroundColor: "#fff7f0", border: "1px solid #fed7aa", borderRadius: "0.4rem", fontFamily: f, fontSize: "1.2rem", fontWeight: 700, color: "#ff6b00", cursor: "pointer" }}>
-                                                        Suspend
-                                                    </button>
-                                                )}
-                                                {user.status === "suspended" && (
-                                                    <button onClick={() => action(user.id, user.email, "approve")} disabled={acting === user.id} style={{ padding: "0.5rem 1.1rem", backgroundColor: "#f0fdf4", border: "1px solid #86efac", borderRadius: "0.4rem", fontFamily: f, fontSize: "1.2rem", fontWeight: 700, color: "#16a34a", cursor: "pointer" }}>
-                                                        Reactivate
-                                                    </button>
-                                                )}
-                                                <button onClick={() => deleteUser(user.id)} disabled={acting === user.id} style={{ padding: "0.5rem 1.1rem", backgroundColor: "#fff0f0", border: "1px solid #fca5a5", borderRadius: "0.4rem", fontFamily: f, fontSize: "1.2rem", fontWeight: 700, color: "#dc2626", cursor: "pointer" }}>
-                                                    Delete
-                                                </button>
+                                        </div>
+
+                                        {/* Details */}
+                                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.8rem", marginBottom: "1.2rem" }}>
+                                            <div>
+                                                <p style={{ fontFamily: f, fontSize: "1.1rem", color: "#99989f", margin: "0 0 0.2rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Role</p>
+                                                <span style={{ padding: "0.3rem 0.8rem", borderRadius: "0.3rem", backgroundColor: user.role === "tips-admin" || user.role === "punter" ? "#f0f0ff" : "#f9fafb", fontFamily: f, fontSize: "1.1rem", fontWeight: 700, color: user.role === "tips-admin" || user.role === "punter" ? "#4f46e5" : "#68676d" }}>
+                                                    {user.role}
+                                                </span>
                                             </div>
-                                        </td>
-                                    </tr>
+                                            <div>
+                                                <p style={{ fontFamily: f, fontSize: "1.1rem", color: "#99989f", margin: "0 0 0.2rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Expires</p>
+                                                <p style={{ fontFamily: f, fontSize: "1.2rem", color: "#1a1a1a", margin: 0 }}>{expiry}</p>
+                                            </div>
+                                        </div>
+
+                                        {/* Payment Info */}
+                                        {user.paymentMethod && (
+                                            <div style={{ marginBottom: "1.2rem", padding: "0.8rem", backgroundColor: "#f9fafb", borderRadius: "0.4rem" }}>
+                                                <p style={{ fontFamily: f, fontSize: "1.1rem", color: "#99989f", margin: "0 0 0.2rem" }}>Payment</p>
+                                                <p style={{ fontFamily: f, fontSize: "1.2rem", color: "#1a1a1a", margin: 0 }}>
+                                                    {user.paymentMethod}
+                                                    {user.paymentRef && <span style={{ display: "block", fontSize: "1.1rem", color: "#68676d" }}>{user.paymentRef}</span>}
+                                                </p>
+                                                {user.proofUrl && (
+                                                    <a href={user.proofUrl} target="_blank" rel="noopener noreferrer" style={{ display: "inline-block", marginTop: "0.4rem" }}>
+                                                        <img src={user.proofUrl} alt="proof" style={{ height: "4rem", width: "5.6rem", objectFit: "cover", borderRadius: "0.4rem", border: "1px solid #e8ebed" }} />
+                                                    </a>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Actions */}
+                                        <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
+                                            {user.status === "pending" && (
+                                                <button onClick={() => action(user.id, user.email, "approve")} disabled={acting === user.id} style={{ flex: 1, minWidth: "fit-content", padding: "0.8rem 1.2rem", backgroundColor: "#f0fdf4", border: "1px solid #86efac", borderRadius: "0.4rem", fontFamily: f, fontSize: "1.3rem", fontWeight: 700, color: "#16a34a", cursor: "pointer" }}>
+                                                    ✓ Approve
+                                                </button>
+                                            )}
+                                            {user.status === "active" && (
+                                                <button onClick={() => action(user.id, user.email, "suspend")} disabled={acting === user.id} style={{ flex: 1, minWidth: "fit-content", padding: "0.8rem 1.2rem", backgroundColor: "#fff7f0", border: "1px solid #fed7aa", borderRadius: "0.4rem", fontFamily: f, fontSize: "1.3rem", fontWeight: 700, color: "#ff6b00", cursor: "pointer" }}>
+                                                    ⏸ Suspend
+                                                </button>
+                                            )}
+                                            {user.status === "suspended" && (
+                                                <button onClick={() => action(user.id, user.email, "approve")} disabled={acting === user.id} style={{ flex: 1, minWidth: "fit-content", padding: "0.8rem 1.2rem", backgroundColor: "#f0fdf4", border: "1px solid #86efac", borderRadius: "0.4rem", fontFamily: f, fontSize: "1.3rem", fontWeight: 700, color: "#16a34a", cursor: "pointer" }}>
+                                                    ✓ Reactivate
+                                                </button>
+                                            )}
+                                            <button onClick={() => deleteUser(user.id, user.email)} disabled={acting === user.id} style={{ flex: 1, minWidth: "fit-content", padding: "0.8rem 1.2rem", backgroundColor: "#fff0f0", border: "1px solid #fca5a5", borderRadius: "0.4rem", fontFamily: f, fontSize: "1.3rem", fontWeight: 700, color: "#dc2626", cursor: "pointer" }}>
+                                                🗑 Delete
+                                            </button>
+                                        </div>
+                                    </div>
                                 );
                             })}
-                        </tbody>
-                    </table>
+                        </div>
+                    </>
                 )}
             </div>
+
+            <style jsx>{`
+                .desktop-only {
+                    display: block;
+                }
+                .mobile-only {
+                    display: none;
+                }
+                
+                @media (max-width: 768px) {
+                    .desktop-only {
+                        display: none;
+                    }
+                    .mobile-only {
+                        display: block;
+                    }
+                }
+            `}</style>
         </div>
     );
 }

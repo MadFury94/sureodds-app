@@ -77,9 +77,9 @@ export async function findUserByEmail(email: string): Promise<User | null> {
     try {
         const token = await getAdminToken();
 
-        // Add cache-busting timestamp
+        // Add cache-busting timestamp and ACF format parameter
         const timestamp = Date.now();
-        const res = await fetch(`${WP_API}/users?search=${encodeURIComponent(email)}&context=edit&_=${timestamp}`, {
+        const res = await fetch(`${WP_API}/users?search=${encodeURIComponent(email)}&context=edit&acf_format=standard&_=${timestamp}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 'Cache-Control': 'no-cache',
@@ -95,21 +95,38 @@ export async function findUserByEmail(email: string): Promise<User | null> {
         const wpUser = users[0];
         const role = mapWordPressRole(wpUser.roles);
 
-        // Check meta.user_status first
+        console.log("🔍 [findUserByEmail] WordPress user data:", {
+            id: wpUser.id,
+            email: wpUser.email,
+            meta: wpUser.meta,
+            acf: wpUser.acf,
+        });
+
+        // Check ACF fields first, then fall back to meta fields
+        const userStatus = wpUser.acf?.user_status || wpUser.meta?.user_status;
+        const subscriptionExpiry = wpUser.acf?.subscription_expiry || wpUser.meta?.subscription_expiry;
+        const approvedAt = wpUser.acf?.approved_at || wpUser.meta?.approved_at;
+        const approvedBy = wpUser.acf?.approved_by || wpUser.meta?.approved_by;
+
+        // Determine status with priority logic
         let status: UserStatus = "pending";
 
-        if (wpUser.meta?.user_status) {
-            // Use the explicit user_status meta field
-            status = wpUser.meta.user_status as UserStatus;
+        if (userStatus) {
+            // Use the explicit user_status field (ACF or meta)
+            status = userStatus as UserStatus;
+            console.log(`🔍 [findUserByEmail] Using explicit user_status: ${status}`);
         } else if (wpUser.roles?.includes("administrator") || wpUser.roles?.includes("editor") || wpUser.roles?.includes("author")) {
             // Existing WordPress users with elevated roles are automatically active
             status = "active";
-        } else if (wpUser.roles?.includes("subscriber") && !wpUser.meta?.user_status) {
+            console.log(`🔍 [findUserByEmail] Elevated role, auto-active`);
+        } else if (wpUser.roles?.includes("subscriber") && !userStatus) {
             // Existing subscribers without explicit status are active (legacy users)
             status = "active";
+            console.log(`🔍 [findUserByEmail] Legacy subscriber, auto-active`);
         } else {
             // New users default to pending
             status = "pending";
+            console.log(`🔍 [findUserByEmail] No status found, defaulting to pending`);
         }
 
         return {
@@ -118,10 +135,10 @@ export async function findUserByEmail(email: string): Promise<User | null> {
             email: wpUser.email,
             role,
             status,
-            subscriptionExpiry: wpUser.meta?.subscription_expiry || null,
+            subscriptionExpiry: subscriptionExpiry || null,
             createdAt: wpUser.registered_date,
-            approvedAt: wpUser.meta?.approved_at || null,
-            approvedBy: wpUser.meta?.approved_by || null,
+            approvedAt: approvedAt || null,
+            approvedBy: approvedBy || null,
         };
     } catch (error) {
         console.error("Error finding user:", error);
@@ -204,32 +221,40 @@ export async function updateUser(id: string, updates: Partial<User>): Promise<Us
             updatePayload.name = updates.name;
         }
 
-        // Update meta fields
-        updatePayload.meta = {};
+        // ACF fields need to be updated via the 'acf' parameter, not 'meta'
+        // Check if we have any ACF fields to update
+        const hasACFUpdates = updates.status !== undefined ||
+            updates.subscriptionExpiry !== undefined ||
+            updates.approvedAt !== undefined ||
+            updates.approvedBy !== undefined;
 
-        if (updates.status !== undefined) {
-            updatePayload.meta.user_status = updates.status;
-            console.log("📝 [updateUser] Setting user_status to:", updates.status);
-        }
+        if (hasACFUpdates) {
+            updatePayload.acf = {};
 
-        if (updates.subscriptionExpiry !== undefined) {
-            updatePayload.meta.subscription_expiry = updates.subscriptionExpiry;
-            console.log("📝 [updateUser] Setting subscription_expiry to:", updates.subscriptionExpiry);
-        }
+            if (updates.status !== undefined) {
+                updatePayload.acf.user_status = updates.status;
+                console.log("📝 [updateUser] Setting ACF user_status to:", updates.status);
+            }
 
-        if (updates.approvedAt !== undefined) {
-            updatePayload.meta.approved_at = updates.approvedAt;
-            console.log("📝 [updateUser] Setting approved_at to:", updates.approvedAt);
-        }
+            if (updates.subscriptionExpiry !== undefined) {
+                updatePayload.acf.subscription_expiry = updates.subscriptionExpiry;
+                console.log("📝 [updateUser] Setting ACF subscription_expiry to:", updates.subscriptionExpiry);
+            }
 
-        if (updates.approvedBy !== undefined) {
-            updatePayload.meta.approved_by = updates.approvedBy;
-            console.log("📝 [updateUser] Setting approved_by to:", updates.approvedBy);
+            if (updates.approvedAt !== undefined) {
+                updatePayload.acf.approved_at = updates.approvedAt;
+                console.log("📝 [updateUser] Setting ACF approved_at to:", updates.approvedAt);
+            }
+
+            if (updates.approvedBy !== undefined) {
+                updatePayload.acf.approved_by = updates.approvedBy;
+                console.log("📝 [updateUser] Setting ACF approved_by to:", updates.approvedBy);
+            }
         }
 
         console.log("📝 [updateUser] Request payload:", JSON.stringify(updatePayload, null, 2));
 
-        const res = await fetch(`${WP_API}/users/${id}`, {
+        const res = await fetch(`${WP_API}/users/${id}?context=edit`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -243,6 +268,15 @@ export async function updateUser(id: string, updates: Partial<User>): Promise<Us
         if (!res.ok) {
             const errorText = await res.text();
             console.error("❌ [updateUser] WordPress API error:", errorText);
+
+            // Try to parse error
+            try {
+                const errorJson = JSON.parse(errorText);
+                console.error("❌ [updateUser] Error details:", errorJson);
+            } catch {
+                // Not JSON, already logged as text
+            }
+
             return null;
         }
 
@@ -252,7 +286,30 @@ export async function updateUser(id: string, updates: Partial<User>): Promise<Us
             name: wpUser.name,
             email: wpUser.email,
             meta: wpUser.meta,
+            acf: wpUser.acf, // ACF fields might be here
         });
+
+        // Check if ACF is being used (fields in wpUser.acf instead of wpUser.meta)
+        const metaStatus = wpUser.meta?.user_status || wpUser.acf?.user_status;
+        const metaExpiry = wpUser.meta?.subscription_expiry || wpUser.acf?.subscription_expiry;
+        const metaApprovedAt = wpUser.meta?.approved_at || wpUser.acf?.approved_at;
+        const metaApprovedBy = wpUser.meta?.approved_by || wpUser.acf?.approved_by;
+
+        console.log("✅ [updateUser] Extracted values:", {
+            metaStatus,
+            metaExpiry,
+            metaApprovedAt,
+            metaApprovedBy,
+        });
+
+        // Verify the meta field was actually saved
+        if (updates.status && metaStatus !== updates.status) {
+            console.warn("⚠️ [updateUser] WARNING: user_status not saved correctly!");
+            console.warn("⚠️ [updateUser] Expected:", updates.status);
+            console.warn("⚠️ [updateUser] Got:", metaStatus);
+            console.warn("⚠️ [updateUser] Full meta object:", wpUser.meta);
+            console.warn("⚠️ [updateUser] Full ACF object:", wpUser.acf);
+        }
 
         // Return the updated user with the values we just set
         // Don't rely on WordPress response meta, use our updates directly
@@ -284,9 +341,9 @@ export async function readUsers(): Promise<User[]> {
 
         console.log("📋 [readUsers] Fetching all users from WordPress...");
 
-        // Add cache-busting timestamp
+        // Add cache-busting timestamp and ACF format parameter
         const timestamp = Date.now();
-        const res = await fetch(`${WP_API}/users?per_page=100&context=edit&_=${timestamp}`, {
+        const res = await fetch(`${WP_API}/users?per_page=100&context=edit&acf_format=standard&_=${timestamp}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 'Cache-Control': 'no-cache',
@@ -305,18 +362,31 @@ export async function readUsers(): Promise<User[]> {
         return wpUsers.map((wpUser: any) => {
             const role = mapWordPressRole(wpUser.roles);
 
-            // Check meta.user_status first
+            console.log(`📋 [readUsers] User ${wpUser.email} raw data:`, {
+                id: wpUser.id,
+                roles: wpUser.roles,
+                meta: wpUser.meta,
+                acf: wpUser.acf,
+            });
+
+            // Check ACF fields first, then fall back to meta fields
+            const userStatus = wpUser.acf?.user_status || wpUser.meta?.user_status;
+            const subscriptionExpiry = wpUser.acf?.subscription_expiry || wpUser.meta?.subscription_expiry;
+            const approvedAt = wpUser.acf?.approved_at || wpUser.meta?.approved_at;
+            const approvedBy = wpUser.acf?.approved_by || wpUser.meta?.approved_by;
+
+            // Determine status with priority logic
             let status: UserStatus = "pending";
 
-            if (wpUser.meta?.user_status) {
-                // Use the explicit user_status meta field
-                status = wpUser.meta.user_status as UserStatus;
-                console.log(`📋 [readUsers] User ${wpUser.email}: Using meta.user_status = ${status}`);
+            if (userStatus) {
+                // Use the explicit user_status field (ACF or meta)
+                status = userStatus as UserStatus;
+                console.log(`📋 [readUsers] User ${wpUser.email}: Using explicit user_status = ${status}`);
             } else if (wpUser.roles?.includes("administrator") || wpUser.roles?.includes("editor") || wpUser.roles?.includes("author")) {
                 // Existing WordPress users with elevated roles are automatically active
                 status = "active";
                 console.log(`📋 [readUsers] User ${wpUser.email}: Elevated role, auto-active`);
-            } else if (wpUser.roles?.includes("subscriber") && !wpUser.meta?.user_status) {
+            } else if (wpUser.roles?.includes("subscriber") && !userStatus) {
                 // Existing subscribers without explicit status are active (legacy users)
                 status = "active";
                 console.log(`📋 [readUsers] User ${wpUser.email}: Legacy subscriber, auto-active`);
@@ -326,11 +396,8 @@ export async function readUsers(): Promise<User[]> {
                 console.log(`📋 [readUsers] User ${wpUser.email}: No status found, defaulting to pending`);
             }
 
-            console.log(`📋 [readUsers] User ${wpUser.email}:`, {
-                id: wpUser.id,
-                roles: wpUser.roles,
+            console.log(`📋 [readUsers] User ${wpUser.email} final:`, {
                 mappedRole: role,
-                metaStatus: wpUser.meta?.user_status,
                 finalStatus: status,
             });
 
@@ -340,10 +407,10 @@ export async function readUsers(): Promise<User[]> {
                 email: wpUser.email,
                 role,
                 status,
-                subscriptionExpiry: wpUser.meta?.subscription_expiry || null,
+                subscriptionExpiry: subscriptionExpiry || null,
                 createdAt: wpUser.registered_date || new Date().toISOString(),
-                approvedAt: wpUser.meta?.approved_at || null,
-                approvedBy: wpUser.meta?.approved_by || null,
+                approvedAt: approvedAt || null,
+                approvedBy: approvedBy || null,
             };
         });
     } catch (error) {
