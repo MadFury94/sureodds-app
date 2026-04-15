@@ -92,15 +92,24 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
         // Generate magic link for one-time dashboard access
         const magicToken = createMagicLink(user.email, user.role);
+        console.log("🔗 [approve] Generated magic token for:", user.email);
 
         // Notify user with role-specific email and magic link
-        sendApprovalEmailWithMagicLink(
-            user.email,
-            user.name,
-            user.role as "punter" | "subscriber",
-            magicToken,
-            expiry ? expiry.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : undefined
-        );
+        try {
+            console.log("📧 [approve] Sending approval email with magic link...");
+            await sendApprovalEmailWithMagicLink(
+                user.email,
+                user.name,
+                user.role as "punter" | "subscriber",
+                magicToken,
+                expiry ? expiry.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : undefined
+            );
+            console.log("✅ [approve] Approval email sent successfully to:", user.email);
+        } catch (emailError) {
+            console.error("❌ [approve] Failed to send approval email:", emailError);
+            console.error("❌ [approve] Email error details:", emailError instanceof Error ? emailError.message : String(emailError));
+            // Don't fail the approval if email fails - user is still approved
+        }
 
         return NextResponse.json({ user: toSafeUser(updated!) });
     }

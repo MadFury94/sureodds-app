@@ -70,10 +70,11 @@ export async function sendOTPEmail(to: string, code: string, purpose: "login" | 
     const isLogin = purpose === "login";
 
     try {
-        console.log("📧 [sendOTPEmail] Starting email send...");
+        console.log("📧 [sendOTPEmail] ===== STARTING EMAIL SEND =====");
         console.log("📧 [sendOTPEmail] To:", to);
         console.log("📧 [sendOTPEmail] Code:", code);
         console.log("📧 [sendOTPEmail] Purpose:", purpose);
+        console.log("📧 [sendOTPEmail] Timestamp:", new Date().toISOString());
 
         const transporter = getTransporter();
 
@@ -100,21 +101,19 @@ export async function sendOTPEmail(to: string, code: string, purpose: "login" | 
             `),
         };
 
-        console.log("📧 [sendOTPEmail] Sending email with options:", {
-            from: mailOptions.from,
-            to: mailOptions.to,
-            subject: mailOptions.subject,
-        });
+        console.log("📧 [sendOTPEmail] Email HTML contains code:", code);
+        console.log("📧 [sendOTPEmail] Sending email...");
 
         const info = await transporter.sendMail(mailOptions);
 
-        console.log("✅ [sendOTPEmail] Email sent successfully!");
+        console.log("✅ [sendOTPEmail] ===== EMAIL SENT SUCCESSFULLY =====");
         console.log("✅ [sendOTPEmail] Message ID:", info.messageId);
-        console.log("✅ [sendOTPEmail] Response:", info.response);
+        console.log("✅ [sendOTPEmail] Code sent:", code);
+        console.log("✅ [sendOTPEmail] Timestamp:", new Date().toISOString());
 
         return { id: info.messageId };
     } catch (error) {
-        console.error("❌ [sendOTPEmail] Failed to send email");
+        console.error("❌ [sendOTPEmail] ===== EMAIL SEND FAILED =====");
         console.error("❌ [sendOTPEmail] Error type:", error instanceof Error ? error.constructor.name : typeof error);
         console.error("❌ [sendOTPEmail] Error message:", error instanceof Error ? error.message : String(error));
         console.error("❌ [sendOTPEmail] Full error:", error);

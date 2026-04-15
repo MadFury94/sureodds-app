@@ -53,6 +53,13 @@ export async function storeOTP(
         attempts: 0,
     };
 
+    console.log("💾 [storeOTP] BEFORE STORAGE:", {
+        email,
+        code,
+        key: `otp_${key}`,
+        timestamp: new Date().toISOString()
+    });
+
     try {
         const token = await getAdminToken();
 
@@ -71,10 +78,19 @@ export async function storeOTP(
         });
 
         if (!res.ok) {
+            const errorText = await res.text();
+            console.error("❌ [storeOTP] WordPress API error:", errorText);
             throw new Error("Failed to store OTP in WordPress");
         }
 
-        console.log("💾 [storeOTP] Stored in WordPress:", { email, code, key: `otp_${key}` });
+        const result = await res.json();
+        console.log("✅ [storeOTP] STORED SUCCESSFULLY:", {
+            email,
+            code,
+            key: `otp_${key}`,
+            result,
+            timestamp: new Date().toISOString()
+        });
     } catch (error) {
         console.error("❌ [storeOTP] Error:", error);
         throw error;
