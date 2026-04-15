@@ -1,155 +1,129 @@
-# Magic Link & OTP Issues - Debug & Fix
+# Magic Link Not Being Sent - Debug Guide
 
-## Issues Identified
+## The Real Issue
 
-### 1. Magic Link Not Being Sent
-**Problem**: After admin approval, users don't receive magic link emails.
+Based on Vercel logs showing "Token found: No", the magic link email is NOT being sent at all. The approval process completes, but the email never reaches the user.
 
-**Root Cause**: 
-- `ADMIN_EMAIL` was set to `admin@sureodds.ng` (non-existent email)
-- Admin notification emails were bouncing
-- This was causing the email system to fail silently
+## What "Token found: No" Means
 
-**Fix Applied**:
-- Changed `ADMIN_EMAIL` to `thecybertechhq@gmail.com` (your actual Gmail)
-- Removed duplicate `FROM_EMAIL` entries in `.env.local`
-- Added try-catch with detailed logging to approval email sending
-- Approval process now continues even if email fails (user is still approved)
+This error appears when someone tries to access `/api/auth/magic` without a token parameter. This happens when:
+1. User clicks a magic link that doesn't have the token in the URL
+2. User manually visits the magic link endpoint
+3. **Most likely: The email was never sent, so there's no link to click**
 
-### 2. OTP Code Mismatch
-**Problem**: Code stored in WordPress differs from code sent via email.
+## Debugging Steps
 
-**Possible Causes**:
-- Multiple OTP requests generating different codes
-- WordPress transient API not saving properly
-- Race condition in WordPress API
-- User checking old email instead of latest one
+### 1. Check Vercel Logs When Clicking "Approve"
 
-**Fix Applied**:
-- Added detailed timestamps to OTP storage logs
-- Added "BEFORE STORAGE" and "STORED SUCCESSFULLY" logs
-- Added "EMAIL SEND" logs with timestamps
-- This will help identify if codes are being regenerated
+After clicking "Approve" on a user, you should see these logs in order:
 
-## Environment Variables Fixed
-
-### Before:
-```env
-RESEND_API_KEY=re_31rGk1ZZ_6sEqTsiCYchtto4sQZnj9a4q
-FROM_EMAIL=noreply@sureodds.ng
-ADMIN_EMAIL=admin@sureodds.ng
-
-GMAIL_USER=thecybertechhq@gmail.com
-GMAIL_APP_PASSWORD=iajv wphc wftk zgzw
-FROM_EMAIL=thecybertechhq@gmail.com  # DUPLICATE!
-```
-
-### After:
-```env
-RESEND_API_KEY=re_31rGk1ZZ_6sEqTsiCYchtto4sQZnj9a4q
-
-# Gmail SMTP Configuration (Primary email service)
-GMAIL_USER=thecybertechhq@gmail.com
-GMAIL_APP_PASSWORD=iajv wphc wftk zgzw
-
-# Email addresses
-FROM_EMAIL=thecybertechhq@gmail.com
-ADMIN_EMAIL=thecybertechhq@gmail.com  # FIXED: Now uses real Gmail
-```
-
-## What to Check in Vercel
-
-### 1. Update Vercel Environment Variables
-Go to Vercel Dashboard → Your Project → Settings → Environment Variables
-
-Update these:
-- `ADMIN_EMAIL` = `thecybertechhq@gmail.com`
-- `FROM_EMAIL` = `thecybertechhq@gmail.com`
-
-Make sure these are also set:
-- `GMAIL_USER` = `thecybertechhq@gmail.com`
-- `GMAIL_APP_PASSWORD` = `iajv wphc wftk zgzw`
-- `NEXT_PUBLIC_APP_URL` = `https://sureodds.ng` (or your Vercel URL)
-
-### 2. Redeploy After Env Variable Changes
-After updating environment variables, trigger a new deployment or restart the project.
-
-### 3. Check Logs for Magic Link
-When you click "Approve" on a user, look for these logs:
 ```
 🔗 [approve] Generated magic token for: user@example.com
 📧 [approve] Sending approval email with magic link...
+📧 [sendApprovalEmail] ===== STARTING MAGIC LINK EMAIL =====
+📧 [sendApprovalEmail] To: user@example.com
+📧 [sendApprovalEmail] Magic Token: eyJlbWFpbCI6InVzZXJAZXhhbXBsZS5jb20iLCJyb2xlIjoicHVudGVyIiwiZXhwaXJlc0F0IjoxNzEzNDU2Nzg5MDAwLCJub25jZSI6ImFiYzEyMyJ9
+📧 [sendApprovalEmail] Dashboard URL: https://sureodds.ng/auth/magic?token=...
+📧 [sendApprovalEmail] SITE: https://sureodds.ng
+📧 [sendApprovalEmail] FROM: thecybertechhq@gmail.com
+✅ [sendApprovalEmail] ===== EMAIL SENT SUCCESSFULLY =====
+✅ [sendApprovalEmail] Message ID: <some-id@gmail.com>
 ✅ [approve] Approval email sent successfully to: user@example.com
 ```
 
-If you see:
-```
-❌ [approve] Failed to send approval email: [error details]
-```
-Then check the error message for clues.
+### 2. If You DON'T See These Logs
 
-### 4. Check Logs for OTP Code
-When requesting OTP, look for:
+The email function is not being called. Possible reasons:
+- The approval endpoint is failing before reaching the email code
+- There's an error in the `updateUser` function
+- The try-catch is swallowing errors silently
+
+### 3. If You See Error Logs
+
+Look for:
 ```
-💾 [storeOTP] BEFORE STORAGE: { email, code, key, timestamp }
-✅ [storeOTP] STORED SUCCESSFULLY: { email, code, key, timestamp }
-📧 [sendOTPEmail] ===== STARTING EMAIL SEND =====
-📧 [sendOTPEmail] Code: 123456
-✅ [sendOTPEmail] ===== EMAIL SENT SUCCESSFULLY =====
-✅ [sendOTPEmail] Code sent: 123456
+❌ [approve] Failed to send approval email: [error message]
+❌ [sendApprovalEmail] ===== EMAIL SEND FAILED =====
 ```
 
-Compare the timestamps and codes to see if they match.
+Common errors:
+- **SMTP Authentication Failed**: Gmail credentials are wrong
+- **Invalid FROM address**: FROM_EMAIL not set correctly
+- **Connection timeout**: Network issues or Gmail blocking
+- **Missing NEXT_PUBLIC_APP_URL**: SITE variable is undefined
 
-## Testing Steps
+## Environment Variables to Check in Vercel
 
-### Test Magic Link:
-1. Register a new punter account
-2. Go to Admin Dashboard → Users
-3. Click "Approve" on the pending user
-4. Check Vercel logs for approval email logs
-5. Check user's email inbox for magic link
-6. Click magic link - should auto-login to dashboard
+Go to: Vercel Dashboard → Project → Settings → Environment Variables
 
-### Test OTP:
-1. Go to login page
-2. Enter email and request OTP
-3. Check Vercel logs for OTP storage and email logs
-4. Note the code in logs and compare with email
-5. Enter the code from email
-6. Should login successfully
+### Required Variables:
+```
+GMAIL_USER=thecybertechhq@gmail.com
+GMAIL_APP_PASSWORD=iajv wphc wftk zgzw
+FROM_EMAIL=thecybertechhq@gmail.com
+NEXT_PUBLIC_APP_URL=https://sureodds.ng
+```
 
-## Common Issues
+### Important Notes:
+- `NEXT_PUBLIC_APP_URL` must NOT have trailing slash
+- `GMAIL_APP_PASSWORD` should have spaces removed (code does this automatically)
+- After changing env variables, you MUST redeploy or restart
 
-### Issue: "Token found: No"
-This means the magic link token is not being generated or passed correctly.
-- Check if `createMagicLink()` is being called
-- Check if token is in the email URL
-- Check Vercel logs for "Generated magic token"
+## Testing the Email Function Directly
 
-### Issue: OTP codes don't match
-- User might be using an old OTP from a previous request
-- Check timestamps in logs to confirm
-- OTP expires after 5 minutes
-- Each new request generates a new code
+Create a test endpoint to verify email sending works:
 
-### Issue: Emails not being sent
-- Check Gmail credentials in Vercel env variables
-- Check if Gmail app password has spaces (should be removed)
-- Check Vercel logs for SMTP errors
-- Verify Gmail account allows "Less secure app access" or uses App Password
+```typescript
+// src/app/api/test-magic-link/route.ts
+import { NextResponse } from "next/server";
+import { sendApprovalEmailWithMagicLink } from "@/lib/email-nodemailer";
+import { createMagicLink } from "@/lib/magic-link";
 
-## Files Modified
+export async function GET() {
+    try {
+        const testEmail = "your-test-email@gmail.com";
+        const magicToken = createMagicLink(testEmail, "punter");
+        
+        await sendApprovalEmailWithMagicLink(
+            testEmail,
+            "Test User",
+            "punter",
+            magicToken
+        );
+        
+        return NextResponse.json({ success: true, message: "Test email sent!" });
+    } catch (error) {
+        return NextResponse.json({ 
+            error: error instanceof Error ? error.message : String(error) 
+        }, { status: 500 });
+    }
+}
+```
 
-1. `.env.local` - Fixed ADMIN_EMAIL and removed duplicate FROM_EMAIL
-2. `src/app/api/admin/users/[id]/route.ts` - Added try-catch and logging for approval emails
-3. `src/lib/otp.ts` - Added detailed logging with timestamps
-4. `src/lib/email-nodemailer.ts` - Added detailed logging for OTP emails
+Visit: `https://your-vercel-url.vercel.app/api/test-magic-link`
+
+## OTP Code Mismatch Issue
+
+The OTP codes not matching is likely because:
+1. User requests OTP multiple times (each generates a new code)
+2. User is checking an old email instead of the latest one
+3. WordPress transient is being overwritten by multiple requests
+
+### Solution:
+The detailed logging now shows timestamps. Compare:
+- Time OTP was stored
+- Time email was sent
+- Time user entered the code
+
+If timestamps show multiple OTP requests, that's the issue.
 
 ## Next Steps
 
-1. Update Vercel environment variables
-2. Redeploy or restart Vercel project
-3. Test user approval flow
-4. Check Vercel logs for detailed output
-5. Report back with any error messages from logs
+1. Deploy the updated code with detailed logging
+2. Try approving a test user
+3. Check Vercel logs immediately after clicking "Approve"
+4. Share the logs here - specifically look for:
+   - "Generated magic token"
+   - "Sending approval email"
+   - "EMAIL SENT SUCCESSFULLY" or "EMAIL SEND FAILED"
+5. If no email logs appear, the function isn't being called

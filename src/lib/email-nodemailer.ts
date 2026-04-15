@@ -1,7 +1,30 @@
 import nodemailer from "nodemailer";
 
 const FROM = process.env.FROM_EMAIL ?? "noreply@sureodds.ng";
-const SITE = process.env.NEXT_PUBLIC_APP_URL ?? "https://sureodds.ng";
+
+// Helper to get the site URL dynamically
+export function getSiteUrl(): string {
+    // Priority 1: Environment variable (if explicitly set)
+    if (process.env.NEXT_PUBLIC_APP_URL) {
+        return process.env.NEXT_PUBLIC_APP_URL;
+    }
+
+    // Priority 2: Vercel URL (automatically set by Vercel)
+    if (process.env.VERCEL_URL) {
+        return `https://${process.env.VERCEL_URL}`;
+    }
+
+    // Priority 3: Fallback to production domain
+    return "https://sureodds.ng";
+}
+
+console.log("📧 [email-nodemailer] Configuration loaded:");
+console.log("📧 [email-nodemailer] FROM:", FROM);
+console.log("📧 [email-nodemailer] NEXT_PUBLIC_APP_URL:", process.env.NEXT_PUBLIC_APP_URL || "not set");
+console.log("📧 [email-nodemailer] VERCEL_URL:", process.env.VERCEL_URL || "not set");
+console.log("📧 [email-nodemailer] Resolved SITE:", getSiteUrl());
+console.log("📧 [email-nodemailer] GMAIL_USER:", process.env.GMAIL_USER ? "✓ Set" : "✗ Not set");
+console.log("📧 [email-nodemailer] GMAIL_APP_PASSWORD:", process.env.GMAIL_APP_PASSWORD ? "✓ Set" : "✗ Not set");
 
 // Create transporter based on environment variables
 function getTransporter() {
@@ -40,7 +63,9 @@ function getTransporter() {
 }
 
 // Email HTML template
-const base = (content: string) => `
+const base = (content: string) => {
+    const SITE = getSiteUrl();
+    return `
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -60,6 +85,7 @@ const base = (content: string) => `
   </table>
 </body>
 </html>`;
+};
 
 const h1 = (t: string) => `<h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#1a1a1a;text-transform:uppercase;letter-spacing:0.02em">${t}</h1>`;
 const p = (t: string) => `<p style="margin:0 0 16px;font-size:15px;color:#3d3c41;line-height:1.6">${t}</p>`;
@@ -124,10 +150,22 @@ export async function sendOTPEmail(to: string, code: string, purpose: "login" | 
 // Send Approval Email with Magic Link
 export async function sendApprovalEmailWithMagicLink(to: string, name: string, role: "punter" | "subscriber", magicToken: string, expiryDate?: string) {
     const isPunter = role === "punter";
+    const SITE = getSiteUrl();
     const dashboardUrl = `${SITE}/auth/magic?token=${magicToken}`;
 
     try {
+        console.log("📧 [sendApprovalEmail] ===== STARTING MAGIC LINK EMAIL =====");
+        console.log("📧 [sendApprovalEmail] To:", to);
+        console.log("📧 [sendApprovalEmail] Name:", name);
+        console.log("📧 [sendApprovalEmail] Role:", role);
+        console.log("📧 [sendApprovalEmail] Magic Token:", magicToken);
+        console.log("📧 [sendApprovalEmail] Dashboard URL:", dashboardUrl);
+        console.log("📧 [sendApprovalEmail] SITE:", SITE);
+        console.log("📧 [sendApprovalEmail] FROM:", FROM);
+        console.log("📧 [sendApprovalEmail] Timestamp:", new Date().toISOString());
+
         const transporter = getTransporter();
+        console.log("📧 [sendApprovalEmail] Transporter created");
 
         const info = await transporter.sendMail({
             from: `Sureodds <${FROM}>`,
@@ -167,16 +205,25 @@ export async function sendApprovalEmailWithMagicLink(to: string, name: string, r
             `),
         });
 
-        console.log("✅ Approval email with magic link sent via Nodemailer:", info.messageId);
+        console.log("✅ [sendApprovalEmail] ===== EMAIL SENT SUCCESSFULLY =====");
+        console.log("✅ [sendApprovalEmail] Message ID:", info.messageId);
+        console.log("✅ [sendApprovalEmail] Response:", info.response);
+        console.log("✅ [sendApprovalEmail] Timestamp:", new Date().toISOString());
+
         return { id: info.messageId };
     } catch (error) {
-        console.error("❌ Failed to send approval email:", error);
+        console.error("❌ [sendApprovalEmail] ===== EMAIL SEND FAILED =====");
+        console.error("❌ [sendApprovalEmail] Error type:", error instanceof Error ? error.constructor.name : typeof error);
+        console.error("❌ [sendApprovalEmail] Error message:", error instanceof Error ? error.message : String(error));
+        console.error("❌ [sendApprovalEmail] Full error:", error);
         throw error;
     }
 }
 
 // Send Suspension Email
 export async function sendSuspensionEmail(to: string, name: string) {
+    const SITE = getSiteUrl();
+
     try {
         const transporter = getTransporter();
 
@@ -204,6 +251,8 @@ export async function sendSuspensionEmail(to: string, name: string) {
 
 // Send Welcome Email (for subscribers)
 export async function sendWelcomeEmail(to: string, name: string) {
+    const SITE = getSiteUrl();
+
     try {
         const transporter = getTransporter();
 
@@ -234,6 +283,7 @@ export async function sendWelcomeEmail(to: string, name: string) {
 // Send New User Notification to Admin
 export async function sendNewUserNotificationToAdmin(user: { name: string; email: string; role: string }) {
     const ADMIN = process.env.ADMIN_EMAIL ?? "admin@sureodds.ng";
+    const SITE = getSiteUrl();
     const isPunter = user.role === "punter";
 
     try {
