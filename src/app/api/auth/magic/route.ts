@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
         }
 
         // Verify the magic link
-        const verification = verifyMagicLink(token);
+        const verification = await verifyMagicLink(token);
 
         if (!verification.valid) {
             return NextResponse.json(
