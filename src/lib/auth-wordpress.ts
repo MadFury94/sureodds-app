@@ -17,6 +17,9 @@ export interface User {
     createdAt: string;
     approvedAt: string | null;
     approvedBy: string | null;
+    paymentMethod: "online" | "manual" | null;
+    paymentRef: string | null;
+    proofUrl: string | null;
 }
 
 export type SafeUser = User;
@@ -107,6 +110,9 @@ export async function findUserByEmail(email: string): Promise<User | null> {
         const subscriptionExpiry = wpUser.acf?.subscription_expiry || wpUser.meta?.subscription_expiry;
         const approvedAt = wpUser.acf?.approved_at || wpUser.meta?.approved_at;
         const approvedBy = wpUser.acf?.approved_by || wpUser.meta?.approved_by;
+        const paymentMethod = wpUser.acf?.payment_method || wpUser.meta?.payment_method;
+        const paymentRef = wpUser.acf?.payment_ref || wpUser.meta?.payment_ref;
+        const proofUrl = wpUser.acf?.proof_url || wpUser.meta?.proof_url;
 
         // Determine status with priority logic
         let status: UserStatus = "pending";
@@ -139,6 +145,9 @@ export async function findUserByEmail(email: string): Promise<User | null> {
             createdAt: wpUser.registered_date,
             approvedAt: approvedAt || null,
             approvedBy: approvedBy || null,
+            paymentMethod: paymentMethod as "online" | "manual" | null || null,
+            paymentRef: paymentRef || null,
+            proofUrl: proofUrl || null,
         };
     } catch (error) {
         console.error("Error finding user:", error);
@@ -198,6 +207,9 @@ export async function createUser(data: {
             createdAt: new Date().toISOString(),
             approvedAt: null,
             approvedBy: null,
+            paymentMethod: null,
+            paymentRef: null,
+            proofUrl: null,
         };
     } catch (error) {
         console.error("Error creating user:", error);
@@ -226,7 +238,10 @@ export async function updateUser(id: string, updates: Partial<User>): Promise<Us
         const hasACFUpdates = updates.status !== undefined ||
             updates.subscriptionExpiry !== undefined ||
             updates.approvedAt !== undefined ||
-            updates.approvedBy !== undefined;
+            updates.approvedBy !== undefined ||
+            updates.paymentMethod !== undefined ||
+            updates.paymentRef !== undefined ||
+            updates.proofUrl !== undefined;
 
         if (hasACFUpdates) {
             updatePayload.acf = {};
@@ -249,6 +264,21 @@ export async function updateUser(id: string, updates: Partial<User>): Promise<Us
             if (updates.approvedBy !== undefined) {
                 updatePayload.acf.approved_by = updates.approvedBy;
                 console.log("📝 [updateUser] Setting ACF approved_by to:", updates.approvedBy);
+            }
+
+            if (updates.paymentMethod !== undefined) {
+                updatePayload.acf.payment_method = updates.paymentMethod;
+                console.log("📝 [updateUser] Setting ACF payment_method to:", updates.paymentMethod);
+            }
+
+            if (updates.paymentRef !== undefined) {
+                updatePayload.acf.payment_ref = updates.paymentRef;
+                console.log("📝 [updateUser] Setting ACF payment_ref to:", updates.paymentRef);
+            }
+
+            if (updates.proofUrl !== undefined) {
+                updatePayload.acf.proof_url = updates.proofUrl;
+                console.log("📝 [updateUser] Setting ACF proof_url to:", updates.proofUrl);
             }
         }
 
@@ -323,6 +353,9 @@ export async function updateUser(id: string, updates: Partial<User>): Promise<Us
             createdAt: wpUser.registered_date,
             approvedAt: updates.approvedAt ?? wpUser.meta?.approved_at ?? null,
             approvedBy: updates.approvedBy ?? wpUser.meta?.approved_by ?? null,
+            paymentMethod: (updates.paymentMethod ?? wpUser.meta?.payment_method ?? null) as "online" | "manual" | null,
+            paymentRef: updates.paymentRef ?? wpUser.meta?.payment_ref ?? null,
+            proofUrl: updates.proofUrl ?? wpUser.meta?.proof_url ?? null,
         };
 
         console.log("✅ [updateUser] Returning user:", JSON.stringify(updatedUser, null, 2));
@@ -374,6 +407,9 @@ export async function readUsers(): Promise<User[]> {
             const subscriptionExpiry = wpUser.acf?.subscription_expiry || wpUser.meta?.subscription_expiry;
             const approvedAt = wpUser.acf?.approved_at || wpUser.meta?.approved_at;
             const approvedBy = wpUser.acf?.approved_by || wpUser.meta?.approved_by;
+            const paymentMethod = wpUser.acf?.payment_method || wpUser.meta?.payment_method;
+            const paymentRef = wpUser.acf?.payment_ref || wpUser.meta?.payment_ref;
+            const proofUrl = wpUser.acf?.proof_url || wpUser.meta?.proof_url;
 
             // Determine status with priority logic
             let status: UserStatus = "pending";
@@ -411,6 +447,9 @@ export async function readUsers(): Promise<User[]> {
                 createdAt: wpUser.registered_date || new Date().toISOString(),
                 approvedAt: approvedAt || null,
                 approvedBy: approvedBy || null,
+                paymentMethod: paymentMethod as "online" | "manual" | null || null,
+                paymentRef: paymentRef || null,
+                proofUrl: proofUrl || null,
             };
         });
     } catch (error) {
