@@ -58,12 +58,35 @@ export async function POST(req: NextRequest) {
             const role = verification.userData.userType === "punter" ? "punter" : undefined;
             const isPunter = role === "punter";
 
-            user = await createUser({
-                name: verification.userData.name,
-                email,
-                password: Math.random().toString(36).slice(2) + Date.now().toString(36), // Random password (not used)
-                role,
-            });
+            console.log("📝 [verify-otp] Creating user:", { email, name: verification.userData.name, role });
+
+            try {
+                user = await createUser({
+                    name: verification.userData.name,
+                    email,
+                    password: Math.random().toString(36).slice(2) + Date.now().toString(36), // Random password (not used)
+                    role,
+                });
+
+                console.log("✅ [verify-otp] User created successfully:", user.id);
+            } catch (createError) {
+                console.error("❌ [verify-otp] Error creating user:", createError);
+
+                // Check if it's a duplicate email error
+                if (createError instanceof Error && createError.message.includes("already registered")) {
+                    // User already exists, try to find them
+                    user = await findUserByEmail(email);
+                    if (!user) {
+                        return NextResponse.json(
+                            { error: "Email already registered. Please sign in instead." },
+                            { status: 409 }
+                        );
+                    }
+                    console.log("ℹ️ [verify-otp] User already exists, logging them in");
+                } else {
+                    throw createError; // Re-throw other errors
+                }
+            }
 
             // Auto-approve subscribers, punters need manual approval
             if (!isPunter) {
@@ -113,9 +136,14 @@ export async function POST(req: NextRequest) {
         return res;
 
     } catch (error) {
-        console.error("Error verifying OTP:", error);
+        console.error("❌ [verify-otp] Error in verification flow:", error);
+        console.error("❌ [verify-otp] Error stack:", error instanceof Error ? error.stack : "No stack trace");
+
         return NextResponse.json(
-            { error: "Verification failed. Please try again." },
+            {
+                error: "Verification failed. Please try again.",
+                details: error instanceof Error ? error.message : "Unknown error"
+            },
             { status: 500 }
         );
     }

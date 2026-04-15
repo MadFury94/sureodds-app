@@ -64,7 +64,8 @@ async function saveOTPsToFile() {
         const entries = Array.from(otpStore.entries());
         await fs.writeFile(OTP_FILE, JSON.stringify(entries, null, 2));
     } catch (error) {
-        console.error("Failed to save OTPs to file:", error);
+        // Silently fail - file persistence is optional
+        // Don't log to avoid spam when disk is full
     }
 }
 

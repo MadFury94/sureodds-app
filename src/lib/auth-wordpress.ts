@@ -168,6 +168,8 @@ export async function createUser(data: {
         // Map our roles to WordPress roles
         const wpRole = data.role === "punter" ? "punter" : "subscriber";
 
+        console.log("📝 [createUser] Creating WordPress user:", { email: data.email, role: wpRole });
+
         const res = await fetch(`${WP_API}/users`, {
             method: "POST",
             headers: {
@@ -180,15 +182,22 @@ export async function createUser(data: {
                 name: data.name,
                 password: data.password,
                 roles: [wpRole],
-                meta: {
+                // Use ACF fields instead of meta
+                acf: {
                     user_status: "pending",
                     subscription_expiry: null,
+                    approved_at: null,
+                    approved_by: null,
+                    payment_method: null,
+                    payment_ref: null,
+                    proof_url: null,
                 },
             }),
         });
 
         if (!res.ok) {
             const error = await res.json();
+            console.error("❌ [createUser] WordPress API error:", error);
             if (error.code === "existing_user_email") {
                 throw new Error("Email already registered");
             }
@@ -196,6 +205,7 @@ export async function createUser(data: {
         }
 
         const wpUser = await res.json();
+        console.log("✅ [createUser] User created:", wpUser.id);
 
         return {
             id: wpUser.id.toString(),
@@ -212,7 +222,7 @@ export async function createUser(data: {
             proofUrl: null,
         };
     } catch (error) {
-        console.error("Error creating user:", error);
+        console.error("❌ [createUser] Error creating user:", error);
         throw error;
     }
 }
