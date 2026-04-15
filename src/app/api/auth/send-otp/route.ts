@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Check if OTP was sent recently (prevent spam)
-        if (hasRecentOTP(email)) {
+        if (await hasRecentOTP(email)) {
             return NextResponse.json(
                 { error: "OTP already sent. Please wait 60 seconds before requesting again." },
                 { status: 429 }
