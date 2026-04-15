@@ -44,10 +44,10 @@ export async function storeOTP(
     purpose: "login" | "register",
     userData?: { name: string; userType: string }
 ): Promise<void> {
-    const key = email.toLowerCase().trim().replace(/[^a-z0-9]/g, '_');
+    const key = email.toLowerCase().trim();
     const entry: OTPEntry = {
         code,
-        email: email.toLowerCase().trim(),
+        email: key,
         purpose,
         userData,
         attempts: 0,
@@ -57,7 +57,7 @@ export async function storeOTP(
         const token = await getAdminToken();
 
         // Store as WordPress transient (expires in 5 minutes)
-        const res = await fetch(`${WP_BASE}/custom/v1/otp`, {
+        await fetch(`${WP_BASE}/custom/v1/transient`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -70,11 +70,7 @@ export async function storeOTP(
             }),
         });
 
-        if (!res.ok) {
-            throw new Error("Failed to store OTP in WordPress");
-        }
-
-        console.log("💾 [storeOTP] Stored in WordPress:", { email, code, key: `otp_${key}` });
+        console.log("💾 [storeOTP] Stored in WordPress:", { email: key, code });
     } catch (error) {
         console.error("❌ [storeOTP] Error:", error);
         throw error;
@@ -87,36 +83,30 @@ export async function verifyOTP(email: string, code: string): Promise<{
     userData?: { name: string; userType: string };
     error?: string;
 }> {
-    const key = email.toLowerCase().trim().replace(/[^a-z0-9]/g, '_');
+    const key = email.toLowerCase().trim();
 
     try {
         const token = await getAdminToken();
 
         // Get transient from WordPress
-        const res = await fetch(`${WP_BASE}/custom/v1/otp/otp_${key}`, {
+        const res = await fetch(`${WP_BASE}/custom/v1/transient/otp_${key}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
 
         if (!res.ok) {
-            console.log("❌ [verifyOTP] No OTP found for key:", `otp_${key}`);
+            console.log("❌ [verifyOTP] No OTP found");
             return { valid: false, error: "No OTP found. Please request a new one." };
         }
 
         const data = await res.json();
         const entry: OTPEntry = JSON.parse(data.value);
 
-        console.log("🔍 [verifyOTP] Found OTP:", {
-            email,
-            key: `otp_${key}`,
-            storedCode: entry.code,
-            inputCode: code,
-            attempts: entry.attempts
-        });
+        console.log("🔍 [verifyOTP] Found OTP:", { email: key, storedCode: entry.code, inputCode: code });
 
         if (entry.attempts >= 3) {
             console.log("❌ [verifyOTP] Too many attempts");
             // Delete transient
-            await fetch(`${WP_BASE}/custom/v1/otp/otp_${key}`, {
+            await fetch(`${WP_BASE}/custom/v1/transient/otp_${key}`, {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` },
             });
@@ -127,7 +117,7 @@ export async function verifyOTP(email: string, code: string): Promise<{
             console.log("❌ [verifyOTP] Invalid code");
             // Increment attempts
             entry.attempts++;
-            await fetch(`${WP_BASE}/custom/v1/otp`, {
+            await fetch(`${WP_BASE}/custom/v1/transient`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -143,7 +133,7 @@ export async function verifyOTP(email: string, code: string): Promise<{
         }
 
         // Valid - delete transient
-        await fetch(`${WP_BASE}/custom/v1/otp/otp_${key}`, {
+        await fetch(`${WP_BASE}/custom/v1/transient/otp_${key}`, {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -163,6 +153,5 @@ export async function verifyOTP(email: string, code: string): Promise<{
 
 export async function hasRecentOTP(email: string): Promise<boolean> {
     // For simplicity, always return false (allow OTP requests)
-    // You can implement rate limiting here if needed
     return false;
 }

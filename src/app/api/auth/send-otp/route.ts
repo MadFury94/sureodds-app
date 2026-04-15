@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
         // Generate and store OTP
         const code = generateOTP();
         const userData = purpose === "register" && name ? { name, userType: userType || "punter" } : undefined;
-        storeOTP(email, code, purpose, userData);
+        await storeOTP(email, code, purpose, userData);
 
         // Send OTP email
         try {
