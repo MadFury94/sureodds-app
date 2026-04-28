@@ -32,6 +32,12 @@ async function writeBetCodes(betCodes: BetCode[]): Promise<void> {
     await fs.writeFile(BET_CODES_FILE, JSON.stringify(betCodes, null, 2), "utf-8");
 }
 
+function isAdminAuthed(req: NextRequest): boolean {
+    const session = req.cookies.get("so_admin_session")?.value;
+    if (!session) return false;
+    try { return !!JSON.parse(session)?.token; } catch { return false; }
+}
+
 export async function GET() {
     try {
         const betCodes = await readBetCodes();
@@ -45,6 +51,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+    if (!isAdminAuthed(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         const body = await req.json();
         const { bookmaker, code, link, image, description, odds, stake, expiresAt } = body;

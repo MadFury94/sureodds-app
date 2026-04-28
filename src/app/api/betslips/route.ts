@@ -4,6 +4,12 @@ import path from "path";
 
 const BETSLIPS_FILE = path.join(process.cwd(), "src/data/betslips.json");
 
+function isAdminAuthed(req: NextRequest): boolean {
+    const session = req.cookies.get("so_admin_session")?.value;
+    if (!session) return false;
+    try { return !!JSON.parse(session)?.token; } catch { return false; }
+}
+
 function readBetslips() {
     try {
         const data = fs.readFileSync(BETSLIPS_FILE, "utf-8");
@@ -30,6 +36,7 @@ export async function GET() {
 
 // POST - Create new betslip
 export async function POST(req: NextRequest) {
+    if (!isAdminAuthed(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         const body = await req.json();
         const { selections, confidence, createdBy } = body;

@@ -1,32 +1,31 @@
-// Magic Link Management - Stateless version for Vercel
-// Encodes user data directly in the token (no file storage needed)
-
+// Magic Link Management — HMAC-signed tokens (tamper-proof)
+import { createHmac, timingSafeEqual } from "crypto";
 import { findUserByEmail } from "./auth-wordpress";
 
-// Create a magic link token with embedded data
-export function createMagicLink(email: string, role: string): string {
-    const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+function getSecret(): string {
+    const s = process.env.JWT_SECRET;
+    if (!s || s.length < 32) throw new Error("JWT_SECRET must be at least 32 characters");
+    return s;
+}
 
-    // Encode data in the token itself
+function sign(payload: string): string {
+    return createHmac("sha256", getSecret()).update(payload).digest("base64url");
+}
+
+// Create a signed magic link token
+export function createMagicLink(email: string, role: string): string {
     const data = JSON.stringify({
         email: email.toLowerCase().trim(),
         role,
-        expiresAt,
-        nonce: Math.random().toString(36).slice(2),
+        expiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
+        nonce: crypto.randomUUID(),
     });
-
-    const token = Buffer.from(data).toString('base64url');
-
-    console.log("🔗 [createMagicLink] Created magic link:", {
-        email,
-        role,
-        tokenPreview: token.substring(0, 20) + "...",
-    });
-
-    return token;
+    const payload = Buffer.from(data).toString("base64url");
+    const sig = sign(payload);
+    return `${payload}.${sig}`;
 }
 
-// Verify magic link token
+// Verify a signed magic link token
 export async function verifyMagicLink(token: string): Promise<{
     valid: boolean;
     email?: string;
@@ -34,36 +33,32 @@ export async function verifyMagicLink(token: string): Promise<{
     error?: string;
 }> {
     try {
-        console.log("🔍 [verifyMagicLink] Verifying token:", token.substring(0, 20) + "...");
+        const dotIdx = token.lastIndexOf(".");
+        if (dotIdx === -1) return { valid: false, error: "Invalid magic link." };
 
-        // Decode the token
-        const data = JSON.parse(Buffer.from(token, 'base64url').toString());
+        const payload = token.slice(0, dotIdx);
+        const sig = token.slice(dotIdx + 1);
+
+        // Constant-time signature comparison to prevent timing attacks
+        const expectedSig = sign(payload);
+        const sigBuf = Buffer.from(sig, "base64url");
+        const expectedBuf = Buffer.from(expectedSig, "base64url");
+        if (sigBuf.length !== expectedBuf.length || !timingSafeEqual(sigBuf, expectedBuf)) {
+            return { valid: false, error: "Invalid magic link." };
+        }
+
+        const data = JSON.parse(Buffer.from(payload, "base64url").toString());
         const { email, role, expiresAt } = data;
 
-        console.log("🔍 [verifyMagicLink] Decoded data:", { email, role, expiresAt });
-
-        // Check expiry
         if (Date.now() > expiresAt) {
-            console.log("❌ [verifyMagicLink] Token expired");
             return { valid: false, error: "Magic link has expired. Please contact admin." };
         }
 
-        // Verify user exists in WordPress
         const user = await findUserByEmail(email);
-        if (!user) {
-            console.log("❌ [verifyMagicLink] User not found");
-            return { valid: false, error: "User not found." };
-        }
+        if (!user) return { valid: false, error: "User not found." };
 
-        console.log("✅ [verifyMagicLink] Token valid for user:", email);
-
-        return {
-            valid: true,
-            email,
-            role,
-        };
-    } catch (error) {
-        console.error("❌ [verifyMagicLink] Error:", error);
+        return { valid: true, email, role };
+    } catch {
         return { valid: false, error: "Invalid magic link." };
     }
 }

@@ -92,25 +92,14 @@ export async function POST(req: NextRequest) {
 
         // Send OTP email
         try {
-            console.log("📧 Attempting to send OTP email...");
-            console.log("📧 To:", email);
-            console.log("📧 Code:", code);
-            console.log("📧 Gmail User:", process.env.GMAIL_USER ? "✓ Set" : "✗ Not set");
-            console.log("📧 Gmail Password:", process.env.GMAIL_APP_PASSWORD ? "✓ Set" : "✗ Not set");
-
             await sendOTPEmail(email, code, purpose);
-            console.log(`✅ OTP sent successfully to ${email}: ${code}`);
         } catch (emailError) {
             console.error("❌ Failed to send OTP email:", emailError);
-            // Still return success since OTP is stored (for testing)
-            // In production, you might want to return an error here
         }
 
         return NextResponse.json({
             success: true,
             message: "OTP sent to your email. Please check your inbox.",
-            // For development/testing only - remove in production
-            ...(process.env.NODE_ENV === "development" && { code }),
         });
 
     } catch (error) {

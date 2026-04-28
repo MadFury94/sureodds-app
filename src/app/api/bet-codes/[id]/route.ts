@@ -32,10 +32,17 @@ async function writeBetCodes(betCodes: BetCode[]): Promise<void> {
     await fs.writeFile(BET_CODES_FILE, JSON.stringify(betCodes, null, 2), "utf-8");
 }
 
+function isAdminAuthed(req: NextRequest): boolean {
+    const session = req.cookies.get("so_admin_session")?.value;
+    if (!session) return false;
+    try { return !!JSON.parse(session)?.token; } catch { return false; }
+}
+
 export async function DELETE(
     req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    if (!isAdminAuthed(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         const { id } = await params;
         const betCodes = await readBetCodes();
@@ -57,6 +64,7 @@ export async function PATCH(
     req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    if (!isAdminAuthed(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         const { id } = await params;
         const body = await req.json();

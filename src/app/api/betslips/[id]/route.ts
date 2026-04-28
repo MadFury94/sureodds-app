@@ -4,6 +4,12 @@ import path from "path";
 
 const BETSLIPS_FILE = path.join(process.cwd(), "src/data/betslips.json");
 
+function isAdminAuthed(req: NextRequest): boolean {
+    const session = req.cookies.get("so_admin_session")?.value;
+    if (!session) return false;
+    try { return !!JSON.parse(session)?.token; } catch { return false; }
+}
+
 function readBetslips() {
     try {
         const data = fs.readFileSync(BETSLIPS_FILE, "utf-8");
@@ -43,6 +49,7 @@ export async function DELETE(
     req: NextRequest,
     context: { params: Promise<{ id: string }> }
 ) {
+    if (!isAdminAuthed(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         const { id } = await context.params;
         const betslips = readBetslips();
@@ -65,6 +72,7 @@ export async function PATCH(
     req: NextRequest,
     context: { params: Promise<{ id: string }> }
 ) {
+    if (!isAdminAuthed(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         const { id } = await context.params;
         const body = await req.json();
@@ -102,6 +110,7 @@ export async function PUT(
     req: NextRequest,
     context: { params: Promise<{ id: string }> }
 ) {
+    if (!isAdminAuthed(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         const { id } = await context.params;
         const body = await req.json();

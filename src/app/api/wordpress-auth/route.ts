@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
         response.cookies.set("so_admin_session", JSON.stringify(session), {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
+            sameSite: "strict",
             path: "/",
             maxAge: 60 * 60 * 8, // 8 hours
         });
@@ -89,7 +89,7 @@ export async function DELETE() {
     response.cookies.set("so_admin_session", "", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        sameSite: "strict",
         path: "/",
         maxAge: 0,
     });

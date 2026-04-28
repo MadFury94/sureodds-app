@@ -58,7 +58,8 @@ export default function MediaPage() {
 
     async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
-        if (!file || !token) return;
+        if (!file) return;
+        if (!token) { setError("Not authenticated. Please log out and log back in."); return; }
         setUploading(true);
         setError("");
         setSuccess("");
@@ -72,13 +73,16 @@ export default function MediaPage() {
                 },
                 body: file,
             });
-            if (!res.ok) throw new Error("Upload failed");
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.message ?? `Upload failed (${res.status})`);
+            }
             const newItem = await res.json();
             setItems(prev => [newItem, ...prev]);
             setSuccess(`"${file.name}" uploaded successfully.`);
             if (fileRef.current) fileRef.current.value = "";
-        } catch {
-            setError("Upload failed. Check file type and size.");
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Upload failed. Check file type and size.");
         } finally {
             setUploading(false);
         }

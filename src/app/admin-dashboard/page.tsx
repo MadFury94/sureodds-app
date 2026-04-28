@@ -41,26 +41,33 @@ function formatDate(dateStr: string): string {
 
 export default function AdminDashboard() {
     const [posts, setPosts] = useState<WPPost[]>([]);
+    const [totalPosts, setTotalPosts] = useState(0);
     const [totalCats, setTotalCats] = useState(0);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const WP_API = process.env.NEXT_PUBLIC_WP_API;
         Promise.all([
-            fetch(`${WP_API}/posts?per_page=10&_embed=1`).then(r => r.json()).catch(() => []),
-            fetch(`${WP_API}/categories?per_page=100`).then(r => r.json()).catch(() => []),
-        ]).then(([p, c]) => {
-            setPosts(Array.isArray(p) ? p : []);
-            setTotalCats(Array.isArray(c) ? c.length : 0);
+            fetch(`${WP_API}/posts?per_page=10&_embed=1&status=publish`).then(async r => ({
+                posts: await r.json().catch(() => []),
+                total: parseInt(r.headers.get("X-WP-Total") ?? "0", 10),
+            })).catch(() => ({ posts: [], total: 0 })),
+            fetch(`${WP_API}/categories?per_page=1`).then(async r => ({
+                total: parseInt(r.headers.get("X-WP-Total") ?? "0", 10),
+            })).catch(() => ({ total: 0 })),
+        ]).then(([postsRes, catsRes]) => {
+            setPosts(Array.isArray(postsRes.posts) ? postsRes.posts : []);
+            setTotalPosts(postsRes.total);
+            setTotalCats(catsRes.total);
         }).finally(() => setLoading(false));
     }, []);
 
     const recentPosts = posts.slice(0, 5);
 
     const stats = [
-        { label: "Total Posts", value: loading ? "…" : posts.length, icon: "📝", color: "#ff6b00" },
+        { label: "Total Posts", value: loading ? "…" : totalPosts, icon: "📝", color: "#ff6b00" },
         { label: "Categories", value: loading ? "…" : totalCats, icon: "◈", color: "#1a1f71" },
-        { label: "Published", value: loading ? "…" : posts.length, icon: "✅", color: "#22c55e" },
+        { label: "Published", value: loading ? "…" : totalPosts, icon: "✅", color: "#22c55e" },
         { label: "Media Files", value: "—", icon: "🖼", color: "#f59e0b" },
     ];
 

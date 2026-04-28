@@ -167,8 +167,9 @@ export default function CategoriesPage() {
                                 borderRadius: "0.3rem", display: "inline-block",
                             }}>{cat.slug}</span>
                             <a
-                                href={`/category/${cat.slug}`}
+                                href={`https://sureodds.ng/category/${cat.slug}`}
                                 target="_blank"
+                                rel="noopener noreferrer"
                                 style={{ fontFamily: f, fontSize: "1.3rem", color: cat.count > 0 ? "#1a1a1a" : "#99989f", textDecoration: "none", fontWeight: 600 }}
                             >
                                 {cat.count} {cat.count === 1 ? "post" : "posts"} ↗

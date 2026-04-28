@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, use } from "react";
 import { fonts } from "@/lib/config";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 const f = fonts.body;
 const fd = fonts.display;
@@ -22,6 +23,12 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
     const [tagInput, setTagInput] = useState("");
     const [tags, setTags] = useState<string[]>([]);
     const [featuredImage, setFeaturedImage] = useState("");
+    const [featuredImageId, setFeaturedImageId] = useState<number | null>(null);
+    const [showMediaPicker, setShowMediaPicker] = useState(false);
+    const [mediaItems, setMediaItems] = useState<{ id: number; source_url: string; title: { rendered: string } }[]>([]);
+    const [mediaLoading, setMediaLoading] = useState(false);
+    const [uploadingFeatured, setUploadingFeatured] = useState(false);
+    const featuredFileRef = useRef<HTMLInputElement>(null);
     const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -63,7 +70,10 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
 
                 // Featured image
                 const media = post._embedded?.["wp:featuredmedia"]?.[0];
-                if (media?.source_url) setFeaturedImage(media.source_url);
+                if (media?.source_url) {
+                    setFeaturedImage(media.source_url);
+                    setFeaturedImageId(media.id ?? null);
+                }
 
                 // Tags
                 const tagTerms = post._embedded?.["wp:term"]?.find(
@@ -89,6 +99,57 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
     }
 
     function removeTag(t: string) { setTags(prev => prev.filter(x => x !== t)); }
+
+    async function openMediaPicker() {
+        setShowMediaPicker(true);
+        if (mediaItems.length > 0) return;
+        setMediaLoading(true);
+        try {
+            const tokenRes = await fetch("/api/admin-token");
+            const { token: t } = await tokenRes.json();
+            const res = await fetch(`${WP_API}/media?per_page=24&orderby=date&order=desc&media_type=image`, {
+                headers: { Authorization: `Bearer ${t}` },
+            });
+            const data = await res.json();
+            setMediaItems(Array.isArray(data) ? data : []);
+        } catch { /* ignore */ } finally {
+            setMediaLoading(false);
+        }
+    }
+
+    async function handleFeaturedUpload(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setUploadingFeatured(true);
+        setErrorMsg("");
+        try {
+            const tokenRes = await fetch("/api/admin-token");
+            const { token: t } = await tokenRes.json();
+            if (!t) throw new Error("Not authenticated");
+            const res = await fetch(`${WP_API}/media`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${t}`,
+                    "Content-Disposition": `attachment; filename="${file.name}"`,
+                    "Content-Type": file.type,
+                },
+                body: file,
+            });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error((err as { message?: string }).message ?? `Upload failed (${res.status})`);
+            }
+            const uploaded = await res.json();
+            setFeaturedImage(uploaded.source_url);
+            setFeaturedImageId(uploaded.id);
+            setMediaItems(prev => [uploaded, ...prev]);
+        } catch (err) {
+            setErrorMsg(err instanceof Error ? err.message : "Image upload failed.");
+        } finally {
+            setUploadingFeatured(false);
+            if (featuredFileRef.current) featuredFileRef.current.value = "";
+        }
+    }
 
     function toggleCat(id: number) {
         setSelectedCats(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -138,6 +199,13 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                 categories: selectedCats,
                 tags: tagIds,
             };
+
+            // Set featured image
+            if (featuredImageId) {
+                body.featured_media = featuredImageId;
+            } else if (featuredImage === "") {
+                body.featured_media = 0; // Remove featured image
+            }
 
             const res = await fetch(`${WP_API}/posts/${id}`, {
                 method: "POST",
@@ -305,7 +373,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                             <div
                                 className="wp-content"
                                 style={{ padding: "2rem", minHeight: "40rem", fontFamily: f, fontSize: "1.6rem", lineHeight: 1.8, color: "#1a1a1a" }}
-                                dangerouslySetInnerHTML={{ __html: content || "<p style='color:#99989f'>Nothing to preview yet…</p>" }}
+                                dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) || "<p style='color:#99989f'>Nothing to preview yet…</p>" }}
                             />
                         )}
                     </div>
@@ -374,7 +442,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                             {featuredImage ? (
                                 <div style={{ position: "relative" }}>
                                     <img src={featuredImage} alt="" style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", borderRadius: "0.6rem", display: "block" }} />
-                                    <button onClick={() => setFeaturedImage("")} style={{
+                                    <button onClick={() => { setFeaturedImage(""); setFeaturedImageId(null); }} style={{
                                         position: "absolute", top: "0.6rem", right: "0.6rem",
                                         backgroundColor: "rgba(0,0,0,0.7)", color: "#fff",
                                         border: "none", borderRadius: "50%", width: "2.4rem", height: "2.4rem",
@@ -382,13 +450,29 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                                     }}>✕</button>
                                 </div>
                             ) : (
-                                <div style={{ border: "2px dashed #e8ebed", borderRadius: "0.6rem", padding: "2.4rem", textAlign: "center" }}>
-                                    <p style={{ fontFamily: f, fontSize: "1.3rem", color: "#99989f", margin: "0 0 1rem" }}>Paste image URL</p>
-                                    <input
-                                        type="url"
-                                        placeholder="https://…"
+                                <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
+                                    <button onClick={openMediaPicker} style={{
+                                        padding: "1rem", border: "2px dashed #e8ebed", borderRadius: "0.6rem",
+                                        backgroundColor: "#f9fafb", fontFamily: f, fontSize: "1.3rem",
+                                        color: "#ff6b00", fontWeight: 700, cursor: "pointer", width: "100%",
+                                    }}>🖼 Pick from Media Library</button>
+                                    <label style={{
+                                        padding: "1rem", border: "2px dashed #e8ebed", borderRadius: "0.6rem",
+                                        backgroundColor: uploadingFeatured ? "#f0f0f0" : "#f9fafb",
+                                        fontFamily: f, fontSize: "1.3rem",
+                                        color: uploadingFeatured ? "#99989f" : "#1a1f71",
+                                        fontWeight: 700, cursor: uploadingFeatured ? "not-allowed" : "pointer",
+                                        width: "100%", textAlign: "center", boxSizing: "border-box", display: "block",
+                                    }}>
+                                        {uploadingFeatured ? "⏳ Uploading…" : "📤 Upload from Device"}
+                                        <input ref={featuredFileRef} type="file" accept="image/*"
+                                            onChange={handleFeaturedUpload} disabled={uploadingFeatured}
+                                            style={{ display: "none" }} />
+                                    </label>
+                                    <p style={{ fontFamily: f, fontSize: "1.2rem", color: "#99989f", textAlign: "center", margin: 0 }}>or paste URL</p>
+                                    <input type="url" placeholder="https://…"
                                         style={{ ...inputStyle, fontSize: "1.3rem" }}
-                                        onKeyDown={e => { if (e.key === "Enter") setFeaturedImage((e.target as HTMLInputElement).value); }}
+                                        onKeyDown={e => { if (e.key === "Enter") { setFeaturedImage((e.target as HTMLInputElement).value); setFeaturedImageId(null); } }}
                                         onFocus={e => (e.target.style.borderColor = "#1a1a1a")}
                                         onBlur={e => (e.target.style.borderColor = "#e8ebed")}
                                     />
@@ -396,6 +480,38 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                             )}
                         </div>
                     </div>
+
+                    {/* Media picker modal */}
+                    {showMediaPicker && (
+                        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.6)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <div style={{ backgroundColor: "#fff", borderRadius: "1.2rem", width: "90%", maxWidth: "80rem", maxHeight: "80vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+                                <div style={{ padding: "1.6rem 2rem", borderBottom: "1px solid #e8ebed", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                                    <h3 style={{ fontFamily: fd, fontWeight: 700, fontSize: "1.6rem", color: "#1a1a1a", margin: 0 }}>Select Featured Image</h3>
+                                    <button onClick={() => setShowMediaPicker(false)} style={{ background: "none", border: "none", fontSize: "2rem", cursor: "pointer", color: "#68676d" }}>✕</button>
+                                </div>
+                                <div style={{ padding: "1.6rem", overflowY: "auto", flex: 1 }}>
+                                    {mediaLoading ? (
+                                        <p style={{ fontFamily: f, fontSize: "1.4rem", color: "#68676d", textAlign: "center", padding: "4rem" }}>Loading media…</p>
+                                    ) : mediaItems.length === 0 ? (
+                                        <p style={{ fontFamily: f, fontSize: "1.4rem", color: "#68676d", textAlign: "center", padding: "4rem" }}>No images found.</p>
+                                    ) : (
+                                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(14rem, 1fr))", gap: "1rem" }}>
+                                            {mediaItems.map(item => (
+                                                <div key={item.id}
+                                                    onClick={() => { setFeaturedImage(item.source_url); setFeaturedImageId(item.id); setShowMediaPicker(false); }}
+                                                    style={{ aspectRatio: "1", borderRadius: "0.6rem", overflow: "hidden", cursor: "pointer", border: "3px solid transparent", transition: "border-color 0.15s" }}
+                                                    onMouseEnter={e => (e.currentTarget.style.borderColor = "#ff6b00")}
+                                                    onMouseLeave={e => (e.currentTarget.style.borderColor = "transparent")}
+                                                >
+                                                    <img src={item.source_url} alt={item.title.rendered} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Categories */}
                     <div style={{ backgroundColor: "#fff", borderRadius: "1rem", border: "1.5px solid #e8ebed", overflow: "hidden" }}>
