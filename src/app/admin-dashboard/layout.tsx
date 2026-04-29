@@ -9,17 +9,16 @@ const fd = fonts.display;
 const FULL_NAV = [
     { label: "Dashboard", href: "/admin-dashboard", icon: "▦", indent: false },
     { label: "Posts", href: "/admin-dashboard/posts", icon: "📄", indent: false },
-    { label: "Add New Post", href: "/admin-dashboard/new-post", icon: "✎", indent: true },
     { label: "All Posts", href: "/admin-dashboard/posts", icon: "≡", indent: true },
+    { label: "Add New", href: "/admin-dashboard/new-post", icon: "✎", indent: true },
     { label: "Categories", href: "/admin-dashboard/categories", icon: "◈", indent: true },
-    { label: "Media", href: "/admin-dashboard/media", icon: "⊞", indent: false },
-    { label: "Betting Tips", href: "/admin-dashboard/tips", icon: "🎯", indent: false },
-    { label: "Bet Codes & Stats", href: "/admin-dashboard/bet-codes-view", icon: "🎫", indent: false },
+    { label: "Media", href: "/admin-dashboard/media", icon: "🖼", indent: false },
+    { label: "Bet Codes", href: "/admin-dashboard/bet-codes-view", icon: "🎫", indent: false },
     { label: "Users", href: "/admin-dashboard/users", icon: "👥", indent: false },
     { label: "Settings", href: "/admin-dashboard/settings", icon: "⚙", indent: false },
 ];
 
-// Tips-admin only sees the Betting Tips page, but punters see everything
+// Tips-admin only sees the Betting Tips page
 const TIPS_ADMIN_NAV = [
     { label: "Betting Tips", href: "/admin-dashboard/tips", icon: "🎯", indent: false },
 ];
@@ -27,9 +26,8 @@ const TIPS_ADMIN_NAV = [
 const PUNTER_NAV = [
     { label: "Dashboard", href: "/admin-dashboard", icon: "▦", indent: false },
     { label: "Posts", href: "/admin-dashboard/posts", icon: "📄", indent: false },
-    { label: "Add New Post", href: "/admin-dashboard/new-post", icon: "✎", indent: true },
     { label: "All Posts", href: "/admin-dashboard/posts", icon: "≡", indent: true },
-    { label: "Betting Tips", href: "/admin-dashboard/tips", icon: "🎯", indent: false },
+    { label: "Add New", href: "/admin-dashboard/new-post", icon: "✎", indent: true },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -40,38 +38,35 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const [user, setUser] = useState<{ name: string; email: string; avatar?: string; role?: string } | null>(null);
 
     useEffect(() => {
-        // Check for punter/tips-admin session first (so_user_session)
-        fetch("/api/auth/me")
+        // Check WP admin session first (highest priority)
+        fetch("/api/wordpress-auth")
             .then(r => r.json())
             .then(d => {
-                if (d.user?.role === "tips-admin" || d.user?.role === "punter") {
-                    // Check if user is pending approval
-                    if (d.user.status === "pending") {
-                        window.location.href = "/register/pending";
-                        return;
-                    }
-                    // Check if user is suspended
-                    if (d.user.status === "suspended") {
-                        window.location.href = "/login";
-                        return;
-                    }
-                    // User is active
-                    setUser({ ...d.user });
+                if (d.valid) {
+                    setUser({ ...d.user, role: "admin" });
                     return;
                 }
-                // If not a punter/tips-admin, check WP admin session
-                fetch("/api/wordpress-auth")
+                // If not WP admin, check for punter/tips-admin session
+                return fetch("/api/auth/me")
                     .then(r => r.json())
-                    .then(d => { if (d.valid) setUser(d.user); })
-                    .catch(() => { });
+                    .then(d => {
+                        if (d.user?.role === "tips-admin" || d.user?.role === "punter") {
+                            // Check if user is pending approval
+                            if (d.user.status === "pending") {
+                                window.location.href = "/register/pending";
+                                return;
+                            }
+                            // Check if user is suspended
+                            if (d.user.status === "suspended") {
+                                window.location.href = "/login";
+                                return;
+                            }
+                            // User is active
+                            setUser({ ...d.user });
+                        }
+                    });
             })
-            .catch(() => {
-                // Also check WP admin session if user session fails
-                fetch("/api/wordpress-auth")
-                    .then(r => r.json())
-                    .then(d => { if (d.valid) setUser(d.user); })
-                    .catch(() => { });
-            });
+            .catch(() => { });
     }, []);
 
     async function handleLogout() {
@@ -81,6 +76,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     const isTipsAdmin = user?.role === "tips-admin";
     const isPunter = user?.role === "punter";
+    const isAdmin = user?.role === "admin" || (!user?.role && user); // WP admin or legacy admin without role
     const NAV = isTipsAdmin ? TIPS_ADMIN_NAV : isPunter ? PUNTER_NAV : FULL_NAV;
 
     const isActive = (href: string) =>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
+import { verifyUserToken } from "@/lib/auth-wordpress";
 
 const BET_CODES_FILE = path.join(process.cwd(), "src/data/bet-codes.json");
 
@@ -17,6 +18,7 @@ interface BetCode {
     createdAt: string;
     status: "active" | "expired" | "won" | "lost";
     createdBy: string;
+    createdByEmail?: string;
 }
 
 async function readBetCodes(): Promise<BetCode[]> {
@@ -38,20 +40,66 @@ function isAdminAuthed(req: NextRequest): boolean {
     try { return !!JSON.parse(session)?.token; } catch { return false; }
 }
 
+async function getUserFromSession(req: NextRequest): Promise<{ id: string; email: string; role: string } | null> {
+    // Check user session (for punters)
+    const userToken = req.cookies.get("so_user_session")?.value;
+    if (userToken) {
+        const payload = await verifyUserToken(userToken);
+        if (payload) {
+            return {
+                id: payload.email, // Use email as ID for now
+                email: payload.email,
+                role: payload.role || "punter",
+            };
+        }
+    }
+
+    // Check admin session
+    const adminSession = req.cookies.get("so_admin_session")?.value;
+    if (adminSession) {
+        try {
+            const session = JSON.parse(adminSession);
+            if (session?.token) {
+                return {
+                    id: "admin",
+                    email: "admin",
+                    role: "admin",
+                };
+            }
+        } catch { }
+    }
+
+    return null;
+}
+
 export async function DELETE(
     req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    if (!isAdminAuthed(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // Allow users to delete their own bet codes, or admins to delete any
+    const user = await getUserFromSession(req);
+    if (!user) {
+        return NextResponse.json({ error: "Unauthorized - Please log in" }, { status: 401 });
+    }
+
     try {
         const { id } = await params;
         const betCodes = await readBetCodes();
-        const filtered = betCodes.filter(bc => bc.id !== id);
+        const betCode = betCodes.find(bc => bc.id === id);
 
-        if (filtered.length === betCodes.length) {
+        if (!betCode) {
             return NextResponse.json({ error: "Bet code not found" }, { status: 404 });
         }
 
+        // Check if user owns this bet code or is admin
+        const isOwner = betCode.createdBy === user.id || betCode.createdByEmail === user.email;
+        const isAdmin = user.role === "admin";
+
+        if (!isOwner && !isAdmin) {
+            return NextResponse.json({ error: "You can only delete your own bet codes" }, { status: 403 });
+        }
+
+        const filtered = betCodes.filter(bc => bc.id !== id);
         await writeBetCodes(filtered);
         return NextResponse.json({ success: true });
     } catch (error) {
@@ -64,7 +112,11 @@ export async function PATCH(
     req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    if (!isAdminAuthed(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // Only admins can update bet code status
+    if (!isAdminAuthed(req)) {
+        return NextResponse.json({ error: "Unauthorized - Admin access required" }, { status: 401 });
+    }
+
     try {
         const { id } = await params;
         const body = await req.json();
