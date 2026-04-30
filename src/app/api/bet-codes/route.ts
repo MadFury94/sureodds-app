@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { promises as fs } from "fs";
-import path from "path";
 import { verifyUserToken } from "@/lib/auth-wordpress";
 
-const BET_CODES_FILE = path.join(process.cwd(), "src/data/bet-codes.json");
+const WP_API_URL = process.env.NEXT_PUBLIC_WP_API || "https://sureodds.ng/wp-json/wp/v2";
 
 interface BetCode {
     id: string;
@@ -23,23 +21,25 @@ interface BetCode {
     confidence?: string; // High, Medium, Low, Banker
 }
 
-async function readBetCodes(): Promise<BetCode[]> {
-    try {
-        const raw = await fs.readFile(BET_CODES_FILE, "utf-8");
-        return JSON.parse(raw) as BetCode[];
-    } catch {
-        return [];
-    }
-}
-
-async function writeBetCodes(betCodes: BetCode[]): Promise<void> {
-    await fs.writeFile(BET_CODES_FILE, JSON.stringify(betCodes, null, 2), "utf-8");
-}
-
-function isAdminAuthed(req: NextRequest): boolean {
-    const session = req.cookies.get("so_admin_session")?.value;
-    if (!session) return false;
-    try { return !!JSON.parse(session)?.token; } catch { return false; }
+// Convert WordPress post to BetCode format
+function wpPostToBetCode(post: any): BetCode {
+    return {
+        id: post.id.toString(),
+        bookmaker: post.meta?.bookmaker || "",
+        code: post.meta?.code || "",
+        link: post.meta?.link || "",
+        image: post.meta?.image || "",
+        description: post.title?.rendered || post.content?.rendered || "",
+        odds: post.meta?.odds || "",
+        stake: post.meta?.stake || "",
+        expiresAt: post.meta?.expires_at || "",
+        createdAt: post.date || new Date().toISOString(),
+        status: post.meta?.status || "active",
+        createdBy: post.author?.toString() || "",
+        createdByEmail: post.meta?.created_by_email || "",
+        category: post.meta?.category || "free",
+        confidence: post.meta?.confidence || "Medium",
+    };
 }
 
 async function getUserFromSession(req: NextRequest): Promise<{ id: string; email: string; role: string } | null> {
@@ -76,7 +76,19 @@ async function getUserFromSession(req: NextRequest): Promise<{ id: string; email
 
 export async function GET(req: NextRequest) {
     try {
-        const betCodes = await readBetCodes();
+        // Fetch bet codes from WordPress
+        const response = await fetch(`${WP_API_URL}/bet-codes?per_page=100&_embed`, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`WordPress API error: ${response.status}`);
+        }
+
+        const posts = await response.json();
+        const betCodes = posts.map(wpPostToBetCode);
 
         // Check if request is from authenticated user
         const user = await getUserFromSession(req);
@@ -143,28 +155,49 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Invalid category" }, { status: 400 });
         }
 
-        const betCodes = await readBetCodes();
+        // Get WordPress auth credentials
+        const wpUser = process.env.WP_ADMIN_USER;
+        const wpPass = process.env.WP_ADMIN_PASSWORD;
 
-        const newBetCode: BetCode = {
-            id: Date.now().toString(),
-            bookmaker,
-            code: code || "",
-            link: link || "",
-            image: image || "",
-            description: description || "",
-            odds: odds || "",
-            stake: stake || "",
-            expiresAt: expiresAt || "",
-            createdAt: new Date().toISOString(),
-            status: "active",
-            createdBy: user.id,
-            createdByEmail: user.email,
-            category: category,
-            confidence: confidence || "Medium",
-        };
+        if (!wpUser || !wpPass) {
+            return NextResponse.json({ error: "WordPress credentials not configured" }, { status: 500 });
+        }
 
-        betCodes.push(newBetCode);
-        await writeBetCodes(betCodes);
+        // Create post in WordPress using admin credentials
+        const wpResponse = await fetch(`${WP_API_URL}/bet-codes`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Basic ' + Buffer.from(`${wpUser}:${wpPass}`).toString('base64'),
+            },
+            body: JSON.stringify({
+                title: `${bookmaker} - ${description.substring(0, 50)}`,
+                content: description,
+                status: 'publish',
+                meta: {
+                    bookmaker,
+                    code: code || "",
+                    link: link || "",
+                    image: image || "",
+                    odds: odds || "",
+                    stake: stake || "",
+                    expires_at: expiresAt || "",
+                    status: "active",
+                    category: category,
+                    confidence: confidence || "Medium",
+                    created_by_email: user.email,
+                },
+            }),
+        });
+
+        if (!wpResponse.ok) {
+            const errorText = await wpResponse.text();
+            console.error("WordPress API error:", errorText);
+            return NextResponse.json({ error: "Failed to create bet code in WordPress" }, { status: 500 });
+        }
+
+        const wpPost = await wpResponse.json();
+        const newBetCode = wpPostToBetCode(wpPost);
 
         return NextResponse.json({ betCode: newBetCode }, { status: 201 });
     } catch (error) {

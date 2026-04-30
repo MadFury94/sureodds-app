@@ -1,44 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { promises as fs } from "fs";
-import path from "path";
 import { verifyUserToken } from "@/lib/auth-wordpress";
 
-const BET_CODES_FILE = path.join(process.cwd(), "src/data/bet-codes.json");
-
-interface BetCode {
-    id: string;
-    bookmaker: string;
-    code: string;
-    link?: string;
-    image?: string;
-    description: string;
-    odds: string;
-    stake?: string;
-    expiresAt: string;
-    createdAt: string;
-    status: "active" | "expired" | "won" | "lost";
-    createdBy: string;
-    createdByEmail?: string;
-}
-
-async function readBetCodes(): Promise<BetCode[]> {
-    try {
-        const raw = await fs.readFile(BET_CODES_FILE, "utf-8");
-        return JSON.parse(raw) as BetCode[];
-    } catch {
-        return [];
-    }
-}
-
-async function writeBetCodes(betCodes: BetCode[]): Promise<void> {
-    await fs.writeFile(BET_CODES_FILE, JSON.stringify(betCodes, null, 2), "utf-8");
-}
-
-function isAdminAuthed(req: NextRequest): boolean {
-    const session = req.cookies.get("so_admin_session")?.value;
-    if (!session) return false;
-    try { return !!JSON.parse(session)?.token; } catch { return false; }
-}
+const WP_API_URL = process.env.NEXT_PUBLIC_WP_API || "https://sureodds.ng/wp-json/wp/v2";
 
 async function getUserFromSession(req: NextRequest): Promise<{ id: string; email: string; role: string } | null> {
     // Check user session (for punters)
@@ -47,7 +10,7 @@ async function getUserFromSession(req: NextRequest): Promise<{ id: string; email
         const payload = await verifyUserToken(userToken);
         if (payload) {
             return {
-                id: payload.email, // Use email as ID for now
+                id: payload.email,
                 email: payload.email,
                 role: payload.role || "punter",
             };
@@ -76,32 +39,59 @@ export async function DELETE(
     req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    // Allow users to delete their own bet codes, or admins to delete any
     const user = await getUserFromSession(req);
     if (!user) {
-        return NextResponse.json({ error: "Unauthorized - Please log in" }, { status: 401 });
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     try {
         const { id } = await params;
-        const betCodes = await readBetCodes();
-        const betCode = betCodes.find(bc => bc.id === id);
 
-        if (!betCode) {
+        // Get WordPress auth credentials
+        const wpUser = process.env.WP_ADMIN_USER;
+        const wpPass = process.env.WP_ADMIN_PASSWORD;
+
+        if (!wpUser || !wpPass) {
+            return NextResponse.json({ error: "WordPress credentials not configured" }, { status: 500 });
+        }
+
+        // First, get the bet code to check ownership
+        const getResponse = await fetch(`${WP_API_URL}/bet-codes/${id}`, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!getResponse.ok) {
             return NextResponse.json({ error: "Bet code not found" }, { status: 404 });
         }
 
-        // Check if user owns this bet code or is admin
-        const isOwner = betCode.createdBy === user.id || betCode.createdByEmail === user.email;
-        const isAdmin = user.role === "admin";
+        const betCode = await getResponse.json();
 
-        if (!isOwner && !isAdmin) {
+        // Check if user is admin or the creator
+        const isAdmin = user.role === "admin";
+        const isCreator = betCode.meta?.created_by_email === user.email;
+
+        if (!isAdmin && !isCreator) {
             return NextResponse.json({ error: "You can only delete your own bet codes" }, { status: 403 });
         }
 
-        const filtered = betCodes.filter(bc => bc.id !== id);
-        await writeBetCodes(filtered);
-        return NextResponse.json({ success: true });
+        // Delete from WordPress
+        const deleteResponse = await fetch(`${WP_API_URL}/bet-codes/${id}?force=true`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Basic ' + Buffer.from(`${wpUser}:${wpPass}`).toString('base64'),
+            },
+        });
+
+        if (!deleteResponse.ok) {
+            const errorText = await deleteResponse.text();
+            console.error("WordPress API error:", errorText);
+            return NextResponse.json({ error: "Failed to delete bet code" }, { status: 500 });
+        }
+
+        return NextResponse.json({ message: "Bet code deleted successfully" });
     } catch (error) {
         console.error("Error deleting bet code:", error);
         return NextResponse.json({ error: "Failed to delete bet code" }, { status: 500 });
@@ -112,27 +102,70 @@ export async function PATCH(
     req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    // Only admins can update bet code status
-    if (!isAdminAuthed(req)) {
-        return NextResponse.json({ error: "Unauthorized - Admin access required" }, { status: 401 });
+    const user = await getUserFromSession(req);
+    if (!user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     try {
         const { id } = await params;
         const body = await req.json();
-        const { status } = body;
 
-        const betCodes = await readBetCodes();
-        const index = betCodes.findIndex(bc => bc.id === id);
+        // Get WordPress auth credentials
+        const wpUser = process.env.WP_ADMIN_USER;
+        const wpPass = process.env.WP_ADMIN_PASSWORD;
 
-        if (index === -1) {
+        if (!wpUser || !wpPass) {
+            return NextResponse.json({ error: "WordPress credentials not configured" }, { status: 500 });
+        }
+
+        // First, get the bet code to check ownership
+        const getResponse = await fetch(`${WP_API_URL}/bet-codes/${id}`, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!getResponse.ok) {
             return NextResponse.json({ error: "Bet code not found" }, { status: 404 });
         }
 
-        betCodes[index] = { ...betCodes[index], status };
-        await writeBetCodes(betCodes);
+        const betCode = await getResponse.json();
 
-        return NextResponse.json({ betCode: betCodes[index] });
+        // Check if user is admin or the creator
+        const isAdmin = user.role === "admin";
+        const isCreator = betCode.meta?.created_by_email === user.email;
+
+        if (!isAdmin && !isCreator) {
+            return NextResponse.json({ error: "You can only update your own bet codes" }, { status: 403 });
+        }
+
+        // Prepare update data
+        const updateData: any = {};
+
+        if (body.status) {
+            updateData.meta = { ...betCode.meta, status: body.status };
+        }
+
+        // Update in WordPress
+        const updateResponse = await fetch(`${WP_API_URL}/bet-codes/${id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Basic ' + Buffer.from(`${wpUser}:${wpPass}`).toString('base64'),
+            },
+            body: JSON.stringify(updateData),
+        });
+
+        if (!updateResponse.ok) {
+            const errorText = await updateResponse.text();
+            console.error("WordPress API error:", errorText);
+            return NextResponse.json({ error: "Failed to update bet code" }, { status: 500 });
+        }
+
+        const updatedPost = await updateResponse.json();
+
+        return NextResponse.json({ betCode: updatedPost });
     } catch (error) {
         console.error("Error updating bet code:", error);
         return NextResponse.json({ error: "Failed to update bet code" }, { status: 500 });

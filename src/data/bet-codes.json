@@ -1,1 +1,34 @@
-[]
+[
+  {
+    "id": "1777472791167",
+    "bookmaker": "Bet9ja",
+    "code": "FGDGGFEWS",
+    "link": "",
+    "image": "",
+    "description": "",
+    "odds": "2",
+    "stake": "10000",
+    "expiresAt": "2026-05-09T18:25",
+    "createdAt": "2026-04-29T14:26:31.167Z",
+    "status": "active",
+    "createdBy": "Onochieazukaeme@gmail.com",
+    "createdByEmail": "Onochieazukaeme@gmail.com"
+  },
+  {
+    "id": "1777473371485",
+    "bookmaker": "Bet9ja",
+    "code": "BCJVHV",
+    "link": "",
+    "image": "",
+    "description": "",
+    "odds": "2.00",
+    "stake": "2000",
+    "expiresAt": "2026-05-08T17:39",
+    "createdAt": "2026-04-29T14:36:11.486Z",
+    "status": "active",
+    "createdBy": "Onochieazukaeme@gmail.com",
+    "createdByEmail": "Onochieazukaeme@gmail.com",
+    "category": "sure-banker",
+    "confidence": "High"
+  }
+]
