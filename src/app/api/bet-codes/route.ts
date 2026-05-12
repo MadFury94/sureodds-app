@@ -88,7 +88,7 @@ export async function GET(req: NextRequest) {
         }
 
         const posts = await response.json();
-        const betCodes = posts.map(wpPostToBetCode);
+        const betCodes: BetCode[] = posts.map(wpPostToBetCode);
 
         // Check if request is from authenticated user
         const user = await getUserFromSession(req);
@@ -98,7 +98,7 @@ export async function GET(req: NextRequest) {
 
         if (!user) {
             // Not logged in - only show free codes
-            filteredCodes = betCodes.filter(bc => bc.category === "free");
+            filteredCodes = betCodes.filter((bc: BetCode) => bc.category === "free");
         } else if (user.role === "admin") {
             // Admin sees everything
             filteredCodes = betCodes;
@@ -106,7 +106,7 @@ export async function GET(req: NextRequest) {
             // Regular user - check subscription level
             // For now, show free + sure-banker for all logged-in users
             // TODO: Implement proper subscription checking
-            filteredCodes = betCodes.filter(bc =>
+            filteredCodes = betCodes.filter((bc: BetCode) =>
                 bc.category === "free" ||
                 bc.category === "sure-banker"
             );

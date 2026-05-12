@@ -69,11 +69,7 @@ export default function NewPostPage() {
         if (mediaItems.length > 0) return;
         setMediaLoading(true);
         try {
-            const tokenRes = await fetch("/api/admin-token");
-            const { token: t } = await tokenRes.json();
-            const res = await fetch(`${process.env.NEXT_PUBLIC_WP_API}/media?per_page=24&orderby=date&order=desc&media_type=image`, {
-                headers: { Authorization: `Bearer ${t}` },
-            });
+            const res = await fetch("/api/admin/media?per_page=24&media_type=image");
             const data = await res.json();
             setMediaItems(Array.isArray(data) ? data : []);
         } catch { /* ignore */ } finally {
@@ -87,13 +83,9 @@ export default function NewPostPage() {
         setUploadingFeatured(true);
         setErrorMsg("");
         try {
-            const tokenRes = await fetch("/api/admin-token");
-            const { token: t } = await tokenRes.json();
-            if (!t) throw new Error("Not authenticated");
-            const res = await fetch(`${process.env.NEXT_PUBLIC_WP_API}/media`, {
+            const res = await fetch("/api/admin/media", {
                 method: "POST",
                 headers: {
-                    Authorization: `Bearer ${t}`,
                     "Content-Disposition": `attachment; filename="${file.name}"`,
                     "Content-Type": file.type,
                 },
@@ -134,30 +126,17 @@ export default function NewPostPage() {
         setErrorMsg("");
 
         try {
-            // Get session token from cookie via API
-            const sessionRes = await fetch("/api/wordpress-auth");
-            const sessionData = await sessionRes.json();
-            if (!sessionData.valid) { window.location.href = "/admin-login"; return; }
-
-            // Get the raw token from the session cookie (server reads it)
-            const tokenRes = await fetch("/api/admin-token");
-            const { token } = await tokenRes.json();
-
-            const WP_API = process.env.NEXT_PUBLIC_WP_API;
-
-            // Create or get tag IDs
+            // Create or get tag IDs via proxy
             const tagIds: number[] = [];
             for (const tag of tags) {
                 try {
-                    const existing = await fetch(`${WP_API}/tags?search=${encodeURIComponent(tag)}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    }).then(r => r.json());
-                    if (existing.length > 0) {
+                    const existing = await fetch(`/api/admin/tags?search=${encodeURIComponent(tag)}`).then(r => r.json());
+                    if (Array.isArray(existing) && existing.length > 0) {
                         tagIds.push(existing[0].id);
                     } else {
-                        const created = await fetch(`${WP_API}/tags`, {
+                        const created = await fetch("/api/admin/tags", {
                             method: "POST",
-                            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                            headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({ name: tag }),
                         }).then(r => r.json());
                         if (created.id) tagIds.push(created.id);
@@ -174,34 +153,23 @@ export default function NewPostPage() {
                 tags: tagIds,
             };
 
-            // Set featured image — use known media ID if picked from library, otherwise sideload
-            if (featuredImage) {
-                if (featuredImageId) {
-                    body.featured_media = featuredImageId;
-                } else {
-                    try {
-                        const sideload = await fetch(`${WP_API}/media`, {
-                            method: "POST",
-                            headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-                            body: JSON.stringify({ source_url: featuredImage }),
-                        }).then(r => r.json()).catch(() => null);
-                        if (sideload?.id) body.featured_media = sideload.id;
-                    } catch { /* skip */ }
-                }
+            // Set featured image — use known media ID if picked from library, otherwise skip sideload
+            if (featuredImageId) {
+                body.featured_media = featuredImageId;
             }
 
-            const res = await fetch(`${WP_API}/posts`, {
+            const res = await fetch("/api/admin/posts", {
                 method: "POST",
-                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(body),
             });
 
             if (!res.ok) {
                 const err = await res.json();
-                throw new Error(err.message ?? "Failed to save post.");
+                if (res.status === 401) { window.location.href = "/admin-login"; return; }
+                throw new Error((err as { message?: string }).message ?? "Failed to save post.");
             }
 
-            const post = await res.json();
             setSaved("success");
             setTimeout(() => {
                 window.location.href = `/admin-dashboard/posts`;

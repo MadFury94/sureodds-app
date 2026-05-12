@@ -24,27 +24,18 @@ export default function MediaPage() {
     const [deleting, setDeleting] = useState<number | null>(null);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [token, setToken] = useState("");
     const fileRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        fetch("/api/admin-token")
-            .then(r => r.json())
-            .then(d => { if (d.token) setToken(d.token); });
-    }, []);
-
-    useEffect(() => {
-        if (!token) return;
         loadMedia();
-    }, [token, page]);
+    }, [page]);
 
     async function loadMedia() {
         setLoading(true);
+        setError("");
         try {
-            const res = await fetch(
-                `${process.env.NEXT_PUBLIC_WP_API}/media?per_page=24&page=${page}&orderby=date&order=desc`,
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
+            const res = await fetch(`/api/admin/media?per_page=24&page=${page}`);
+            if (res.status === 401) { window.location.href = "/admin-login"; return; }
             const total = parseInt(res.headers.get("X-WP-TotalPages") ?? "1");
             setTotalPages(total);
             const data = await res.json();
@@ -59,15 +50,13 @@ export default function MediaPage() {
     async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
         if (!file) return;
-        if (!token) { setError("Not authenticated. Please log out and log back in."); return; }
         setUploading(true);
         setError("");
         setSuccess("");
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_WP_API}/media`, {
+            const res = await fetch("/api/admin/media", {
                 method: "POST",
                 headers: {
-                    Authorization: `Bearer ${token}`,
                     "Content-Disposition": `attachment; filename="${file.name}"`,
                     "Content-Type": file.type,
                 },
@@ -75,7 +64,7 @@ export default function MediaPage() {
             });
             if (!res.ok) {
                 const errData = await res.json().catch(() => ({}));
-                throw new Error(errData.message ?? `Upload failed (${res.status})`);
+                throw new Error((errData as { message?: string }).message ?? `Upload failed (${res.status})`);
             }
             const newItem = await res.json();
             setItems(prev => [newItem, ...prev]);
@@ -92,10 +81,8 @@ export default function MediaPage() {
         if (!confirm("Delete this file permanently?")) return;
         setDeleting(id);
         try {
-            await fetch(`${process.env.NEXT_PUBLIC_WP_API}/media/${id}?force=true`, {
-                method: "DELETE",
-                headers: { Authorization: `Bearer ${token}` },
-            });
+            const res = await fetch(`/api/admin/media/${id}`, { method: "DELETE" });
+            if (!res.ok) throw new Error("Delete failed");
             setItems(prev => prev.filter(i => i.id !== id));
             if (selected?.id === id) setSelected(null);
         } catch {
