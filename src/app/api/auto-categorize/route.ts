@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const WP_API = process.env.NEXT_PUBLIC_WP_API ?? "https://sureodds.ng/wp-json/wp/v2";
+const WP_API = process.env.NEXT_PUBLIC_WP_API ?? "https://cms.sureodds.ng/wp-json/wp/v2";
 
 // Keyword map: slug → keywords to match in title+excerpt (lowercase)
 const KEYWORD_MAP: Record<string, string[]> = {

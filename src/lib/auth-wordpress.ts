@@ -1,8 +1,8 @@
 // WordPress-based user authentication and storage
 // Uses WordPress REST API to manage users
 
-const WP_API = process.env.NEXT_PUBLIC_WP_API ?? "https://sureodds.ng/wp-json/wp/v2";
-const WP_JWT_BASE = "https://sureodds.ng/wp-json";
+const WP_API = process.env.NEXT_PUBLIC_WP_API ?? "https://cms.sureodds.ng/wp-json/wp/v2";
+const WP_JWT_BASE = process.env.NEXT_PUBLIC_WP_API?.replace("/wp/v2", "") ?? "https://cms.sureodds.ng/wp-json";
 
 export type UserRole = "subscriber" | "punter" | "tips-admin";
 export type UserStatus = "pending" | "active" | "suspended";

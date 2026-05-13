@@ -6,7 +6,6 @@ import { sanitizeHtml } from "@/lib/sanitize";
 const f = fonts.body;
 const fd = fonts.display;
 
-const WP_API = process.env.NEXT_PUBLIC_WP_API;
 const STATUS_OPTIONS = ["draft", "publish", "pending", "private"];
 
 interface WPCategory { id: number; name: string; slug: string; }
@@ -44,21 +43,19 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
             const authData = await authRes.json();
             if (!authData.valid) { window.location.href = "/admin-login"; return; }
 
-            // Load categories
-            fetch(`${WP_API}/categories?per_page=100`)
+            // Load categories via proxy
+            fetch("/api/admin/categories")
                 .then(r => r.json())
-                .then(setCategories)
+                .then(d => { if (Array.isArray(d)) setCategories(d); })
                 .catch(() => { });
 
-            // Load post
+            // Load post via proxy
             try {
-                const tokenRes = await fetch("/api/admin-token");
-                const { token } = await tokenRes.json();
-                const res = await fetch(`${WP_API}/posts/${id}?context=edit&_embed=1`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                    cache: "no-store",
-                });
-                if (!res.ok) throw new Error("Post not found");
+                const res = await fetch(`/api/admin/posts/${id}`);
+                if (!res.ok) {
+                    if (res.status === 401) { window.location.href = "/admin-login"; return; }
+                    throw new Error("Post not found");
+                }
                 const post = await res.json();
 
                 setTitle(post.title?.raw ?? post.title?.rendered ?? "");
@@ -105,11 +102,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
         if (mediaItems.length > 0) return;
         setMediaLoading(true);
         try {
-            const tokenRes = await fetch("/api/admin-token");
-            const { token: t } = await tokenRes.json();
-            const res = await fetch(`${WP_API}/media?per_page=24&orderby=date&order=desc&media_type=image`, {
-                headers: { Authorization: `Bearer ${t}` },
-            });
+            const res = await fetch("/api/admin/media?per_page=24&media_type=image");
             const data = await res.json();
             setMediaItems(Array.isArray(data) ? data : []);
         } catch { /* ignore */ } finally {
@@ -123,13 +116,9 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
         setUploadingFeatured(true);
         setErrorMsg("");
         try {
-            const tokenRes = await fetch("/api/admin-token");
-            const { token: t } = await tokenRes.json();
-            if (!t) throw new Error("Not authenticated");
-            const res = await fetch(`${WP_API}/media`, {
+            const res = await fetch("/api/admin/media", {
                 method: "POST",
                 headers: {
-                    Authorization: `Bearer ${t}`,
                     "Content-Disposition": `attachment; filename="${file.name}"`,
                     "Content-Type": file.type,
                 },
@@ -168,22 +157,17 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
         setErrorMsg("");
 
         try {
-            const tokenRes = await fetch("/api/admin-token");
-            const { token } = await tokenRes.json();
-
-            // Resolve tag IDs
+            // Resolve tag IDs via proxy
             const tagIds: number[] = [];
             for (const tag of tags) {
                 try {
-                    const existing = await fetch(`${WP_API}/tags?search=${encodeURIComponent(tag)}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    }).then(r => r.json());
-                    if (existing.length > 0) {
+                    const existing = await fetch(`/api/admin/tags?search=${encodeURIComponent(tag)}`).then(r => r.json());
+                    if (Array.isArray(existing) && existing.length > 0) {
                         tagIds.push(existing[0].id);
                     } else {
-                        const created = await fetch(`${WP_API}/tags`, {
+                        const created = await fetch("/api/admin/tags", {
                             method: "POST",
-                            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                            headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({ name: tag }),
                         }).then(r => r.json());
                         if (created.id) tagIds.push(created.id);
@@ -207,15 +191,16 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
                 body.featured_media = 0; // Remove featured image
             }
 
-            const res = await fetch(`${WP_API}/posts/${id}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            const res = await fetch(`/api/admin/posts/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(body),
             });
 
             if (!res.ok) {
                 const err = await res.json();
-                throw new Error(err.message ?? "Failed to update post.");
+                if (res.status === 401) { window.location.href = "/admin-login"; return; }
+                throw new Error((err as { message?: string }).message ?? "Failed to update post.");
             }
 
             const updated = await res.json();

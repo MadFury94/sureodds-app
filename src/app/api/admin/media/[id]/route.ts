@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const WP_API_URL = process.env.NEXT_PUBLIC_WP_API || "https://sureodds.ng/wp-json/wp/v2";
+const WP_API_URL = process.env.NEXT_PUBLIC_WP_API || "https://cms.sureodds.ng/wp-json/wp/v2";
 
 function getAdminToken(req: NextRequest): string | null {
     const session = req.cookies.get("so_admin_session")?.value;

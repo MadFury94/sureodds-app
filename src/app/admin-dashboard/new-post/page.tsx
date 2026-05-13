@@ -47,9 +47,9 @@ export default function NewPostPage() {
             .then(d => { if (!d.valid) window.location.href = "/admin-login"; })
             .catch(() => { });
 
-        fetch(`${process.env.NEXT_PUBLIC_WP_API}/categories?per_page=100`)
+        fetch("/api/admin/categories")
             .then(r => r.json())
-            .then(setCategories)
+            .then(d => { if (Array.isArray(d)) setCategories(d); })
             .catch(() => { });
     }, []);
 

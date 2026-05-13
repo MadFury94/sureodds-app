@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyUserToken } from "@/lib/auth-wordpress";
 
-const WP_API_URL = process.env.NEXT_PUBLIC_WP_API || "https://sureodds.ng/wp-json/wp/v2";
+const WP_API_URL = process.env.NEXT_PUBLIC_WP_API || "https://cms.sureodds.ng/wp-json/wp/v2";
 
 async function getUserFromSession(req: NextRequest): Promise<{ id: string; email: string; role: string } | null> {
     // Check user session (for punters)

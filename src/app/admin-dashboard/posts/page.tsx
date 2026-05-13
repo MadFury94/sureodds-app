@@ -5,7 +5,6 @@ import { fonts } from "@/lib/config";
 const f = fonts.body;
 const fd = fonts.display;
 
-const WP_API = process.env.NEXT_PUBLIC_WP_API;
 const PAGE_SIZE = 25;
 
 interface WPPost {
@@ -57,10 +56,13 @@ export default function PostsPage() {
             let totalPages = 1;
             do {
                 const res = await fetch(
-                    `${WP_API}/posts?per_page=100&page=${currentPage}&_embed=1`,
+                    `/api/admin/posts?per_page=100&page=${currentPage}&status=any`,
                     { cache: "no-store" }
                 );
-                if (!res.ok) break;
+                if (!res.ok) {
+                    if (res.status === 401) { window.location.href = "/admin-login"; return; }
+                    break;
+                }
                 totalPages = Number(res.headers.get("X-WP-TotalPages") ?? "1");
                 const batch: WPPost[] = await res.json();
                 all.push(...batch);

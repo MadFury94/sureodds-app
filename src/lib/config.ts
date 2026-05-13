@@ -1,7 +1,7 @@
 // ── Site ──────────────────────────────────────────────────────────────────
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sureodds.ng";
 export const SITE_NAME = "Sureodds";
-export const WP_API_BASE = process.env.NEXT_PUBLIC_WP_API ?? "https://sureodds.ng/wp-json/wp/v2";
+export const WP_API_BASE = process.env.NEXT_PUBLIC_WP_API ?? "https://cms.sureodds.ng/wp-json/wp/v2";
 
 // ── Design tokens ─────────────────────────────────────────────────────────
 export const colors = {

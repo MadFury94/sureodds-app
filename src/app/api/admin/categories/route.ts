@@ -13,18 +13,12 @@ function getAdminToken(req: NextRequest): string | null {
     }
 }
 
-// GET /api/admin/tags?search=...
+// GET /api/admin/categories
 export async function GET(req: NextRequest) {
     const token = getAdminToken(req);
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { searchParams } = new URL(req.url);
-    const search = searchParams.get("search") ?? "";
-
-    const params = new URLSearchParams({ per_page: "20" });
-    if (search) params.set("search", search);
-
-    const res = await fetch(`${WP_API_URL}/tags?${params}`, {
+    const res = await fetch(`${WP_API_URL}/categories?per_page=100`, {
         headers: { Authorization: `Bearer ${token}` },
         cache: "no-store",
     });
@@ -33,14 +27,14 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(data, { status: res.status });
 }
 
-// POST /api/admin/tags — create a tag
+// POST /api/admin/categories — create a category
 export async function POST(req: NextRequest) {
     const token = getAdminToken(req);
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await req.json();
 
-    const res = await fetch(`${WP_API_URL}/tags`, {
+    const res = await fetch(`${WP_API_URL}/categories`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

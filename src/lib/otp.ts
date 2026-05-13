@@ -1,7 +1,7 @@
 // OTP Management using WordPress Transients API
 // Works on Vercel by storing OTPs temporarily in WordPress database
 
-const WP_BASE = "https://sureodds.ng/wp-json";
+const WP_BASE = process.env.NEXT_PUBLIC_WP_API?.replace("/wp/v2", "") ?? "https://cms.sureodds.ng/wp-json";
 
 interface OTPEntry {
     code: string;

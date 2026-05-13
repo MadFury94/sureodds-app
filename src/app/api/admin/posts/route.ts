@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const WP_API_URL = process.env.NEXT_PUBLIC_WP_API || "https://sureodds.ng/wp-json/wp/v2";
-const WP_JWT_BASE = "https://sureodds.ng/wp-json";
+const WP_API_URL = process.env.NEXT_PUBLIC_WP_API || "https://cms.sureodds.ng/wp-json/wp/v2";
+const WP_JWT_BASE = process.env.NEXT_PUBLIC_WP_API?.replace("/wp/v2", "") ?? "https://cms.sureodds.ng/wp-json";
 
 function getAdminToken(req: NextRequest): string | null {
     const session = req.cookies.get("so_admin_session")?.value;
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
     const status = searchParams.get("status") ?? "any";
     const search = searchParams.get("search") ?? "";
 
-    const params = new URLSearchParams({ per_page: perPage, page, status, orderby: "date", order: "desc" });
+    const params = new URLSearchParams({ per_page: perPage, page, status, orderby: "date", order: "desc", _embed: "1" });
     if (search) params.set("search", search);
 
     const res = await fetch(`${WP_API_URL}/posts?${params}`, {

@@ -152,8 +152,8 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
         }
 
         // Get admin token
-        const WP_JWT_BASE = "https://sureodds.ng/wp-json";
-        const WP_API = process.env.NEXT_PUBLIC_WP_API ?? "https://sureodds.ng/wp-json/wp/v2";
+        const WP_JWT_BASE = process.env.NEXT_PUBLIC_WP_API?.replace("/wp/v2", "") ?? "https://cms.sureodds.ng/wp-json";
+        const WP_API = process.env.NEXT_PUBLIC_WP_API ?? "https://cms.sureodds.ng/wp-json/wp/v2";
 
         const username = process.env.WP_ADMIN_USER;
         const password = process.env.WP_ADMIN_PASSWORD;

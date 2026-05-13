@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const WP_BASE = process.env.NEXT_PUBLIC_WP_API?.replace("/wp/v2", "") ?? "https://sureodds.ng/wp-json";
-const WP_JWT_BASE = "https://sureodds.ng/wp-json";
+const WP_BASE = process.env.NEXT_PUBLIC_WP_API?.replace("/wp/v2", "") ?? "https://cms.sureodds.ng/wp-json";
+const WP_JWT_BASE = process.env.NEXT_PUBLIC_WP_API?.replace("/wp/v2", "") ?? "https://cms.sureodds.ng/wp-json";
 
 export async function POST(req: NextRequest) {
     try {
