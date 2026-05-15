@@ -35,6 +35,15 @@ export function middleware(req: NextRequest) {
     // Inject pathname so layout.tsx can conditionally hide Navbar/Footer
     const res = NextResponse.next();
     res.headers.set("x-pathname", pathname);
+
+    // Enforce HTTPS in production
+    if (
+        process.env.NODE_ENV === "production" &&
+        req.headers.get("x-forwarded-proto") === "http"
+    ) {
+        return NextResponse.redirect(`https://${req.headers.get("host")}${pathname}`, 301);
+    }
+
     return res;
 }
 

@@ -115,6 +115,17 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         url,
     };
 
+    // JSON-LD: BreadcrumbList
+    const breadcrumbLd = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+            { "@type": "ListItem", position: 2, name: category, item: `${SITE_URL}/category/${catSlug}` },
+            { "@type": "ListItem", position: 3, name: title, item: url },
+        ],
+    };
+
     return (
         <div style={{ backgroundColor: "#fff", minHeight: "100vh" }}>
 
@@ -122,6 +133,10 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
             />
 
             <ArticleHero
@@ -175,7 +190,11 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                         />
 
                         {/* In-article ad — below content */}
-                        <AdUnit slot="0000000000" format="auto" style={{ margin: "3.2rem 0" }} />
+                        <AdUnit
+                            slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_ARTICLE ?? "0000000000"}
+                            format="auto"
+                            style={{ margin: "3.2rem 0" }}
+                        />
 
                         {/* Tags + Share */}
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1.2rem", marginTop: "4rem", paddingTop: "2.4rem", borderTop: "1px solid #e8ebed" }}>
@@ -245,7 +264,11 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                         </div>
 
                         {/* AdSense — sidebar */}
-                        <AdUnit slot="0000000000" format="vertical" style={{ marginTop: "3.2rem" }} />
+                        <AdUnit
+                            slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_SIDEBAR ?? "0000000000"}
+                            format="vertical"
+                            style={{ marginTop: "3.2rem" }}
+                        />
                     </aside>
 
                 </div>

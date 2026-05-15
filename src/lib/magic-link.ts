@@ -17,7 +17,7 @@ export function createMagicLink(email: string, role: string): string {
     const data = JSON.stringify({
         email: email.toLowerCase().trim(),
         role,
-        expiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
+        expiresAt: Date.now() + 60 * 60 * 1000, // 1 hour
         nonce: crypto.randomUUID(),
     });
     const payload = Buffer.from(data).toString("base64url");

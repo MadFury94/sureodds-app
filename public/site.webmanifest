@@ -1,0 +1,23 @@
+{
+    "name": "Sureodds",
+    "short_name": "Sureodds",
+    "description": "Football News, Betting Tips & Match Analysis",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#f2f5f6",
+    "theme_color": "#ff6b00",
+    "icons": [
+        {
+            "src": "/logo.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/logo.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

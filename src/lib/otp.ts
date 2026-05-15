@@ -35,7 +35,10 @@ async function getAdminToken(): Promise<string> {
 }
 
 export function generateOTP(): string {
-    return Math.floor(100000 + Math.random() * 900000).toString();
+    // Use crypto.getRandomValues for cryptographically secure OTP
+    const array = new Uint32Array(1);
+    crypto.getRandomValues(array);
+    return String(100000 + (array[0] % 900000));
 }
 
 export async function storeOTP(
@@ -44,7 +47,7 @@ export async function storeOTP(
     purpose: "login" | "register",
     userData?: { name: string; userType: string }
 ): Promise<void> {
-    const key = email.toLowerCase().trim().replace(/[^a-z0-9]/g, '_');
+    const key = email.toLowerCase().trim().replace(/[^a-z0-9]/g, "_");
     const entry: OTPEntry = {
         code,
         email: email.toLowerCase().trim(),
@@ -53,17 +56,9 @@ export async function storeOTP(
         attempts: 0,
     };
 
-    console.log("💾 [storeOTP] BEFORE STORAGE:", {
-        email,
-        code,
-        key: `otp_${key}`,
-        timestamp: new Date().toISOString()
-    });
-
     try {
         const token = await getAdminToken();
 
-        // Store as WordPress transient (expires in 5 minutes)
         const res = await fetch(`${WP_BASE}/custom/v1/otp`, {
             method: "POST",
             headers: {
@@ -78,21 +73,11 @@ export async function storeOTP(
         });
 
         if (!res.ok) {
-            const errorText = await res.text();
-            console.error("❌ [storeOTP] WordPress API error:", errorText);
-            throw new Error("Failed to store OTP in WordPress");
+            throw new Error("Failed to store OTP");
         }
-
-        const result = await res.json();
-        console.log("✅ [storeOTP] STORED SUCCESSFULLY:", {
-            email,
-            code,
-            key: `otp_${key}`,
-            result,
-            timestamp: new Date().toISOString()
-        });
     } catch (error) {
-        console.error("❌ [storeOTP] Error:", error);
+        // Log error without sensitive data
+        console.error("[storeOTP] Failed to store OTP for email hash:", hashEmail(email));
         throw error;
     }
 }
@@ -103,35 +88,24 @@ export async function verifyOTP(email: string, code: string): Promise<{
     userData?: { name: string; userType: string };
     error?: string;
 }> {
-    const key = email.toLowerCase().trim().replace(/[^a-z0-9]/g, '_');
+    const key = email.toLowerCase().trim().replace(/[^a-z0-9]/g, "_");
 
     try {
         const token = await getAdminToken();
 
-        // Get transient from WordPress
         const res = await fetch(`${WP_BASE}/custom/v1/otp/otp_${key}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
 
         if (!res.ok) {
-            console.log("❌ [verifyOTP] No OTP found for key:", `otp_${key}`);
             return { valid: false, error: "No OTP found. Please request a new one." };
         }
 
         const data = await res.json();
         const entry: OTPEntry = JSON.parse(data.value);
 
-        console.log("🔍 [verifyOTP] Found OTP:", {
-            email,
-            key: `otp_${key}`,
-            storedCode: entry.code,
-            inputCode: code,
-            attempts: entry.attempts
-        });
-
         if (entry.attempts >= 3) {
-            console.log("❌ [verifyOTP] Too many attempts");
-            // Delete transient
+            // Delete transient after max attempts
             await fetch(`${WP_BASE}/custom/v1/otp/otp_${key}`, {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` },
@@ -139,8 +113,13 @@ export async function verifyOTP(email: string, code: string): Promise<{
             return { valid: false, error: "Too many failed attempts. Please request a new OTP." };
         }
 
-        if (entry.code !== code) {
-            console.log("❌ [verifyOTP] Invalid code");
+        // Constant-time comparison to prevent timing attacks
+        const inputBuf = Buffer.from(code.padEnd(6, "0"));
+        const storedBuf = Buffer.from(entry.code.padEnd(6, "0"));
+        const codesMatch = inputBuf.length === storedBuf.length &&
+            require("crypto").timingSafeEqual(inputBuf, storedBuf);
+
+        if (!codesMatch) {
             // Increment attempts
             entry.attempts++;
             await fetch(`${WP_BASE}/custom/v1/otp`, {
@@ -158,13 +137,11 @@ export async function verifyOTP(email: string, code: string): Promise<{
             return { valid: false, error: "Invalid OTP code. Please try again." };
         }
 
-        // Valid - delete transient
+        // Valid — delete transient immediately (one-time use)
         await fetch(`${WP_BASE}/custom/v1/otp/otp_${key}`, {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },
         });
-
-        console.log("✅ [verifyOTP] OTP verified successfully");
 
         return {
             valid: true,
@@ -172,13 +149,20 @@ export async function verifyOTP(email: string, code: string): Promise<{
             userData: entry.userData,
         };
     } catch (error) {
-        console.error("❌ [verifyOTP] Error:", error);
+        console.error("[verifyOTP] Verification error for email hash:", hashEmail(email));
         return { valid: false, error: "Verification failed. Please try again." };
     }
 }
 
-export async function hasRecentOTP(email: string): Promise<boolean> {
-    // For simplicity, always return false (allow OTP requests)
-    // You can implement rate limiting here if needed
+export async function hasRecentOTP(_email: string): Promise<boolean> {
     return false;
+}
+
+// One-way hash for safe logging — never log raw emails
+function hashEmail(email: string): string {
+    return require("crypto")
+        .createHash("sha256")
+        .update(email.toLowerCase().trim())
+        .digest("hex")
+        .slice(0, 8);
 }

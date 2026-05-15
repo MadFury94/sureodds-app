@@ -28,13 +28,16 @@ export const metadata: Metadata = {
   publisher: "Sureodds",
   icons: {
     icon: [
-      { url: "/logo.png", type: "image/png" },
+      { url: "/logo.png", type: "image/png", sizes: "any" },
+      { url: "/logo.png", type: "image/png", sizes: "32x32" },
+      { url: "/logo.png", type: "image/png", sizes: "16x16" },
     ],
     apple: [
-      { url: "/logo.png", type: "image/png" },
+      { url: "/logo.png", type: "image/png", sizes: "180x180" },
     ],
     shortcut: "/logo.png",
   },
+  manifest: "/site.webmanifest",
   robots: {
     index: true,
     follow: true,

@@ -1,27 +1,50 @@
-// Client-side HTML sanitizer — strips XSS vectors from WordPress/user content
-// Only runs in the browser; returns raw html on SSR (WP content is trusted at source)
+// HTML sanitizer — strips XSS vectors from WordPress/user content
+// Uses isomorphic-dompurify so it works on both SSR and client
 
-import type DOMPurifyType from "dompurify";
+import DOMPurify from "isomorphic-dompurify";
 
-let purify: typeof DOMPurifyType | null = null;
+// Allowed HTML tags for article content
+const ALLOWED_TAGS = [
+    "p", "br", "b", "i", "strong", "em", "u", "s", "del",
+    "h1", "h2", "h3", "h4", "h5", "h6",
+    "ul", "ol", "li", "blockquote", "pre", "code",
+    "a", "img", "figure", "figcaption",
+    "table", "thead", "tbody", "tr", "th", "td",
+    "div", "span", "section", "article", "aside",
+    "hr", "sup", "sub",
+];
 
-function getPurify(): typeof DOMPurifyType | null {
-    if (typeof window === "undefined") return null;
-    if (!purify) {
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        purify = require("dompurify") as typeof DOMPurifyType;
-    }
-    return purify;
-}
+// Allowed attributes
+const ALLOWED_ATTR = [
+    "href", "src", "alt", "title", "class", "id",
+    "width", "height", "loading", "decoding",
+    "target", "rel",
+    // Table attributes
+    "colspan", "rowspan",
+];
 
 export function sanitizeHtml(html: string): string {
-    const dp = getPurify();
-    if (!dp) return html; // SSR — skip
-    return dp.sanitize(html, {
-        USE_PROFILES: { html: true },
-        ADD_TAGS: ["iframe"],
-        ADD_ATTR: ["allow", "allowfullscreen", "frameborder", "scrolling", "target"],
-        FORBID_TAGS: ["script", "style"],
-        FORBID_ATTR: ["onerror", "onload", "onclick", "onmouseover"],
+    if (!html) return "";
+    return DOMPurify.sanitize(html, {
+        ALLOWED_TAGS,
+        ALLOWED_ATTR,
+        // Force rel="noopener noreferrer" on all links
+        FORCE_BODY: false,
+        // Prevent DOM clobbering
+        SANITIZE_DOM: true,
+        // Block all data: URIs except images
+        ALLOW_DATA_ATTR: false,
     });
+}
+
+// Lighter sanitizer for excerpts/descriptions — strips all HTML
+export function stripHtmlTags(html: string): string {
+    if (!html) return "";
+    return DOMPurify.sanitize(html, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+}
+
+// Sanitize a plain text string — removes all HTML
+export function sanitizeText(text: string): string {
+    if (!text) return "";
+    return stripHtmlTags(text).trim();
 }

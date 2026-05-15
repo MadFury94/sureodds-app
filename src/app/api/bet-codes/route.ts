@@ -138,12 +138,18 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const { bookmaker, code, link, image, description, odds, stake, expiresAt, category, confidence } = body;
 
-        if (!bookmaker) {
-            return NextResponse.json({ error: "Bookmaker is required" }, { status: 400 });
+        // Input validation
+        if (!bookmaker || typeof bookmaker !== "string" || bookmaker.length > 100) {
+            return NextResponse.json({ error: "Bookmaker is required (max 100 chars)" }, { status: 400 });
         }
-
         if (!code && !link && !image) {
             return NextResponse.json({ error: "At least one of code, link, or image is required" }, { status: 400 });
+        }
+        if (link && !/^https?:\/\/.+/.test(link)) {
+            return NextResponse.json({ error: "Link must be a valid URL" }, { status: 400 });
+        }
+        if (description && typeof description === "string" && description.length > 2000) {
+            return NextResponse.json({ error: "Description too long (max 2000 chars)" }, { status: 400 });
         }
 
         if (!category) {
@@ -155,20 +161,31 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Invalid category" }, { status: 400 });
         }
 
-        // Get WordPress auth credentials
+        // Get WordPress JWT token (more secure than Basic Auth)
         const wpUser = process.env.WP_ADMIN_USER;
         const wpPass = process.env.WP_ADMIN_PASSWORD;
+        const WP_JWT_BASE = WP_API_URL.replace("/wp/v2", "");
 
         if (!wpUser || !wpPass) {
             return NextResponse.json({ error: "WordPress credentials not configured" }, { status: 500 });
         }
 
-        // Create post in WordPress using admin credentials
+        const tokenRes = await fetch(`${WP_JWT_BASE}/jwt-auth/v1/token`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: wpUser, password: wpPass }),
+        });
+        if (!tokenRes.ok) {
+            return NextResponse.json({ error: "Failed to authenticate with WordPress" }, { status: 500 });
+        }
+        const { token: wpToken } = await tokenRes.json();
+
+        // Create post in WordPress using JWT token
         const wpResponse = await fetch(`${WP_API_URL}/bet-codes`, {
-            method: 'POST',
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Basic ' + Buffer.from(`${wpUser}:${wpPass}`).toString('base64'),
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${wpToken}`,
             },
             body: JSON.stringify({
                 title: `${bookmaker} - ${description.substring(0, 50)}`,
