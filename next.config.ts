@@ -30,23 +30,90 @@ const nextConfig: NextConfig = {
         destination: "/betting",
         permanent: true,
       },
-      // /predictions-betting-tips/:slug → /article/:slug (if old slugs existed)
+      // /predictions-betting-tips/:slug → /article/:slug
       {
         source: "/predictions-betting-tips/:slug",
         destination: "/article/:slug",
         permanent: true,
       },
-      // /category/:sport/page/:num — pagination-style URLs that don't exist
+      // /category/:sport/page/:num — old WP pagination
       {
         source: "/category/:sport/page/:num",
         destination: "/category/:sport",
         permanent: true,
       },
-      // /luka-modrics-season-ends-following-successful-facial-surgery/ (bare slug at root)
-      // These are WordPress-era URLs at the root — redirect to /article/:slug
-      // Can't enumerate all 247 — this wildcard handles the pattern:
-      // We only redirect root-level slugs that look like article slugs (contain hyphens and no known top-level route)
-    ];
+      // /category/:sport/:sub — e.g. /category/epl/epl-top-headline
+      {
+        source: "/category/:sport/:sub",
+        destination: "/category/:sport",
+        permanent: true,
+      },
+      // /tag/:tag — WordPress tag pages don't exist
+      {
+        source: "/tag/:tag",
+        destination: "/",
+        permanent: true,
+      },
+      // /tag/:tag/page/:num
+      {
+        source: "/tag/:tag/page/:num",
+        destination: "/",
+        permanent: true,
+      },
+      // /tag/:tag/feed/ — WordPress RSS for tags
+      {
+        source: "/tag/:tag/feed",
+        destination: "/",
+        permanent: true,
+      },
+      // /:slug/feed/ — WordPress per-post RSS feeds
+      {
+        source: "/:slug/feed",
+        destination: "/article/:slug",
+        permanent: true,
+      },
+      // /page/:num — WordPress root pagination e.g. /page/2/, /page/122/
+      {
+        source: "/page/:num",
+        destination: "/",
+        permanent: true,
+      },
+      // /live-scores — old page that doesn't exist
+      {
+        source: "/live-scores",
+        destination: "/",
+        permanent: true,
+      },
+      // /daily-tips — old page
+      {
+        source: "/daily-tips",
+        destination: "/betting",
+        permanent: true,
+      },
+      // /editorial-guidelines — old WP page
+      {
+        source: "/editorial-guidelines",
+        destination: "/about",
+        permanent: true,
+      },
+      // /terms-conditions — old WP page
+      {
+        source: "/terms-conditions",
+        destination: "/about",
+        permanent: true,
+      },
+      // /feed.xml — redirect to home (RSS not implemented)
+      {
+        source: "/feed.xml",
+        destination: "/",
+        permanent: false,
+      },
+      // /$  and /& — garbage crawler URLs
+      {
+        source: "/$",
+        destination: "/",
+        permanent: true,
+      },
   },
   images: {
     formats: ["image/avif", "image/webp"],
