@@ -264,7 +264,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ sport
                                     <CategorySidebar sport={sport} color={color} standings={standings} recent={recent} />
 
                                     {/* AdSense sidebar */}
-                                    <AdUnit slot="0000000000" format="vertical" />
+                                    <AdUnit slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_SIDEBAR ?? "0000000000"} format="vertical" />
                                 </div>
                             </div>
                         </div>

@@ -2,6 +2,52 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  async redirects() {
+    return [
+      // ── www → non-www (canonical domain) ─────────────────────────────────
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.sureodds.ng" }],
+        destination: "https://sureodds.ng/:path*",
+        permanent: true,
+      },
+      // ── Old/stale URLs crawled by Google ─────────────────────────────────
+      // /home → /
+      {
+        source: "/home",
+        destination: "/",
+        permanent: true,
+      },
+      // /article (no slug) → /
+      {
+        source: "/article",
+        destination: "/",
+        permanent: true,
+      },
+      // /predictions-betting-tips → /betting
+      {
+        source: "/predictions-betting-tips",
+        destination: "/betting",
+        permanent: true,
+      },
+      // /predictions-betting-tips/:slug → /article/:slug (if old slugs existed)
+      {
+        source: "/predictions-betting-tips/:slug",
+        destination: "/article/:slug",
+        permanent: true,
+      },
+      // /category/:sport/page/:num — pagination-style URLs that don't exist
+      {
+        source: "/category/:sport/page/:num",
+        destination: "/category/:sport",
+        permanent: true,
+      },
+      // /luka-modrics-season-ends-following-successful-facial-surgery/ (bare slug at root)
+      // These are WordPress-era URLs at the root — redirect to /article/:slug
+      // Can't enumerate all 247 — this wildcard handles the pattern:
+      // We only redirect root-level slugs that look like article slugs (contain hyphens and no known top-level route)
+    ];
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [

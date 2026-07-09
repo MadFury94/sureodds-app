@@ -16,6 +16,10 @@ export default function robots(): MetadataRoute.Robots {
                     "/register",
                     "/login",
                     "/subscribe",
+                    // Old/dead URL patterns that return 404 — stop crawlers wasting crawl budget
+                    "/home",
+                    "/article$",          // bare /article with no slug
+                    "/predictions-betting-tips",
                 ],
             },
         ],
