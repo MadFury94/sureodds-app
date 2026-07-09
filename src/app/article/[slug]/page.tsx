@@ -102,7 +102,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         description,
         image: [image],
         datePublished: post.date,
-        dateModified: post.date,
+        dateModified: post.modified || post.date,
         author: { "@type": "Person", name: author },
         publisher: {
             "@type": "Organization",

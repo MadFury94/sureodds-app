@@ -4,12 +4,20 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sureodds.ng";
 
 export const metadata: Metadata = {
     title: "Contact Us | Sureodds",
-    description: "Get in touch with the Sureodds team. Advertising, press, partnerships, corrections and general enquiries.",
+    description:
+        "Get in touch with the Sureodds team for advertising, press inquiries, partnerships, corrections or general questions.",
     alternates: { canonical: `${SITE_URL}/contact` },
     openGraph: {
         type: "website",
-        title: "Contact Sureodds",
-        description: "Reach out for advertising, press, partnerships or general enquiries.",
+        url: `${SITE_URL}/contact`,
+        title: "Contact Us | Sureodds",
+        description: "Reach the Sureodds team for advertising, press, partnerships and support.",
+        images: [{ url: `${SITE_URL}/logo.png`, width: 800, height: 800, alt: "Sureodds" }],
+    },
+    twitter: {
+        card: "summary",
+        title: "Contact Us | Sureodds",
+        description: "Reach the Sureodds team for advertising, press, partnerships and support.",
     },
 };
 

@@ -6,12 +6,14 @@ export interface WPPost {
     id: number;
     slug: string;
     date: string;
+    modified: string;
     title: { rendered: string };
     excerpt: { rendered: string };
     content: { rendered: string };
     featured_media: number;
     jetpack_featured_media_url?: string;
     categories: number[];
+    tags: number[];
     _embedded?: {
         "wp:featuredmedia"?: Array<{ source_url: string; alt_text: string }>;
         "wp:term"?: Array<Array<{ id: number; name: string; slug: string }>>;

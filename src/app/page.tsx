@@ -24,6 +24,13 @@ export const metadata: Metadata = {
     url: SITE_URL,
     title: "Sureodds | Football News, Betting Tips & Match Analysis",
     description: "Your home for football news, transfer updates, match previews, betting tips and live scores.",
+    images: [{ url: `${SITE_URL}/logo.png`, width: 800, height: 800, alt: "Sureodds" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Sureodds | Football News, Betting Tips & Match Analysis",
+    description: "Your home for football news, transfer updates, match previews, betting tips and live scores.",
+    images: [`${SITE_URL}/logo.png`],
   },
 };
 
@@ -152,7 +159,7 @@ export default async function Home() {
 
       {transferSection && <SportSection {...transferSection} />}
 
-      <AdUnit slot="0000000000" format="auto" style={{ maxWidth: "132.48rem", margin: "0 auto", padding: "0 1.2rem" }} />
+      <AdUnit slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_HOME ?? "0000000000"} format="auto" style={{ maxWidth: "132.48rem", margin: "0 auto", padding: "0 1.2rem" }} />
 
       {latestNewsPosts.length > 0 && (
         <LatestSection posts={latestNewsPosts.map(p => ({
@@ -166,7 +173,7 @@ export default async function Home() {
 
       <PhoneMarquee />
 
-      <AdUnit slot="0000000000" format="auto" style={{ maxWidth: "132.48rem", margin: "0 auto", padding: "0 1.2rem" }} />
+      <AdUnit slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_HOME ?? "0000000000"} format="auto" style={{ maxWidth: "132.48rem", margin: "0 auto", padding: "0 1.2rem" }} />
 
       {breakingSection && <SportSection {...breakingSection} reverse />}
       {laLigaSection && <SportSection {...laLigaSection} />}

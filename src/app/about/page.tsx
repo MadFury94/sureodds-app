@@ -9,6 +9,8 @@ export const metadata: Metadata = {
         type: "website",
         title: "About Sureodds",
         description: "Built by fans, for fans. Expert football coverage with zero fluff.",
+        url: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://sureodds.ng"}/about`,
+        images: [{ url: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://sureodds.ng"}/logo.png`, width: 800, height: 800, alt: "Sureodds" }],
     },
 };
 

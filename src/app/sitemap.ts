@@ -1,22 +1,25 @@
 import type { MetadataRoute } from "next";
-import { getPosts, getCategories } from "@/lib/wordpress";
+import { getAllPosts, getCategories } from "@/lib/wordpress";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sureodds.ng";
 
 const CATEGORY_SLUGS = [
     "news", "transfer", "breaking-news", "football-stories",
     "la-liga", "epl", "ucl", "afcon", "serie-a", "international-football",
+    "blog",
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const now = new Date();
 
-    // Static pages
+    // Static pages — ordered by importance
     const staticPages: MetadataRoute.Sitemap = [
         { url: SITE_URL, lastModified: now, changeFrequency: "hourly", priority: 1.0 },
-        { url: `${SITE_URL}/betting`, lastModified: now, changeFrequency: "daily", priority: 0.8 },
+        { url: `${SITE_URL}/betting`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
+        { url: `${SITE_URL}/bet-codes`, lastModified: now, changeFrequency: "daily", priority: 0.8 },
         { url: `${SITE_URL}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
         { url: `${SITE_URL}/contact`, lastModified: now, changeFrequency: "monthly", priority: 0.4 },
+        // /search and /h2h are noindex tool pages — intentionally excluded
     ];
 
     // Category pages
@@ -27,13 +30,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.9,
     }));
 
-    // Article pages — fetch latest 100
+    // Article pages — fetch ALL posts (not just 100)
     let articlePages: MetadataRoute.Sitemap = [];
     try {
-        const posts = await getPosts({ perPage: 100 });
+        const posts = await getAllPosts();
         articlePages = posts.map(post => ({
             url: `${SITE_URL}/article/${post.slug}`,
-            lastModified: new Date(post.date),
+            lastModified: new Date(post.modified || post.date),
             changeFrequency: "weekly" as const,
             priority: 0.7,
         }));

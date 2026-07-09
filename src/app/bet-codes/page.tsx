@@ -78,7 +78,7 @@ export default function BetCodesPublicPage() {
                         </h1>
                         {!user ? (
                             <button
-                                onClick={() => router.push("/auth/login")}
+                                onClick={() => router.push("/login")}
                                 style={{
                                     padding: "1.2rem 2.4rem",
                                     backgroundColor: "#ff6b00",
@@ -192,7 +192,7 @@ export default function BetCodesPublicPage() {
                         </p>
                         {userRole === "guest" && (
                             <button
-                                onClick={() => router.push("/auth/login")}
+                                onClick={() => router.push("/login")}
                                 style={{
                                     padding: "1.2rem 3.2rem",
                                     backgroundColor: "#ff6b00",

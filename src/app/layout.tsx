@@ -9,7 +9,7 @@ import { headers } from "next/headers";
 
 const DEFAULT_DESCRIPTION =
   "Sureodds — expert football analysis, transfer news, match previews, betting tips, La Liga, EPL, UCL and AFCON coverage. Stay ahead of the game.";
-const DEFAULT_OG_IMAGE = `${SITE_URL}/og-default.jpg`;
+const DEFAULT_OG_IMAGE = `${SITE_URL}/logo.png`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
