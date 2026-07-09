@@ -1,7 +1,9 @@
 import { readFileSync } from "fs";
 import path from "path";
+import type { Metadata } from "next";
 import { fonts } from "@/lib/config";
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sureodds.ng";
 const f = fonts.body;
 const fd = fonts.display;
 
@@ -32,6 +34,38 @@ function getTip(id: string): Tip | null {
     } catch {
         return null;
     }
+}
+
+export async function generateMetadata(
+    { params }: { params: Promise<{ id: string }> }
+): Promise<Metadata> {
+    const { id } = await params;
+    const tip = getTip(id);
+    if (!tip) return { title: "Prediction Not Found | Sureodds" };
+
+    const title = `${tip.home} vs ${tip.away} Prediction — ${tip.outcome} @ ${tip.odds}`;
+    const description = tip.analysis
+        ? tip.analysis.slice(0, 155).trim() + "…"
+        : `Expert prediction for ${tip.home} vs ${tip.away}. ${tip.league} — ${tip.matchDate}.`;
+
+    return {
+        title: `${title} | Sureodds`,
+        description,
+        alternates: { canonical: `${SITE_URL}/predictions/${id}` },
+        openGraph: {
+            type: "article",
+            url: `${SITE_URL}/predictions/${id}`,
+            title,
+            description,
+            images: [{ url: `${SITE_URL}/logo.png`, width: 800, height: 800, alt: "Sureodds prediction" }],
+        },
+        twitter: {
+            card: "summary",
+            title,
+            description,
+            images: [`${SITE_URL}/logo.png`],
+        },
+    };
 }
 
 export default async function PredictionPage({ params }: { params: Promise<{ id: string }> }) {

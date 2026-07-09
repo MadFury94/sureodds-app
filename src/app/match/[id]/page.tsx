@@ -32,6 +32,13 @@ export async function generateMetadata(
             url: `${SITE_URL}/match/${id}`,
             title,
             description,
+            images: [{ url: `${SITE_URL}/logo.png`, width: 800, height: 800, alt: title }],
+        },
+        twitter: {
+            card: "summary",
+            title,
+            description,
+            images: [`${SITE_URL}/logo.png`],
         },
     };
 }
