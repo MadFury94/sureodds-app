@@ -114,6 +114,7 @@ const nextConfig: NextConfig = {
         destination: "/",
         permanent: true,
       },
+    ];
   },
   images: {
     formats: ["image/avif", "image/webp"],
