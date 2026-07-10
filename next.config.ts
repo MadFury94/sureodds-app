@@ -2,6 +2,13 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  // Prevent dev server from reloading on changes to these directories
+  experimental: {
+    staleTimes: {
+      dynamic: 0,
+      static: 180,
+    },
+  },
   async redirects() {
     return [
       // ── www → non-www (canonical domain) ─────────────────────────────────

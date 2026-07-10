@@ -58,3 +58,6 @@ cookies.txt
 
 # Magic links store (development only)
 .magic-links.json
+
+# Google Search Console exports (local analysis only)
+public/ads/
