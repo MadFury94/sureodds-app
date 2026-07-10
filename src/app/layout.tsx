@@ -27,14 +27,8 @@ export const metadata: Metadata = {
   creator: "Sureodds",
   publisher: "Sureodds",
   icons: {
-    icon: [
-      { url: "/logo.png", type: "image/png", sizes: "any" },
-      { url: "/logo.png", type: "image/png", sizes: "32x32" },
-      { url: "/logo.png", type: "image/png", sizes: "16x16" },
-    ],
-    apple: [
-      { url: "/logo.png", type: "image/png", sizes: "180x180" },
-    ],
+    icon: "/logo.png",
+    apple: "/logo.png",
     shortcut: "/logo.png",
   },
   manifest: "/site.webmanifest",

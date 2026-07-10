@@ -7,10 +7,13 @@ export const FD_LEAGUE_CODES: Record<string, string> = {
     "la-liga": "PD",
     ucl: "CL",
     "serie-a": "SA",
+    "world-cup": "WC",
+    "bundesliga": "BL1",
+    "ligue-1": "FL1",
 };
 
-// Competitions that have league-format standings
-export const HAS_STANDINGS = new Set(["PL", "PD", "SA"]);
+// Competitions that have league-format standings (not knockout/group only)
+export const HAS_STANDINGS = new Set(["PL", "PD", "SA", "BL1", "FL1"]);
 
 async function fdFetch<T>(path: string, revalidate = 300): Promise<T | null> {
     if (!KEY) {
@@ -294,14 +297,43 @@ export async function getTopScorers(code: string, limit = 10): Promise<TopScorer
     return data.scorers.slice(0, limit);
 }
 
-/** Get live matches across all competitions */
+/** Get live matches across all competitions including World Cup */
 export async function getLiveMatches(): Promise<MatchCard[]> {
-    const data = await fdFetch<{ matches: FDMatch[] }>(
-        `/matches?status=IN_PLAY`,
-        60 // Revalidate every minute for live data
-    );
-    if (!data?.matches?.length) return [];
-    return data.matches.map(normaliseMatch);
+    const [globalLive, wcLive] = await Promise.all([
+        fdFetch<{ matches: FDMatch[] }>(`/matches?status=IN_PLAY`, 30),
+        fdFetch<{ matches: FDMatch[] }>(`/competitions/WC/matches?status=IN_PLAY,PAUSED`, 30),
+    ]);
+
+    const allMatches = [
+        ...(globalLive?.matches ?? []),
+        ...(wcLive?.matches ?? []),
+    ];
+
+    // Deduplicate by id
+    const seen = new Set<number>();
+    return allMatches
+        .filter(m => seen.has(m.id) ? false : (seen.add(m.id), true))
+        .map(normaliseMatch);
+}
+
+/** Get today's and recent World Cup matches */
+export async function getWorldCupMatches(limit = 10): Promise<MatchCard[]> {
+    // Fetch recent finished + live + upcoming in one call
+    const [finished, live, upcoming] = await Promise.all([
+        fdFetch<{ matches: FDMatch[] }>(`/competitions/WC/matches?status=FINISHED`, 120),
+        fdFetch<{ matches: FDMatch[] }>(`/competitions/WC/matches?status=IN_PLAY,PAUSED`, 30),
+        fdFetch<{ matches: FDMatch[] }>(`/competitions/WC/matches?status=SCHEDULED,TIMED`, 300),
+    ]);
+
+    const liveMatches = (live?.matches ?? []).map(normaliseMatch);
+    const recentFinished = (finished?.matches ?? []).slice(-limit).reverse().map(normaliseMatch);
+    const nextMatches = (upcoming?.matches ?? []).slice(0, 4).map(normaliseMatch);
+
+    // Priority: live first, then recent results, then upcoming
+    const combined = [...liveMatches, ...recentFinished, ...nextMatches];
+    // Deduplicate by id
+    const seen = new Set<number>();
+    return combined.filter(m => seen.has(m.id) ? false : (seen.add(m.id), true)).slice(0, limit);
 }
 
 /** Get detailed match information including lineups, goals, cards, subs */

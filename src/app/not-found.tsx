@@ -90,6 +90,7 @@ export default function NotFound() {
                         <Link
                             key={link.href}
                             href={link.href}
+                            className="not-found-link"
                             style={{
                                 padding: "1.4rem",
                                 border: "1.5px solid #e8ebed",
@@ -99,16 +100,9 @@ export default function NotFound() {
                                 fontWeight: 700,
                                 color: "#1a1a1a",
                                 textDecoration: "none",
-                                transition: "border-color 0.15s, background-color 0.15s",
                                 backgroundColor: "#fff",
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.borderColor = "#ff6b00";
-                                e.currentTarget.style.backgroundColor = "#fff5f0";
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.borderColor = "#e8ebed";
-                                e.currentTarget.style.backgroundColor = "#fff";
+                                display: "block",
+                                textAlign: "center",
                             }}
                         >
                             {link.label}

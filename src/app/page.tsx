@@ -12,7 +12,7 @@ import {
   getPosts, getCategories, getFeaturedImage, getPostCategory,
   formatDate, decodeTitle, WPPost, WPCategory
 } from "@/lib/wordpress";
-import { getRecentMatches, getUpcomingMatches } from "@/lib/footballdata";
+import { getRecentMatches, getUpcomingMatches, getWorldCupMatches } from "@/lib/footballdata";
 import { SITE_URL, LEAGUE_LOGOS } from "@/lib/config";
 
 export const metadata: Metadata = {
@@ -80,17 +80,21 @@ export default async function Home() {
   // Fetch featured matches for ScoreSection
   async function getFeaturedMatches() {
     try {
-      const [eplMatches, laLigaMatches, uclMatches] = await Promise.all([
+      const [wcMatches, eplMatches, laLigaMatches, uclMatches] = await Promise.all([
+        getWorldCupMatches(4),
         getRecentMatches("PL", 2),
         getRecentMatches("PD", 2),
         getRecentMatches("CL", 2),
       ]);
-      const allMatches = [...eplMatches, ...laLigaMatches, ...uclMatches];
-      // Take up to 4 matches for the ScoreSection
+
+      // World Cup matches first if available, then league matches
+      const allMatches = wcMatches.length > 0
+        ? [...wcMatches, ...eplMatches, ...laLigaMatches, ...uclMatches]
+        : [...eplMatches, ...laLigaMatches, ...uclMatches];
+
       return allMatches.slice(0, 4).map(match => ({
         title: `${match.home} vs ${match.away}`,
         emoji: "⚽",
-        // Use home team crest as image, or fallback to competition emblem
         image: match.homeCrest || "/afconbg.webp",
         homeTeam: match.home,
         awayTeam: match.away,
