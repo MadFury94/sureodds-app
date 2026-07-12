@@ -23,10 +23,8 @@ export const metadata: Metadata = {
 };
 
 const team = [
-    { name: "Jordan Ellis", role: "Editor in Chief", initials: "JE", bio: "15 years covering football. Former beat writer for three clubs." },
-    { name: "Marcus Webb", role: "Senior Transfer Writer", initials: "MW", bio: "Transfer analyst and contract nerd. Knows every clause in the game." },
-    { name: "Sofia Reyes", role: "UCL Correspondent", initials: "SR", bio: "Champions League obsessive. Covers European football from Madrid." },
-    { name: "Darius King", role: "Stats Editor", initials: "DK", bio: "Advanced stats advocate. Data-driven takes on every match." },
+    { name: "JFakayejo Paul Adeluyi", role: "Editor in Chief", initials: "JE", bio: "15 years covering football. Former beat writer for three clubs." },
+
 ];
 
 export default function AboutPage() {
@@ -124,9 +122,9 @@ export default function AboutPage() {
                 {/* Stats */}
                 <div className="about-stats">
                     {[
-                        { num: "2M+", label: "Monthly Readers" },
-                        { num: "50+", label: "Articles Per Week" },
-                        { num: "8", label: "Sports Covered" },
+                        { num: "100K+", label: "Monthly Readers" },
+                        { num: "10+", label: "Articles Per Week" },
+                        { num: "8", label: "Leagues Covered" },
                     ].map(s => (
                         <div key={s.label}>
                             <p style={{ fontFamily: '"Druk Text Wide","Arial Black",sans-serif', fontWeight: 700, fontSize: "clamp(2.8rem, 5vw, 5rem)", color: "#1a1a1a", lineHeight: 1 }}>{s.num}</p>

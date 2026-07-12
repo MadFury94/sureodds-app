@@ -72,10 +72,35 @@ export default async function Home() {
     getFeaturedMatches(),
   ]);
 
+  // ── Deduplication ──────────────────────────────────────────────────────
+  // Track slugs already shown to avoid the same story appearing in multiple sections
+  const shown = new Set<string>();
+  function dedupe(posts: WPPost[], limit: number): WPPost[] {
+    const out: WPPost[] = [];
+    for (const p of posts) {
+      if (!shown.has(p.slug) && out.length < limit) {
+        shown.add(p.slug);
+        out.push(p);
+      }
+    }
+    return out;
+  }
+
+  // Hero gets first pick
   const heroPost = latestPosts[0] ?? null;
-  const leftPosts = latestPosts.slice(1, 3);
-  const topHeadlines = latestPosts.slice(3, 9);
+  if (heroPost) shown.add(heroPost.slug);
+  const leftPosts = dedupe(latestPosts.slice(1), 2);
+  const topHeadlines = dedupe(latestPosts, 6);
+
+  // Most Read pulls from a separate "popular" pool — allow overlap here intentionally
+  // (readers expect Most Read to be independent of what's above the fold)
   const mostReadPosts = latestPosts.slice(0, 4);
+
+  // Latest news strip — exclude anything already in hero/left/headlines
+  const latestStrip = dedupe(
+    [...latestNewsPosts, ...latestPosts],
+    8
+  );
 
   // Fetch featured matches for ScoreSection
   async function getFeaturedMatches() {
@@ -121,11 +146,11 @@ export default async function Home() {
     };
   }
 
-  const transferSection = toSection("Transfers", transferPosts, "transfer");
-  const breakingSection = toSection("Breaking News", breakingPosts, "breaking-news");
-  const laLigaSection = toSection("La Liga", laLigaPosts, "la-liga");
-  const eplSection = toSection("Premier League", eplPosts, "epl");
-  const serieASection = toSection("Serie A", serieAPosts, "serie-a");
+  const transferSection = toSection("Transfers", dedupe(transferPosts, 5), "transfer");
+  const breakingSection = toSection("Breaking News", dedupe(breakingPosts, 5), "breaking-news");
+  const laLigaSection = toSection("La Liga", dedupe(laLigaPosts, 5), "la-liga");
+  const eplSection = toSection("Premier League", dedupe(eplPosts, 5), "epl");
+  const serieASection = toSection("Serie A", dedupe(serieAPosts, 5), "serie-a");
 
   return (
     <>
@@ -165,8 +190,8 @@ export default async function Home() {
 
       <AdUnit slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_HOME ?? "0000000000"} format="auto" style={{ maxWidth: "132.48rem", margin: "0 auto", padding: "0 1.2rem" }} />
 
-      {latestNewsPosts.length > 0 && (
-        <LatestSection posts={latestNewsPosts.map(p => ({
+      {latestStrip.length > 0 && (
+        <LatestSection posts={latestStrip.map(p => ({
           slug: p.slug,
           title: decodeTitle(p.title.rendered),
           image: getFeaturedImage(p),

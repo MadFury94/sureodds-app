@@ -18,10 +18,27 @@ export default function ContactPage() {
     const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
     const [sent, setSent] = useState(false);
     const [focused, setFocused] = useState<string | null>(null);
+    const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState("");
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        setSent(true);
+        setSubmitting(true);
+        fetch("/api/contact", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(form),
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    setSent(true);
+                } else {
+                    setError(data.error ?? "Something went wrong. Please try again.");
+                }
+            })
+            .catch(() => setError("Something went wrong. Please try again."))
+            .finally(() => setSubmitting(false));
     }
 
     const inp = (field: string): React.CSSProperties => ({
@@ -142,10 +159,14 @@ export default function ContactPage() {
                                 <p style={{ fontFamily: f, fontSize: "1.3rem", color: "#99989f" }}>
                                     Fields marked <span style={{ color: "#ff6b00" }}>*</span> are required
                                 </p>
-                                <button type="submit" className="contact-btn">
-                                    Send Message
+                                <button type="submit" className="contact-btn" disabled={submitting}
+                                    style={{ opacity: submitting ? 0.7 : 1, cursor: submitting ? "not-allowed" : "pointer" }}>
+                                    {submitting ? "Sending..." : "Send Message"}
                                 </button>
                             </div>
+                            {error && (
+                                <p style={{ fontFamily: f, fontSize: "1.3rem", color: "#ff6b00", textAlign: "center" }}>{error}</p>
+                            )}
                         </form>
                     )}
                 </div>

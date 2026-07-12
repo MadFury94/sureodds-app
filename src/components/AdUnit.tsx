@@ -53,14 +53,17 @@ export default function AdUnit({
         >
             {label && (
                 <p style={{
-                    fontSize: "1rem",
-                    color: "#99989f",
+                    fontSize: "0.9rem",
+                    color: "#bbb",
                     textTransform: "uppercase",
-                    letterSpacing: "0.1em",
+                    letterSpacing: "0.12em",
                     margin: "0 0 0.4rem",
                     fontFamily: "Arial, sans-serif",
+                    borderTop: "1px solid #e8ebed",
+                    paddingTop: "0.4rem",
+                    display: "inline-block",
                 }}>
-                    Advertisement
+                    Ad
                 </p>
             )}
             <ins

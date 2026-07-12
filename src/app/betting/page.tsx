@@ -258,7 +258,19 @@ function TipCard({ tip }: { tip: Tip }) {
                             </span>
                         )}
                     </div>
-                    <img src="/logo.png" alt="Sureodds" style={{ height: "1.8rem", width: "auto", opacity: 0.5 }} />
+                    {tip.createdBy ? (
+                        <div style={{
+                            width: "3.2rem", height: "3.2rem", borderRadius: "50%",
+                            backgroundColor: "#1a1a1a", display: "flex", alignItems: "center", justifyContent: "center",
+                            flexShrink: 0,
+                        }}>
+                            <span style={{ fontFamily: f, fontSize: "1.1rem", fontWeight: 700, color: "#fff" }}>
+                                {tip.createdBy.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+                            </span>
+                        </div>
+                    ) : (
+                        <span style={{ fontFamily: f, fontSize: "1.1rem", color: "#99989f" }}>SO</span>
+                    )}
                 </div>
             </div>
         </div>

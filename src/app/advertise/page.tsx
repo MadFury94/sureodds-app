@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import PageHeader from "@/components/PageHeader";
+import Icon from "@/components/Icon";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sureodds.ng";
 const f = '"Proxima Nova", Arial, sans-serif';
@@ -19,12 +20,12 @@ export const metadata: Metadata = {
 };
 
 const adFormats = [
-    { icon: "📰", title: "Sponsored Articles", desc: "Native content written by our editorial team or supplied by you. Published alongside organic editorial and clearly labelled as sponsored." },
-    { icon: "🖼️", title: "Display Advertising", desc: "High-visibility banner placements across homepage, category pages and article sidebars. Desktop and mobile formats available." },
-    { icon: "📬", title: "Newsletter Sponsorship", desc: "Reach our engaged email subscribers directly. Logo placement, dedicated sections or full takeovers available." },
-    { icon: "📱", title: "Social Amplification", desc: "Boost your campaign reach across our Twitter, Instagram, Facebook and TikTok channels with dedicated posts." },
-    { icon: "🎯", title: "Category Takeovers", desc: "Own an entire category — EPL, La Liga, UCL, AFCON — for a set period. Maximum brand visibility for sports-specific campaigns." },
-    { icon: "✉️", title: "Custom Partnerships", desc: "Have something else in mind? We're open to creative partnerships. Get in touch and let's build something together." },
+    { icon: "article" as const, title: "Sponsored Articles", desc: "Native content written by our editorial team or supplied by you. Published alongside organic editorial and clearly labelled as sponsored." },
+    { icon: "display" as const, title: "Display Advertising", desc: "High-visibility banner placements across homepage, category pages and article sidebars. Desktop and mobile formats available." },
+    { icon: "newsletter" as const, title: "Newsletter Sponsorship", desc: "Reach our engaged email subscribers directly. Logo placement, dedicated sections or full takeovers available." },
+    { icon: "social" as const, title: "Social Amplification", desc: "Boost your campaign reach across our Twitter, Instagram, Facebook and TikTok channels with dedicated posts." },
+    { icon: "target" as const, title: "Category Takeovers", desc: "Own an entire category — EPL, La Liga, UCL, AFCON — for a set period. Maximum brand visibility for sports-specific campaigns." },
+    { icon: "handshake" as const, title: "Custom Partnerships", desc: "Have something else in mind? We're open to creative partnerships. Get in touch and let's build something together." },
 ];
 
 const stats = [
@@ -42,6 +43,8 @@ export default function AdvertisePage() {
                 .adv-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 2rem; margin-bottom: 7rem; }
                 .adv-grid  { display: grid; grid-template-columns: repeat(3,1fr); gap: 2.4rem; margin-bottom: 7rem; }
                 .adv-card  { padding: 2.8rem; border: 1.5px solid #e8ebed; border-radius: 1.2rem; }
+                .adv-icon  { width: 4.8rem; height: 4.8rem; border-radius: 1rem; background: #f2f5f6;
+                             display: flex; align-items: center; justify-content: center; margin-bottom: 1.6rem; }
                 @media(max-width:900px){
                     .adv-stats { grid-template-columns: repeat(2,1fr); }
                     .adv-grid  { grid-template-columns: repeat(2,1fr); }
@@ -79,7 +82,9 @@ export default function AdvertisePage() {
                 <div className="adv-grid">
                     {adFormats.map(fmt => (
                         <div key={fmt.title} className="adv-card">
-                            <p style={{ fontSize: "3.2rem", marginBottom: "1.2rem" }}>{fmt.icon}</p>
+                            <div className="adv-icon">
+                                <Icon name={fmt.icon} size={24} color="#ff6b00" />
+                            </div>
                             <h3 style={{ fontFamily: fd, fontWeight: 700, fontSize: "1.6rem", color: "#1a1a1a", marginBottom: "0.8rem", textTransform: "uppercase" }}>{fmt.title}</h3>
                             <p style={{ fontFamily: f, fontSize: "1.5rem", color: "#68676d", lineHeight: 1.65 }}>{fmt.desc}</p>
                         </div>
