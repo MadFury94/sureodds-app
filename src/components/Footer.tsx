@@ -4,9 +4,26 @@ import { useState } from "react";
 const f = '"Proxima Nova", Arial, sans-serif';
 const fd = '"Druk Text Wide", "Arial Black", sans-serif';
 
-const footerLinks1 = ["About", "Advertise", "Contact Us", "Get Help", "Careers", "Sitemap", "Community Guidelines", "Privacy"];
-const footerLinks2 = ["Do Not Sell or Share My Personal Information", "Terms Of Use", "AdChoices", "S/O Sports on HBO Max", "S/O Creators Program"];
-const footerLinks3 = ["Latest Articles", "RSS"];
+const footerLinks1 = [
+    { label: "About", href: "/about" },
+    { label: "Advertise", href: "/advertise" },
+    { label: "Contact Us", href: "/contact" },
+    { label: "Get Help", href: "/help" },
+    { label: "Careers", href: "/careers" },
+    { label: "Sitemap", href: "/sitemap.xml" },
+    { label: "Community Guidelines", href: "/community-guidelines" },
+    { label: "Privacy", href: "/privacy-policy" },
+];
+const footerLinks2 = [
+    { label: "Do Not Sell or Share My Personal Information", href: "/privacy-policy#do-not-sell" },
+    { label: "Terms Of Use", href: "/terms-of-use" },
+    { label: "AdChoices", href: "/privacy-policy#adchoices" },
+    { label: "Creators Program", href: "/creators" },
+];
+const footerLinks3 = [
+    { label: "Latest Articles", href: "/category/news" },
+    { label: "RSS", href: "/feed.xml" },
+];
 
 export default function Footer() {
     const [email, setEmail] = useState("");
@@ -29,8 +46,8 @@ export default function Footer() {
                     </h3>
                     <p style={{ fontFamily: f, fontSize: "1.2rem", color: "#68676d", textAlign: "center", lineHeight: 1.6 }}>
                         By entering your email address, you agree to the Sureodds{" "}
-                        <a href="#" style={{ color: "#BD4110" }}>Terms of Use</a> and{" "}
-                        <a href="#" style={{ color: "#BD4110" }}>Privacy Policy</a>.
+                        <a href="/terms-of-use" style={{ color: "#BD4110" }}>Terms of Use</a> and{" "}
+                        <a href="/privacy-policy" style={{ color: "#BD4110" }}>Privacy Policy</a>.
                     </p>
                     <div className="footer-email-row">
                         <input
@@ -87,11 +104,11 @@ export default function Footer() {
                 {/* Nav links row 1 */}
                 <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "0 0", borderTop: "1px solid #27262a", paddingTop: "2.4rem", width: "100%" }}>
                     {footerLinks1.map((l, i) => (
-                        <span key={l} style={{ display: "flex", alignItems: "center" }}>
-                            <a href="#" style={{ fontFamily: f, fontSize: "1.2rem", color: "#fff", padding: "0 1.2rem" }}
+                        <span key={l.label} style={{ display: "flex", alignItems: "center" }}>
+                            <a href={l.href} style={{ fontFamily: f, fontSize: "1.2rem", color: "#fff", padding: "0 1.2rem", textDecoration: "none" }}
                                 onMouseEnter={e => (e.currentTarget.style.textDecoration = "underline")}
                                 onMouseLeave={e => (e.currentTarget.style.textDecoration = "none")}
-                            >{l}</a>
+                            >{l.label}</a>
                             {i < footerLinks1.length - 1 && <span style={{ color: "#27262a", fontSize: "1.4rem" }}>|</span>}
                         </span>
                     ))}
@@ -100,11 +117,11 @@ export default function Footer() {
                 {/* Nav links row 2 */}
                 <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "0 0" }}>
                     {footerLinks2.map((l, i) => (
-                        <span key={l} style={{ display: "flex", alignItems: "center" }}>
-                            <a href="#" style={{ fontFamily: f, fontSize: "1.2rem", color: "#fff", padding: "0 1.2rem" }}
+                        <span key={l.label} style={{ display: "flex", alignItems: "center" }}>
+                            <a href={l.href} style={{ fontFamily: f, fontSize: "1.2rem", color: "#fff", padding: "0 1.2rem", textDecoration: "none" }}
                                 onMouseEnter={e => (e.currentTarget.style.textDecoration = "underline")}
                                 onMouseLeave={e => (e.currentTarget.style.textDecoration = "none")}
-                            >{l}</a>
+                            >{l.label}</a>
                             {i < footerLinks2.length - 1 && <span style={{ color: "#27262a", fontSize: "1.4rem" }}>|</span>}
                         </span>
                     ))}
@@ -113,11 +130,11 @@ export default function Footer() {
                 {/* Nav links row 3 */}
                 <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "0 0" }}>
                     {footerLinks3.map((l, i) => (
-                        <span key={l} style={{ display: "flex", alignItems: "center" }}>
-                            <a href="#" style={{ fontFamily: f, fontSize: "1.2rem", color: "#fff", padding: "0 1.2rem" }}
+                        <span key={l.label} style={{ display: "flex", alignItems: "center" }}>
+                            <a href={l.href} style={{ fontFamily: f, fontSize: "1.2rem", color: "#fff", padding: "0 1.2rem", textDecoration: "none" }}
                                 onMouseEnter={e => (e.currentTarget.style.textDecoration = "underline")}
                                 onMouseLeave={e => (e.currentTarget.style.textDecoration = "none")}
-                            >{l}</a>
+                            >{l.label}</a>
                             {i < footerLinks3.length - 1 && <span style={{ color: "#27262a", fontSize: "1.4rem" }}>|</span>}
                         </span>
                     ))}

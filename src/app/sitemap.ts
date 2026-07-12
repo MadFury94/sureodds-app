@@ -17,8 +17,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         { url: SITE_URL, lastModified: now, changeFrequency: "hourly", priority: 1.0 },
         { url: `${SITE_URL}/betting`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
         { url: `${SITE_URL}/bet-codes`, lastModified: now, changeFrequency: "daily", priority: 0.8 },
-        { url: `${SITE_URL}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
-        { url: `${SITE_URL}/contact`, lastModified: now, changeFrequency: "monthly", priority: 0.4 },
+        { url: `${SITE_URL}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+        { url: `${SITE_URL}/contact`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
+        { url: `${SITE_URL}/advertise`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
+        { url: `${SITE_URL}/careers`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
+        { url: `${SITE_URL}/creators`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
+        { url: `${SITE_URL}/help`, lastModified: now, changeFrequency: "monthly", priority: 0.4 },
+        { url: `${SITE_URL}/privacy-policy`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
+        { url: `${SITE_URL}/terms-of-use`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
+        { url: `${SITE_URL}/community-guidelines`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
         // /search and /h2h are noindex tool pages — intentionally excluded
     ];
 
