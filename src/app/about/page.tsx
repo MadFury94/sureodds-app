@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 };
 
 const team = [
-    { name: "JFakayejo Paul Adeluyi", role: "Editor in Chief", initials: "JE", bio: "15 years covering football. Former beat writer for three clubs." },
+    { name: "Fakayejo Paul Adeluyi", role: "Editor in Chief", initials: "JE", bio: "15 years covering football. Former beat writer for three clubs." },
 
 ];
 
