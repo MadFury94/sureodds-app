@@ -68,3 +68,6 @@ cookies.txt
 
 # Google Search Console exports (local analysis only)
 public/ads/
+
+# Kiro agent skills (IDE-specific, not project files)
+.agents/
