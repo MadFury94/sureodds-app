@@ -43,8 +43,6 @@ const r2 = new S3Client({
         accessKeyId: process.env.R2_ACCESS_KEY_ID ?? "",
         secretAccessKey: process.env.R2_SECRET_ACCESS_KEY ?? "",
     },
-    requestChecksumCalculation: "WHEN_REQUIRED" as never,
-    responseChecksumValidation: "WHEN_REQUIRED" as never,
 });
 
 async function uploadFile(key: string, filePath: string, contentType: string): Promise<string> {
