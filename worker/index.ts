@@ -22,6 +22,16 @@ import { bundle } from "@remotion/bundler";
 import { renderMedia, renderStill, selectComposition } from "@remotion/renderer";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
+// ── Chromium path ─────────────────────────────────────────────────────────
+// Prefer env var, then common nixpacks paths, then let Remotion find it
+function getChromiumPath(): string | undefined {
+    return (
+        process.env.CHROMIUM_PATH ||
+        process.env.PUPPETEER_EXECUTABLE_PATH ||
+        undefined
+    );
+}
+
 // ── Config ────────────────────────────────────────────────────────────────
 
 const APP_URL = process.env.NEXTJS_APP_URL ?? "https://sureodds.ng";
@@ -112,10 +122,14 @@ async function processJob(job: VideoJob) {
         });
 
         // ── 2. Select composition ──
+        const chromiumPath = getChromiumPath();
+        console.log(`[worker] using chromium: ${chromiumPath ?? "remotion default"}`);
+
         const composition = await selectComposition({
             serveUrl: bundled,
             id: "ArticleCard",
             inputProps: { title, image, category, excerpt, date },
+            ...(chromiumPath ? { browserExecutable: chromiumPath } : {}),
         });
 
         // ── 3. Render video ──
@@ -126,12 +140,9 @@ async function processJob(job: VideoJob) {
             codec: "h264",
             outputLocation: videoOut,
             inputProps: { title, image, category, excerpt, date },
-            // Use system Chromium installed by nixpacks (avoids missing shared lib errors)
-            browserExecutable: process.env.CHROMIUM_PATH ?? "/usr/bin/chromium",
-            // Quality settings optimised for social media
+            ...(chromiumPath ? { browserExecutable: chromiumPath } : {}),
             crf: 18,
             pixelFormat: "yuv420p",
-            // Log progress every 10%
             onProgress: ({ progress }) => {
                 if (Math.round(progress * 100) % 10 === 0) {
                     console.log(`[worker] render progress: ${Math.round(progress * 100)}%`);
@@ -149,7 +160,7 @@ async function processJob(job: VideoJob) {
             frame: 90,
             imageFormat: "jpeg",
             jpegQuality: 90,
-            browserExecutable: process.env.CHROMIUM_PATH ?? "/usr/bin/chromium",
+            ...(chromiumPath ? { browserExecutable: chromiumPath } : {}),
         });
 
         // ── 5. Upload to R2 ──
