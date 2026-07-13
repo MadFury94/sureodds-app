@@ -3,22 +3,25 @@
     "version": "1.0.0",
     "private": true,
     "description": "Remotion video render worker for Sureodds",
-    "main": "dist/index.js",
+    "main": "index.ts",
+    "engines": {
+        "node": ">=20.0.0"
+    },
     "scripts": {
-        "build": "npx tsc",
-        "start": "node dist/index.js",
-        "dev": "npx ts-node index.ts",
+        "build": "echo 'No build step needed - using ts-node'",
+        "start": "node --require ts-node/register index.ts",
+        "dev": "node --require ts-node/register index.ts",
         "studio": "npx remotion studio remotion/index.ts"
     },
     "dependencies": {
-        "@aws-sdk/client-s3": "^3.600.0",
+        "@aws-sdk/client-s3": "3.600.0",
         "@remotion/bundler": "4.0.290",
         "@remotion/renderer": "4.0.290",
         "remotion": "4.0.290",
-        "typescript": "^5",
-        "ts-node": "^10.9.2",
-        "@types/node": "^20",
-        "@types/react": "^19",
-        "@types/react-dom": "^19"
+        "typescript": "5.4.5",
+        "ts-node": "10.9.2",
+        "@types/node": "20.14.0",
+        "@types/react": "19.0.0",
+        "@types/react-dom": "19.0.0"
     }
 }

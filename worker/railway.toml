@@ -1,15 +1,16 @@
 [build]
 builder = "nixpacks"
-buildCommand = "npm install && npx tsc"
+buildCommand = "npm install"
 
 [deploy]
-startCommand = "node dist/index.js"
+startCommand = "node --require ts-node/register index.ts"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
 
-# Chromium needs these system packages for Remotion rendering
+# Force Node 20 and install Chromium + ffmpeg for Remotion
 [build.nixpacksPlan.phases.setup]
 nixPkgs = [
+  "nodejs_20",
   "chromium",
   "ffmpeg",
   "nss",
