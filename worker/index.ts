@@ -126,6 +126,8 @@ async function processJob(job: VideoJob) {
             codec: "h264",
             outputLocation: videoOut,
             inputProps: { title, image, category, excerpt, date },
+            // Use system Chromium installed by nixpacks (avoids missing shared lib errors)
+            browserExecutable: process.env.CHROMIUM_PATH ?? "/usr/bin/chromium",
             // Quality settings optimised for social media
             crf: 18,
             pixelFormat: "yuv420p",
@@ -147,6 +149,7 @@ async function processJob(job: VideoJob) {
             frame: 90,
             imageFormat: "jpeg",
             jpegQuality: 90,
+            browserExecutable: process.env.CHROMIUM_PATH ?? "/usr/bin/chromium",
         });
 
         // ── 5. Upload to R2 ──

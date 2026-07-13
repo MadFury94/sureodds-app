@@ -1,27 +1,43 @@
 [build]
 builder = "nixpacks"
-buildCommand = "npm install"
+buildCommand = "npm install && which chromium || which chromium-browser || find /nix -name 'chromium' -type f 2>/dev/null | head -1"
 
 [deploy]
 startCommand = "node --require ts-node/register index.ts"
 restartPolicyType = "on_failure"
-restartPolicyMaxRetries = 3
+restartPolicyMaxRetries = 5
 
-# Force Node 20 and install Chromium + ffmpeg for Remotion
+# System packages for Chromium + Remotion rendering
 [build.nixpacksPlan.phases.setup]
 nixPkgs = [
   "nodejs_20",
   "chromium",
   "ffmpeg",
+  "glib",
   "nss",
+  "nspr",
   "atk",
   "cups",
   "libdrm",
   "gtk3",
+  "pango",
+  "cairo",
   "mesa",
   "alsa-lib",
+  "expat",
+  "dbus",
+  "xorg.libX11",
   "xorg.libXcomposite",
+  "xorg.libXcursor",
   "xorg.libXdamage",
+  "xorg.libXext",
+  "xorg.libXfixes",
+  "xorg.libXi",
   "xorg.libXrandr",
-  "xorg.libXcursor"
+  "xorg.libXrender",
+  "xorg.libXtst",
+  "xorg.libxcb"
 ]
+
+[build.nixpacksPlan.phases.setup.environment]
+CHROMIUM_PATH = "/run/current-system/sw/bin/chromium"
