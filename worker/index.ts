@@ -144,7 +144,7 @@ async function processJob(job: VideoJob) {
         await renderStill({
             composition,
             serveUrl: bundled,
-            outputLocation: thumbOut,
+            output: thumbOut,
             inputProps: { title, image, category, excerpt, date },
             frame: 90,
             imageFormat: "jpeg",
