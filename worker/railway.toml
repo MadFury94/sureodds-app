@@ -1,0 +1,26 @@
+[build]
+builder = "nixpacks"
+buildCommand = "npm install && npm run build"
+
+[deploy]
+startCommand = "npm start"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
+
+# Chromium needs these system packages
+[deploy.nixpacksPlan.phases.setup]
+nixPkgs = [
+  "chromium",
+  "ffmpeg",
+  "nss",
+  "atk",
+  "cups",
+  "libdrm",
+  "gtk3",
+  "mesa",
+  "alsa-lib",
+  "xorg.libXcomposite",
+  "xorg.libXdamage",
+  "xorg.libXrandr",
+  "xorg.libXcursor"
+]
