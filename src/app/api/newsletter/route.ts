@@ -1,34 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const AUDIENCE_ID = process.env.RESEND_AUDIENCE_ID ?? "";
 const FROM_EMAIL = process.env.FROM_EMAIL ?? "noreply@sureodds.ng";
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "admin@sureodds.ng";
 
 export async function POST(req: NextRequest) {
-    try {
-        const { email } = await req.json();
+  // Instantiate inside handler — avoids "Missing API key" error at build time
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  try {
+    const { email } = await req.json();
 
-        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
-        }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
+    }
 
-        // Add contact to Resend audience (if audience ID is configured)
-        if (AUDIENCE_ID) {
-            await resend.contacts.create({
-                email,
-                audienceId: AUDIENCE_ID,
-                unsubscribed: false,
-            });
-        }
+    // Add contact to Resend audience (if audience ID is configured)
+    if (AUDIENCE_ID) {
+      await resend.contacts.create({
+        email,
+        audienceId: AUDIENCE_ID,
+        unsubscribed: false,
+      });
+    }
 
-        // Send welcome email to subscriber
-        await resend.emails.send({
-            from: `Sureodds <${FROM_EMAIL}>`,
-            to: email,
-            subject: "Welcome to Sureodds — Football News in Your Inbox",
-            html: `
+    // Send welcome email to subscriber
+    await resend.emails.send({
+      from: `Sureodds <${FROM_EMAIL}>`,
+      to: email,
+      subject: "Welcome to Sureodds — Football News in Your Inbox",
+      html: `
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -61,19 +62,19 @@ export async function POST(req: NextRequest) {
   </div>
 </body>
 </html>`,
-        });
+    });
 
-        // Notify admin
-        await resend.emails.send({
-            from: `Sureodds <${FROM_EMAIL}>`,
-            to: ADMIN_EMAIL,
-            subject: `New newsletter subscriber: ${email}`,
-            html: `<p>New subscriber: <strong>${email}</strong></p>`,
-        });
+    // Notify admin
+    await resend.emails.send({
+      from: `Sureodds <${FROM_EMAIL}>`,
+      to: ADMIN_EMAIL,
+      subject: `New newsletter subscriber: ${email}`,
+      html: `<p>New subscriber: <strong>${email}</strong></p>`,
+    });
 
-        return NextResponse.json({ success: true });
-    } catch (err) {
-        console.error("Newsletter signup error:", err);
-        return NextResponse.json({ error: "Failed to subscribe. Please try again." }, { status: 500 });
-    }
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("Newsletter signup error:", err);
+    return NextResponse.json({ error: "Failed to subscribe. Please try again." }, { status: 500 });
+  }
 }

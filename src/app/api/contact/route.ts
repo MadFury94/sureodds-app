@@ -1,32 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM_EMAIL = process.env.FROM_EMAIL ?? "noreply@sureodds.ng";
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "admin@sureodds.ng";
 
 export async function POST(req: NextRequest) {
-    try {
-        const { name, email, subject, message } = await req.json();
+  // Instantiate inside handler — avoids "Missing API key" error at build time
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  try {
+    const { name, email, subject, message } = await req.json();
 
-        if (!name || !email || !subject || !message) {
-            return NextResponse.json({ error: "All fields are required" }, { status: 400 });
-        }
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
-        }
-        // Basic spam guard — message must be at least 10 chars
-        if (message.trim().length < 10) {
-            return NextResponse.json({ error: "Message is too short" }, { status: 400 });
-        }
+    if (!name || !email || !subject || !message) {
+      return NextResponse.json({ error: "All fields are required" }, { status: 400 });
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
+    }
+    // Basic spam guard — message must be at least 10 chars
+    if (message.trim().length < 10) {
+      return NextResponse.json({ error: "Message is too short" }, { status: 400 });
+    }
 
-        // Send notification to admin
-        await resend.emails.send({
-            from: `Sureodds Contact <${FROM_EMAIL}>`,
-            to: ADMIN_EMAIL,
-            replyTo: email,
-            subject: `Contact form: ${subject}`,
-            html: `
+    // Send notification to admin
+    await resend.emails.send({
+      from: `Sureodds Contact <${FROM_EMAIL}>`,
+      to: ADMIN_EMAIL,
+      replyTo: email,
+      subject: `Contact form: ${subject}`,
+      html: `
 <div style="font-family:Arial,sans-serif;max-width:600px;">
   <h2 style="color:#1a1a1a;">New Contact Form Submission</h2>
   <table style="width:100%;border-collapse:collapse;">
@@ -37,14 +38,14 @@ export async function POST(req: NextRequest) {
   </table>
   <p style="color:#99989f;font-size:12px;margin-top:16px;">Reply directly to this email to respond to ${name}.</p>
 </div>`,
-        });
+    });
 
-        // Send confirmation to user
-        await resend.emails.send({
-            from: `Sureodds <${FROM_EMAIL}>`,
-            to: email,
-            subject: "We received your message — Sureodds",
-            html: `
+    // Send confirmation to user
+    await resend.emails.send({
+      from: `Sureodds <${FROM_EMAIL}>`,
+      to: email,
+      subject: "We received your message — Sureodds",
+      html: `
 <div style="font-family:Arial,sans-serif;max-width:600px;background:#fff;">
   <div style="background:#000;padding:24px;text-align:center;">
     <img src="https://sureodds.ng/logo.png" alt="Sureodds" style="height:40px;">
@@ -58,11 +59,11 @@ export async function POST(req: NextRequest) {
     <p style="color:#3d3c41;font-size:15px;line-height:1.7;">The Sureodds Team</p>
   </div>
 </div>`,
-        });
+    });
 
-        return NextResponse.json({ success: true });
-    } catch (err) {
-        console.error("Contact form error:", err);
-        return NextResponse.json({ error: "Failed to send message. Please try again." }, { status: 500 });
-    }
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("Contact form error:", err);
+    return NextResponse.json({ error: "Failed to send message. Please try again." }, { status: 500 });
+  }
 }
