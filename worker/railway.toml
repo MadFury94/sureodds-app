@@ -1,39 +1,8 @@
 [build]
 builder = "nixpacks"
-buildCommand = "npm install && echo 'Chromium path:' && (which chromium 2>/dev/null || which chromium-browser 2>/dev/null || find /nix/store -name 'chromium' -type f 2>/dev/null | grep '/bin/chromium$' | head -1 || echo 'NOT FOUND')"
+buildCommand = "apt-get update && apt-get install -y chromium-browser && echo 'Chromium:' && which chromium-browser && npm install"
 
 [deploy]
 startCommand = "node --require ts-node/register index.ts"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 5
-
-[build.nixpacksPlan.phases.setup]
-nixPkgs = [
-  "nodejs_20",
-  "chromium",
-  "ffmpeg",
-  "glib",
-  "nss",
-  "nspr",
-  "atk",
-  "cups",
-  "libdrm",
-  "gtk3",
-  "pango",
-  "cairo",
-  "mesa",
-  "alsa-lib",
-  "expat",
-  "dbus",
-  "xorg.libX11",
-  "xorg.libXcomposite",
-  "xorg.libXcursor",
-  "xorg.libXdamage",
-  "xorg.libXext",
-  "xorg.libXfixes",
-  "xorg.libXi",
-  "xorg.libXrandr",
-  "xorg.libXrender",
-  "xorg.libXtst",
-  "xorg.libxcb"
-]
