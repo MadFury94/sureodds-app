@@ -123,7 +123,7 @@ async function processJob(job: VideoJob) {
 
         // ── 2. Select composition ──
         const chromiumPath = getChromiumPath();
-        console.log(`[worker] using chromium: ${chromiumPath ?? "remotion default"}`);
+        console.log(`[worker] using chromium: ${chromiumPath ?? "remotion bundled chrome"}`);
 
         const composition = await selectComposition({
             serveUrl: bundled,
