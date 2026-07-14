@@ -21,10 +21,10 @@ export const RemotionRoot: React.FC = () => {
             <Composition
                 id="ArticleCard"
                 component={ArticleCard}
-                durationInFrames={600}   // 20 seconds @ 30fps
-                fps={30}
-                width={1080}
-                height={1920}
+                durationInFrames={360}   // 15 seconds @ 24fps
+                fps={24}
+                width={720}
+                height={1280}
                 defaultProps={PREVIEW_PROPS}
             />
         </>

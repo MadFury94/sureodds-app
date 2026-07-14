@@ -141,8 +141,14 @@ async function processJob(job: VideoJob) {
             outputLocation: videoOut,
             inputProps: { title, image, category, excerpt, date },
             ...(chromiumPath ? { browserExecutable: chromiumPath } : {}),
-            crf: 18,
+            crf: 23,
             pixelFormat: "yuv420p",
+            // Limit concurrency to reduce memory usage on free tier
+            concurrency: 1,
+            chromiumOptions: {
+                disableWebSecurity: false,
+                enableMultiProcessOnLinux: false,
+            },
             onProgress: ({ progress }) => {
                 if (Math.round(progress * 100) % 10 === 0) {
                     console.log(`[worker] render progress: ${Math.round(progress * 100)}%`);
