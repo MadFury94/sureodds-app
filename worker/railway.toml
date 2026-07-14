@@ -1,45 +1,8 @@
 [build]
-builder = "nixpacks"
-buildCommand = "npm install"
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
 
 [deploy]
 startCommand = "node --require ts-node/register index.ts"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 5
-
-# Ubuntu packages that Remotion's bundled chrome-headless-shell needs
-[build.nixpacksPlan.phases.setup]
-nixPkgs = [
-  "nodejs_20",
-  "ffmpeg",
-  "glib",
-  "glibc",
-  "nss",
-  "nspr",
-  "atk",
-  "at-spi2-atk",
-  "cups",
-  "libdrm",
-  "gtk3",
-  "pango",
-  "cairo",
-  "gdk-pixbuf",
-  "mesa",
-  "alsa-lib",
-  "expat",
-  "dbus",
-  "fontconfig",
-  "freetype",
-  "xorg.libX11",
-  "xorg.libXcomposite",
-  "xorg.libXcursor",
-  "xorg.libXdamage",
-  "xorg.libXext",
-  "xorg.libXfixes",
-  "xorg.libXi",
-  "xorg.libXrandr",
-  "xorg.libXrender",
-  "xorg.libXtst",
-  "xorg.libxcb",
-  "xorg.libXScrnSaver"
-]
