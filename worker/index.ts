@@ -19,17 +19,30 @@ import path from "path";
 import os from "os";
 import fs from "fs/promises";
 import { bundle } from "@remotion/bundler";
-import { renderMedia, renderStill, selectComposition } from "@remotion/renderer";
+import { renderMedia, renderStill, selectComposition, ensureBrowser } from "@remotion/renderer";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
 // ── Chromium path ─────────────────────────────────────────────────────────
-// Prefer env var, then common nixpacks paths, then let Remotion find it
 function getChromiumPath(): string | undefined {
     return (
         process.env.CHROMIUM_PATH ||
         process.env.PUPPETEER_EXECUTABLE_PATH ||
         undefined
     );
+}
+
+// ── Bundle cache — only bundle once per process lifetime ──────────────────
+let cachedBundle: string | null = null;
+
+async function getBundle(): Promise<string> {
+    if (cachedBundle) return cachedBundle;
+    console.log(`[worker] bundling remotion composition...`);
+    cachedBundle = await bundle({
+        entryPoint: path.join(__dirname, "remotion", "index.ts"),
+        webpackOverride: (config) => config,
+    });
+    console.log(`[worker] bundle ready`);
+    return cachedBundle;
 }
 
 // ── Config ────────────────────────────────────────────────────────────────
@@ -113,13 +126,8 @@ async function processJob(job: VideoJob) {
     const thumbOut = path.join(tmpDir, "thumb.jpg");
 
     try {
-        // ── 1. Bundle the Remotion composition ──
-        console.log(`[worker] bundling...`);
-        const bundled = await bundle({
-            entryPoint: path.join(__dirname, "remotion", "index.ts"),
-            // Webpack override — allow node_modules
-            webpackOverride: (config) => config,
-        });
+        // ── 1. Get cached bundle ──
+        const bundled = await getBundle();
 
         // ── 2. Select composition ──
         const chromiumPath = getChromiumPath();
@@ -236,5 +244,29 @@ async function poll() {
 
 // ── Start ─────────────────────────────────────────────────────────────────
 
-console.log(`[worker] starting — polling ${APP_URL}/api/video/next`);
-poll();
+async function start() {
+    console.log(`[worker] starting — polling ${APP_URL}/api/video/next`);
+
+    // Pre-download Chrome and bundle once at startup
+    // This avoids downloading 108MB on every job
+    try {
+        const chromiumPath = getChromiumPath();
+        console.log(`[worker] pre-downloading chrome...`);
+        await ensureBrowser({
+            ...(chromiumPath ? { browserExecutable: chromiumPath } : {}),
+            onBrowserDownload: ({ percent }) => {
+                if (percent && Math.round(percent * 100) % 25 === 0) {
+                    console.log(`[worker] chrome download: ${Math.round(percent * 100)}%`);
+                }
+            },
+        });
+        console.log(`[worker] chrome ready`);
+        await getBundle();
+    } catch (err) {
+        console.error(`[worker] startup error:`, err);
+    }
+
+    poll();
+}
+
+start();
